@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Zgłoszenia (QR / Service Desk)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link " href="index.html" aria-current="">Strona główna</a></li>
+        <li><a class="nav-link" href="zamowienia.html">Zamówienia</a></li>
+        <li><a class="nav-link " href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link active" href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link " href="personel.html">Personel</a></li>
+        <li><a class="nav-link " href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link " href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj…" />
+      </form>
+      <button class="theme-toggle" aria-label="Przełącz motyw" title="Motyw">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><g stroke-width="2"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Zgłoszenia (QR / Service Desk)</h1>
+        <p class="subtitle">Lista i tworzenie zgłoszeń</p>
+      </div>
+    </div>
+  </header>
+  <main class="page-main">
+
+    <div class="container layout-2cols">
+      <div class="card">
+        <header class="card-header">
+          <h2>Zgłoszenia serwisowe</h2>
+          <div class="tools">
+            <input class="input" type="search" placeholder="Filtruj…">
+          </div>
+        </header>
+        <div class="card-content">
+          <table class="table">
+            <thead>
+              <tr><th>ID</th><th>Typ</th><th>Pracownik</th><th>Asortyment</th><th>Utworzono</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SRV-2025-0145</td><td>Serwisowe</td><td>Jan Kowalski</td><td>Spodnie Motion</td><td>19.08.2025 10:12</td>
+                <td><span class="badge new">Nowe</span></td>
+              </tr>
+              <tr>
+                <td>SRV-2025-0139</td><td>Reklamacyjne</td><td>Agnieszka Nowak</td><td>Bluza Hi-Vis</td><td>19.08.2025 08:27</td>
+                <td><span class="badge info">W toku</span></td>
+              </tr>
+              <tr>
+                <td>SRV-2025-0132</td><td>Serwisowe</td><td>Piotr Zieliński</td><td>Kurtka FR</td><td>18.08.2025 15:02</td>
+                <td><span class="badge rate">Do oceny</span></td>
+              </tr>
+              <tr>
+                <td>SRV-2025-0121</td><td>Serwisowe</td><td>Anna Wiśniewska</td><td>Fartuch Food Safety</td><td>17.08.2025 11:49</td>
+                <td><span class="badge ok">Zakończone</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <header class="card-header">
+          <h2>Nowe zgłoszenie</h2>
+        </header>
+        <div class="card-content">
+          <form class="form" onsubmit="event.preventDefault();">
+            <label>Pracownik
+              <input class="input" type="text" placeholder="np. Jan Kowalski">
+            </label>
+            <label>Szafka/Skrytka
+              <input class="input" type="text" placeholder="np. A-12 / 03">
+            </label>
+            <label>Typ zgłoszenia
+              <select class="input">
+                <option>Serwisowe</option>
+                <option>Reklamacyjne</option>
+              </select>
+            </label>
+            <label>Asortyment
+              <input class="input" type="text" placeholder="np. Spodnie Motion">
+            </label>
+            <label>Nr CHIP (3 ostatnie cyfry)
+              <input class="input" type="text" placeholder="np. 532" maxlength="3">
+            </label>
+            <label>Opis
+              <textarea class="input" rows="4" placeholder="Krótki opis problemu…"></textarea>
+            </label>
+            <div class="form-actions">
+              <button class="btn" type="submit">Wyślij zgłoszenie</button>
+              <button class="btn btn-secondary" type="reset">Wyczyść</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  
+  </main>
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

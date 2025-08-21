@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Personel i odzież</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+  </style>
+</head>
+<body>
+  <!-- Główna nawigacja -->
+  <nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link" href="index.html">Strona główna</a></li>
+        <li><a class="nav-link" href="zamowienia.html">Zamówienia</a></li>
+        <li><a class="nav-link" href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link" href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link active" href="personel.html" aria-current="page">Personel</a></li>
+        <li><a class="nav-link" href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link" href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w personelu">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj pracownika…" />
+      </form>
+      <button class="theme-toggle" aria-label="Przełącz motyw" title="Motyw">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><g stroke-width="2"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Nagłówek -->
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Personel i odzież</h1>
+        <p class="subtitle">Lista pracowników, filtry i zarządzanie danymi</p>
+      </div>
+      <div class="tools">
+        <a class="btn" href="#" data-open-modal="#modal-add-employee" onclick="event.preventDefault();">+ Dodaj nowego pracownika</a>
+        <label class="btn btn-secondary" for="csv-upload" title="Masowe dodawanie (CSV)" style="display:inline-grid;place-items:center;cursor:pointer;">Masowe dodawanie (CSV)</label>
+        <input id="csv-upload" type="file" accept=".csv" hidden />
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <!-- Utrzymujemy taki sam układ jak na innych podstronach: container + stack -->
+    <div class="container stack">
+
+      <!-- Filtry (card #1) -->
+      <section class="card" aria-label="Filtry personelu">
+        <header class="card-header">
+          <h2>Filtry</h2>
+        </header>
+        <div class="card-content">
+          <form class="form" onsubmit="event.preventDefault();">
+            <div class="grid-2">
+              <label>Numer pracownika
+                <input class="input" type="text" placeholder="np. NP-0021" />
+              </label>
+              <label>Imię i/lub nazwisko
+                <input class="input" type="text" placeholder="np. Jan, Kowalski" />
+              </label>
+            </div>
+            <div class="grid-2">
+              <label>Dział
+                <select>
+                  <option>Wszystkie</option>
+                  <option>Produkcja</option>
+                  <option>Magazyn</option>
+                  <option>Logistyka</option>
+                  <option>Utrzymanie Ruchu</option>
+                </select>
+              </label>
+              <div></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn" type="submit">Zastosuj</button>
+              <button class="btn btn-secondary" type="reset">Wyczyść</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Lista pracowników (card #2) — ta sama szerokość co filtry -->
+      <section class="card" aria-label="Tabela pracowników">
+        <header class="card-header">
+          <h3>Lista pracowników</h3>
+        </header>
+        <div class="card-content">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nr</th>
+                <th>Imię i nazwisko</th>
+                <th>Stanowisko</th>
+                <th>Dział</th>
+                <th>Adres</th>
+                <th>Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>NP-0001</strong></td>
+                <td>Jan Kowalski</td>
+                <td>Operator</td>
+                <td>Produkcja</td>
+                <td>ul. Główna 12, Kielce</td>
+                <td><a class="btn btn-secondary" href="karta-pracownika.html?id=NP-0001&name=Jan%20Kowalski&role=Operator&dept=Produkcja">Karta</a><td>
+              </tr>
+              <tr>
+                <td><strong>NP-0002</strong></td>
+                <td>Anna Nowak</td>
+                <td>Magazynier</td>
+                <td>Magazyn</td>
+                <td>ul. Zielona 5, Kielce</td>
+                <td><a class="btn btn-secondary" href="karta-pracownika.html?id=NP-0001&name=Jan%20Kowalski&role=Operator&dept=Produkcja">Karta</a></td>
+              </tr>
+              <tr>
+                <td><strong>NP-0015</strong></td>
+                <td>Piotr Wiśniewski</td>
+                <td>Kierowca</td>
+                <td>Logistyka</td>
+                <td>ul. Spacerowa 8, Chęciny</td>
+                <td><a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Karta</a></td>
+              </tr>
+              <tr>
+                <td><strong>NP-0021</strong></td>
+                <td>Katarzyna Mazur</td>
+                <td>Technik UR</td>
+                <td>Utrzymanie Ruchu</td>
+                <td>ul. Fabryczna 1, Kielce</td>
+                <td><a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Karta</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-content" style="display:flex;justify-content:space-between;align-items:center;">
+          <small class="muted">Wyświetlono 1–4 z 86</small>
+          <div class="tools">
+            <a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Poprzednia</a>
+            <a class="btn" href="#" onclick="event.preventDefault();">Następna</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+
+  <!-- MODAL: Dodaj pracownika (z ujednoliconymi polami) -->
+  <div class="modal" id="modal-add-employee" aria-hidden="true">
+    <div class="modal-backdrop" data-modal-close></div>
+
+    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="add-employee-title">
+      <header class="modal-header">
+        <h2 id="add-employee-title">Dodaj nowego pracownika</h2>
+        <button class="modal-close" aria-label="Zamknij" title="Zamknij" data-modal-close>×</button>
+      </header>
+
+      <div class="modal-content">
+        <form class="form" onsubmit="event.preventDefault();">
+          <div class="grid-2">
+            <label>Numer pracownika
+              <input class="input" type="text" placeholder="NP-0000" />
+            </label>
+            <label>Imię i nazwisko
+              <input class="input" type="text" placeholder="np. Jan Kowalski" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label>Dział
+              <select>
+                <option>Wybierz…</option>
+                <option>Produkcja</option>
+                <option>Magazyn</option>
+                <option>Logistyka</option>
+                <option>Utrzymanie Ruchu</option>
+              </select>
+            </label>
+            <label>Stanowisko
+              <input class="input" type="text" placeholder="np. Operator" />
+            </label>
+          </div>
+
+          <h4>Wymiary</h4>
+          <div class="grid-2">
+            <label>Wzrost (cm)
+              <input class="input" type="number" placeholder="180" />
+            </label>
+            <label>Obwód klatki  (cm)
+              <input class="input" type="number" placeholder="48" />
+            </label>
+          </div>
+          <div class="grid-2">
+            <label>Obwód pasa (cm)
+              <input class="input" type="number" placeholder="96" />
+            </label>
+            <label>Rozmiar obuwia (EU)
+              <input class="input" type="number" placeholder="42" />
+            </label>
+          </div>
+        </form>
+      </div>
+
+      <footer class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 16px;border-top:1px solid var(--line);">
+        <button class="btn btn-secondary" type="button" data-modal-close>Anuluj</button>
+        <button class="btn" type="submit">Zapisz</button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- Skrypty -->
+  <script src="app.js"></script>
+  <script>
+    // CSV (demo)
+    document.getElementById('csv-upload')?.addEventListener('change', (e)=>{
+      if(e.target.files && e.target.files[0]){
+        alert('Wybrano plik: ' + e.target.files[0].name + '\\n(Import to demo)');
+      }
+    });
+
+    // Rezerwowa obsługa modala, jeśli app.js nie zainicjuje
+    (function(){
+      if(window.__modalInit) return;
+      window.__modalInit = true;
+      document.addEventListener('click', (e) => {
+        const openBtn = e.target.closest('[data-open-modal]');
+        if (openBtn) {
+          const sel = openBtn.getAttribute('data-open-modal');
+          const modal = document.querySelector(sel);
+          if (modal) {
+            modal.setAttribute('open', '');
+            document.documentElement.classList.add('has-modal');
+          }
+        }
+        const closeBtn = e.target.closest('[data-modal-close]');
+        if (closeBtn) {
+          const modal = closeBtn.closest('.modal');
+          if (modal) {
+            modal.removeAttribute('open');
+            document.documentElement.classList.remove('has-modal');
+          }
+        }
+        if (e.target.classList.contains('modal-backdrop')) {
+          const modal = e.target.closest('.modal');
+          if (modal) {
+            modal.removeAttribute('open');
+            document.documentElement.classList.remove('has-modal');
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Zamówienia</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Lokalne dodatki tylko dla tej podstrony */
+    .table th, .table td{ padding: 10px 12px; }
+    .table tbody tr[data-order]{ cursor: pointer; }
+    .table tbody tr[data-order]:hover{ background:#f3f6ff; }
+
+    /* MODAL — zawsze idealnie wycentrowany */
+    .modal-backdrop{
+      position: fixed; inset: 0; background: rgba(2,6,23,.45);
+      backdrop-filter: blur(2px); display:none; z-index:1000;
+    }
+    .modal{
+      position: fixed; inset: 0; display:none; place-items:center; z-index:1001;
+    }
+    .modal.open, .modal-backdrop.open{ display:grid; }
+    .modal-card{
+      width: min(920px, 96vw); background:#fff; border:1px solid var(--line);
+      border-radius:16px; box-shadow: 0 20px 60px rgba(2,6,23,.35); overflow:hidden;
+    }
+    .modal-head{ padding:14px 16px; border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .modal-body{ padding:12px 16px; }
+    .modal-actions{ padding:12px 16px; border-top:1px solid var(--line);
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .modal-close{ background:transparent; border:0; font-weight:800; font-size:18px; cursor:pointer; color:var(--muted); }
+
+    .meta{ display:flex; gap:18px; flex-wrap:wrap; color:var(--muted); font-size:13px; }
+    .meta b{ color: var(--text); }
+    .item-photo{ width:64px; height:64px; border:1px solid var(--line); border-radius:10px; object-fit:cover; background:#fafbfe; }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link" href="index.html">Strona główna</a></li>
+        <li><a class="nav-link active" href="zamowienia.html" aria-current="page">Zamówienia</a></li>
+        <li><a class="nav-link" href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link" href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link" href="personel.html">Personel</a></li>
+        <li><a class="nav-link" href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link" href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj…" />
+      </form>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Zamówienia</h1>
+        <p class="subtitle">Rejestr zamówień, statusy i dostawy — SUPON</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <!-- TEN SAM CONTAINER co filtry: szerokość = var(--container) -->
+    <div class="container stack">
+
+      <!-- FILTRY -->
+      <section class="card" aria-label="Filtry listy">
+        <header class="card-header"><h2>Filtry</h2></header>
+        <div class="card-content">
+          <form class="form filters" id="filtersForm" onsubmit="event.preventDefault();">
+            <div class="filters-row">
+              <label>Numer pracownika
+                <input class="input" type="text" id="f-nr" placeholder="np. 004215">
+              </label>
+              <label>Imię i nazwisko
+                <input class="input" type="text" id="f-osoba" placeholder="np. Jan Kowalski">
+              </label>
+              <label>Zakład / Dział
+                <input class="input" type="text" id="f-dept" placeholder="np. Kielce — Zakład 1">
+              </label>
+              <label>Status
+                <select class="input" id="f-status">
+                  <option value="">Wszystkie</option>
+                  <option>Nowe</option>
+                  <option>W realizacji</option>
+                  <option>Wysłane</option>
+                  <option>Gotowe do dostawy</option>
+                  <option>Dostarczone</option>
+                  <option>Anulowane</option>
+                </select>
+              </label>
+              <label>Data od
+                <input class="input" type="date" id="f-od">
+              </label>
+              <label>Data do
+                <input class="input" type="date" id="f-do">
+              </label>
+            </div>
+            <div class="form-actions">
+              <button class="btn" id="applyBtn" type="button">Zastosuj</button>
+              <button class="btn btn-secondary" id="clearBtn" type="reset">Wyczyść</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- LISTA ZAMÓWIEŃ (ta sama szerokość co filtry) -->
+      <!-- LISTA ZAMÓWIEŃ (ta sama szerokość co filtry) -->
+<section class="card" aria-label="Tabela zamówień">
+  <header class="card-header">
+    <h2>Lista zamówień</h2>
+    <a href="nowe-zamowienie.html" class="btn">Nowe zamówienie</a>
+  </header>
+  <div class="card-content">
+    <table class="table" id="orders-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Utworzono</th><th>Zakład / Dział</th><th>Pozycje (skrót)</th><th>Status</th><th>Dostawa (ETA)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- wiersze demo -->
+        <tr data-order='{
+          "id":"Z-2025-1048",
+          "created":"2025-08-19 08:10",
+          "eta":"2025-08-21 10:00",
+          "addr":"Kielce — Zakład 1",
+          "status":"W realizacji",
+          "items":[
+            {"produkt":"Spodnie Motion","nr":"MOT-TRS-001","rozmiar":"L / 182–190","ilosc":1,"osoba":"Jan Kowalski (004215)","foto":"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
+            {"produkt":"Bluza Hi-Vis","nr":"HIV-BLS-110","rozmiar":"M","ilosc":1,"osoba":"Jan Kowalski (004215)","foto":"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
+          ]
+        }'>
+          <td><strong>Z-2025-1048</strong></td>
+          <td>19.08.2025</td>
+          <td>Kielce — Zakład 1</td>
+          <td>Spodnie Motion, Bluza Hi-Vis</td>
+          <td><span class="badge info">W realizacji</span></td>
+          <td>21.08.2025</td>
+        </tr>
+        <!-- ... kolejne zamówienia ... -->
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+    </div> <!-- /container -->
+  </main>
+
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+
+  <!-- MODAL: szczegóły -->
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="order-title" style="margin:0;">Zamówienie</h3>
+        <button class="modal-close" aria-label="Zamknij" data-close>×</button>
+      </div>
+      <div class="modal-body">
+        <div class="meta" id="order-meta"></div>
+
+        <h4 style="margin:12px 0 8px;">Pozycje w zamówieniu</h4>
+        <table class="table">
+          <thead>
+            <tr><th>Foto</th><th>Produkt</th><th>Nr artykułu</th><th>Rozmiar</th><th>Ilość</th><th>Przeznaczone dla</th></tr>
+          </thead>
+          <tbody id="order-items"></tbody>
+        </table>
+        <p class="muted" style="margin-top:8px;">* Zdjęcia pochodzą z bazy asortymentowej.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" type="button">Pobierz potwierdzenie (PDF)</button>
+        <button class="btn btn-secondary" type="button">Zmień zamówienie</button>
+        <button class="btn btn-secondary" type="button">Reklamacja</button>
+        <button class="btn" type="button">Wyślij do realizacji</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filtry + modal (dopasowane do pól Numer/Osoba/Status/Daty)
+    (function(){
+      const $ = (s, r=document)=>r.querySelector(s);
+      const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+      const nr = $("#f-nr");
+      const osoba = $("#f-osoba");
+      const statusSel = $("#f-status");
+      const od = $("#f-od");
+      const doD = $("#f-do");
+      const rows = $$("#orders-table tbody tr");
+
+      function norm(v){ return (v||"").toString().trim().toLowerCase(); }
+      function inRange(dateStr, from, to){
+        if(!from && !to) return true;
+        const d = new Date((dateStr||"").replace(" ", "T"));
+        if(from && d < new Date(from)) return false;
+        if(to && d > new Date(to)) return false;
+        return true;
+      }
+      function apply(){
+        const fNr = norm(nr.value);
+        const fOs = norm(osoba.value);
+        const fSt = norm(statusSel.value);
+        const fOd = od.value || null;
+        const fDo = doD.value || null;
+
+        rows.forEach(tr=>{
+          let p={};
+          try{ p = JSON.parse(tr.getAttribute("data-order")); }catch(e){}
+          const people = (p.items||[]).map(it => (it.osoba||"").toLowerCase());
+          const matchNr = !fNr || people.some(s => s.includes(fNr));
+          const matchOs = !fOs || people.some(s => s.includes(fOs));
+          const matchSt = !fSt || norm(p.status||"") === fSt;
+          const matchDate = inRange(p.created, fOd, fDo);
+          tr.style.display = (matchNr && matchOs && matchSt && matchDate) ? "" : "none";
+        });
+      }
+      [nr, osoba].forEach(el => el && el.addEventListener("input", apply));
+      $("#applyBtn")?.addEventListener("click", apply);
+      $("#clearBtn")?.addEventListener("click", ()=>setTimeout(apply,0));
+      apply();
+
+      // Modal
+      const modal = $("#order-modal");
+      const backdrop = $("#modal-backdrop");
+      const itemsBox = $("#order-items");
+      const metaBox = $("#order-meta");
+      const title = $("#order-title");
+      const openM = ()=>{ modal.classList.add("open"); backdrop.classList.add("open"); };
+      const closeM = ()=>{ modal.classList.remove("open"); backdrop.classList.remove("open"); };
+      modal.addEventListener("click", e=>{ if(e.target.matches("[data-close]")) closeM(); });
+      backdrop.addEventListener("click", closeM);
+      document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeM(); });
+
+      $("#orders-table").addEventListener("click", (e)=>{
+        const tr = e.target.closest("tr[data-order]");
+        if(!tr) return;
+        let p={};
+        try{ p = JSON.parse(tr.getAttribute("data-order")); }catch(e){}
+        title.textContent = `Zamówienie ${p.id||""}`;
+        metaBox.innerHTML = `
+          <span>Status: <b>${p.status||"—"}</b></span>
+          <span>Utworzono: <b>${p.created||"—"}</b></span>
+          <span>Adres dostawy: <b>${p.addr||"—"}</b></span>
+          <span>ETA: <b>${p.eta||"—"}</b></span>
+        `;
+        itemsBox.innerHTML = (p.items||[]).map(it=>`
+          <tr>
+            <td><img class="item-photo" src="${it.foto||''}" alt=""></td>
+            <td>${it.produkt||''}</td>
+            <td>${it.nr||''}</td>
+            <td>${it.rozmiar||''}</td>
+            <td>${it.ilosc||''}</td>
+            <td>${it.osoba||''}</td>
+          </tr>
+        `).join("");
+        openM();
+      });
+    })();
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>

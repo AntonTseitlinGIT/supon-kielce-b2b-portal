@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Karta pracownika</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Lokalne, lekkie uzupełnienia tylko dla tej podstrony */
+    .profile{ display:grid; grid-template-columns: 88px 1fr; gap:14px; align-items:center; }
+    .avatar{
+      width:76px; height:76px; border-radius:50%;
+      display:grid; place-items:center; font-weight:800; font-size:26px;
+      background: color-mix(in oklab, var(--accent) 14%, var(--page-bg));
+      border:1px solid var(--line);
+      box-shadow: 0 10px 28px rgba(2,6,23,.08);
+    }
+    .meta-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; }
+    .meta-grid .label{ font-size:12px; color: var(--muted); text-transform: uppercase; letter-spacing:.3px; }
+    .divider{ height:1px; background: var(--line); margin: 10px 0; }
+    .section-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+    .table .status-cell{ white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link" href="index.html">Strona główna</a></li>
+        <li><a class="nav-link" href="zamowienia.html">Zamówienia</a></li>
+        <li><a class="nav-link" href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link" href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link active" href="personel.html" aria-current="page">Personel</a></li>
+        <li><a class="nav-link" href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link" href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj…" />
+      </form>
+      <button class="theme-toggle" aria-label="Przełącz motyw" title="Motyw">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><g stroke-width="2"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Karta pracownika</h1>
+        <p class="subtitle">Podgląd danych i pełna historia obiegu odzieży</p>
+      </div>
+      <div class="tools">
+        <a class="btn btn-secondary" href="personel.html">← Wróć do listy</a>
+        <button class="btn">Eksportuj kartę (PDF)</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="container stack">
+
+      <!-- PROFIL -->
+      <section class="card" aria-label="Dane pracownika">
+        <header class="card-header">
+          <h2>Profil pracownika</h2>
+          <div class="chips">
+            <span class="chip ok">Aktywny</span>
+            <span class="chip info">RFID: TAK</span>
+            <span class="chip">PPE: TAK</span>
+          </div>
+        </header>
+        <div class="card-content">
+          <div class="profile">
+            <div class="avatar" id="avatar">JK</div>
+            <div>
+              <h3 id="emp-name" style="margin:0;">Jan Kowalski</h3>
+              <p class="muted" id="emp-id" style="margin:4px 0 0;">Nr: NP-0001</p>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="meta-grid" role="list">
+            <div>
+              <div class="label">Stanowisko</div>
+              <div id="emp-role"><strong>Operator</strong></div>
+            </div>
+            <div>
+              <div class="label">Dział</div>
+              <div id="emp-dept"><strong>Produkcja</strong></div>
+            </div>
+            <div>
+              <div class="label">Adres</div>
+              <div id="emp-addr">ul. Główna 12, Kielce</div>
+            </div>
+            <div>
+              <div class="label">Wymiary</div>
+              <div id="emp-size">Wzrost 180 • Klatka 100 • Pas 96 • Obuwie 42</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section-actions">
+            <button class="btn btn-secondary">Edytuj dane</button>
+            <button class="btn btn-secondary">Zgłoś zmianę rozmiaru</button>
+            <a class="btn" href="nowe-zamowienie.html">Nowe zamówienie odzieży</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI -->
+      <section class="card" aria-label="Wskaźniki">
+        <header class="card-header"><h2>Wskaźniki</h2></header>
+        <div class="card-content">
+          <div class="kpis">
+            <div class="kpi"><h3>Przypisane sztuki</h3><div class="value">12</div></div>
+            <div class="kpi"><h3>W praniu</h3><div class="value">3</div></div>
+            <div class="kpi"><h3>W szafce</h3><div class="value">7</div></div>
+            <div class="kpi"><h3>Wydania (YTD)</h3><div class="value">9</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ASORTYMENT PRZYPISANY -->
+      <section class="card" aria-label="Asortyment przypisany">
+        <header class="card-header">
+          <h2>Asortyment przypisany</h2>
+          <div class="tools">
+            <input class="input" type="search" placeholder="Szybkie filtrowanie (nr / nazwa / rozmiar)…" />
+          </div>
+        </header>
+        <div class="card-content">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>CHIP</th><th>Nr artykułu</th><th>Nazwa</th><th>Rozmiar</th><th class="status-cell">Status</th><th>Ostatnia operacja</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>...532</td><td>MOT-TRS-001</td><td>Spodnie Motion</td><td>L / 182–190</td>
+                <td class="status-cell"><span class="badge">W szafce</span></td>
+                <td>19.08.2025 10:41 — zwrot z prania</td>
+              </tr>
+              <tr>
+                <td>...218</td><td>HIV-BLS-110</td><td>Bluza Hi-Vis</td><td>M</td>
+                <td class="status-cell"><span class="badge info">W praniu</span></td>
+                <td>19.08.2025 09:39 — skan RFID (odbiór)</td>
+              </tr>
+              <tr>
+                <td>...774</td><td>FR-JKT-220</td><td>Kurtka FR</td><td>M</td>
+                <td class="status-cell"><span class="badge ok">Wydane</span></td>
+                <td>18.08.2025 08:12 — wydanie z magazynu</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ZAMÓWIENIA PRACOWNIKA -->
+      <section class="card" aria-label="Zamówienia pracownika">
+        <header class="card-header"><h2>Zamówienia — ostatnie</h2></header>
+        <div class="card-content">
+          <table class="table">
+            <thead><tr><th>#</th><th>Utworzono</th><th>Pozycje (skrót)</th><th>Status</th><th>ETA</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Z-2025-1048</strong></td>
+                <td>19.08.2025</td>
+                <td>Spodnie Motion, Bluza Hi-Vis</td>
+                <td><span class="badge info">W realizacji</span></td>
+                <td>21.08.2025 10:00</td>
+              </tr>
+              <tr>
+                <td><strong>Z-2025-1007</strong></td>
+                <td>02.08.2025</td>
+                <td>Kurtka FR</td>
+                <td><span class="badge ok">Dostarczone</span></td>
+                <td>05.08.2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- HISTORIA OPERACJI -->
+      <section class="card" aria-label="Historia operacji">
+        <header class="card-header"><h2>Historia operacji (RFID / wydania / zwroty)</h2></header>
+        <div class="card-content">
+          <ul class="timeline" role="list">
+            <li><span class="tl-dot"></span><div class="tl-item"><strong>10:41</strong> • CHIP <b>...532</b> — <em>zwrot z prania</em></div></li>
+            <li><span class="tl-dot"></span><div class="tl-item"><strong>09:39</strong> • CHIP <b>...218</b> — <em>odbiór do prania</em></div></li>
+            <li><span class="tl-dot"></span><div class="tl-item"><strong>08:12</strong> • CHIP <b>...774</b> — <em>wydanie z magazynu</em></div></li>
+            <li><span class="tl-dot"></span><div class="tl-item"><strong>Wczoraj</strong> • utworzono zamówienie <b>Z-2025-1048</b></div></li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // Opcjonalnie: wczytaj dane z query string (?id=NP-0001&name=Jan%20Kowalski)
+    (function(){
+      const p = new URLSearchParams(location.search);
+      const id = p.get('id') || 'NP-0001';
+      const name = p.get('name') || 'Jan Kowalski';
+      const role = p.get('role') || 'Operator';
+      const dept = p.get('dept') || 'Produkcja';
+
+      document.getElementById('emp-id').textContent = 'Nr: ' + id;
+      document.getElementById('emp-name').textContent = name;
+      document.getElementById('emp-role').innerHTML = '<strong>'+role+'</strong>';
+      document.getElementById('emp-dept').innerHTML = '<strong>'+dept+'</strong>';
+      const initials = name.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+      document.getElementById('avatar').textContent = initials;
+    })();
+  </script>
+</body>
+</html>

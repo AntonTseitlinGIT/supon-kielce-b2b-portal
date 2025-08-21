@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Serwis odzieży (RFID)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link " href="index.html" aria-current="">Strona główna</a></li>
+        <li><a class="nav-link" href="zamowienia.html">Zamówienia</a></li>
+        <li><a class="nav-link active" href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link " href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link " href="personel.html">Personel</a></li>
+        <li><a class="nav-link " href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link " href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj…" />
+      </form>
+      <button class="theme-toggle" aria-label="Przełącz motyw" title="Motyw">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><g stroke-width="2"><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></g></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </nav>
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Serwis odzieży (RFID)</h1>
+        <p class="subtitle">Podgląd procesu i skanowań</p>
+      </div>
+    </div>
+  </header>
+  <main class="page-main">
+
+    <div class="container stack">
+      <section class="card">
+        <header class="card-header">
+          <h2>Przepływ serwisowy (RFID)</h2>
+        </header>
+        <div class="card-content">
+          <ol class="stepper" role="list">
+            <li class="done"><span class="dot">1</span> Odbiór brudnej odzieży</li>
+            <li class="done"><span class="dot">2</span> Skanowanie (RFID)</li>
+            <li class="active"><span class="dot">3</span> Pranie</li>
+            <li><span class="dot">4</span> Suszenie</li>
+            <li><span class="dot">5</span> Pakowanie</li>
+            <li><span class="dot">6</span> Dostawa do Klienta</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <header class="card-header">
+            <h3>Partie w toku</h3>
+          </header>
+          <div class="card-content">
+            <table class="table">
+              <thead>
+                <tr><th>Partia</th><th>Ilość szt.</th><th>Etap</th><th>Postęp</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#A-1234</td><td>480</td><td>Pranie</td>
+                  <td><div class="progress"><span style="width:55%"></span></div></td>
+                  <td><span class="badge info">W toku</span></td>
+                </tr>
+                <tr>
+                  <td>#A-1235</td><td>320</td><td>Suszenie</td>
+                  <td><div class="progress"><span style="width:70%"></span></div></td>
+                  <td><span class="badge info">W toku</span></td>
+                </tr>
+                <tr>
+                  <td>#A-1230</td><td>510</td><td>Pakowanie</td>
+                  <td><div class="progress"><span style="width:90%"></span></div></td>
+                  <td><span class="badge warn">Na kontroli</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <header class="card-header">
+            <h3>Skanowania RFID — ostatnie</h3>
+          </header>
+          <div class="card-content">
+            <ul class="list">
+              <li><span class="muted">10:41</span> • CHIP <strong>...532</strong> — <em>pranie</em></li>
+              <li><span class="muted">10:39</span> • CHIP <strong>...218</strong> — <em>odbiór</em></li>
+              <li><span class="muted">10:35</span> • CHIP <strong>...774</strong> — <em>skan RFID</em></li>
+              <li><span class="muted">10:30</span> • CHIP <strong>...019</strong> — <em>pakowanie</em></li>
+            </ul>
+            <button class="btn btn-secondary">Eksportuj log (CSV)</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  
+  </main>
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>

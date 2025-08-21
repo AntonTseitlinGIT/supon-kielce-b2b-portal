@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SUPON Kielce — Nowe zamówienie</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Drobne uzupełnienia tylko dla tej strony (wizual, bez JS) */
+    .page-main { background: var(--bg); }
+    .container-narrow { max-width: var(--container); margin-inline: auto; padding: 0 16px; }
+    .items-card .card-content{ padding:0; }
+    .items-toolbar{ display:flex; gap:10px; padding: 12px 16px; border-bottom:1px solid var(--line); }
+    .items-scroll{ max-height: 72vh; overflow:auto; }
+    .table.items td, .table.items th{ vertical-align: top; }
+    .photo-cell{ width: 140px; }
+    .photo{
+      width: 110px; height: 110px; border:1px solid var(--line); border-radius: 10px;
+      object-fit: cover; background:#fafbfe;
+    }
+    .kpis{ display:grid; gap:10px; grid-template-columns: repeat(4, minmax(140px,1fr)); }
+    .kpi{ border:1px dashed var(--line); border-radius: 12px; padding:10px; background:#fff; }
+    .kpi h3{ margin:0; font-size:12px; color:var(--muted); font-weight:800; letter-spacing:.2px; }
+    .kpi .value{ font-weight: 800; font-size: 20px; }
+    .hint{ font-size:12px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <!-- Topbar -->
+  <nav class="topbar" aria-label="Główna nawigacja">
+    <div class="container">
+      <a class="brand" href="index.html" aria-label="SUPON Kielce">
+        <img src="logo.png" alt="" class="brand-logo" />
+        <span class="brand-name">SUPON Kielce</span>
+      </a>
+      <ul class="nav-list" role="list">
+        <li><a class="nav-link" href="index.html">Strona główna</a></li>
+        <li><a class="nav-link" href="zamowienia.html">Zamówienia</a></li>
+        <li><a class="nav-link" href="serwis.html">Serwis Odzieży</a></li>
+        <li><a class="nav-link" href="zgloszenia.html">Zgłoszenia</a></li>
+        <li><a class="nav-link" href="personel.html">Personel</a></li>
+        <li><a class="nav-link" href="raporty.html">Raporty</a></li>
+        <li><a class="nav-link" href="faktury.html">Faktury</a></li>
+      </ul>
+      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
+        <label for="q" class="sr-only">Szukaj</label>
+        <input id="q" name="q" type="search" placeholder="Szukaj…" />
+      </form>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container header-grid">
+      <div>
+        <h1>Nowe zamówienie</h1>
+        <p class="subtitle">Dane zamówienia → Pozycje → Podsumowanie → Akcje</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="container-narrow stack">
+
+      <!-- 1) DANE ZAMÓWIENIA -->
+      <section class="card" aria-label="Dane zamówienia">
+        <header class="card-header">
+          <h2>Dane zamówienia</h2>
+        </header>
+        <div class="card-content">
+          <form class="form" onsubmit="event.preventDefault();">
+            <label>Adres dostawy
+              <select class="input">
+                <option value="">— Wybierz adres —</option>
+                <option>Kielce — Zakład 1 • Magazyn</option>
+                <option>Kielce — Zakład 2 • Portiernia</option>
+                <option>Zakład 3 • Dział Produkcji</option>
+              </select>
+            </label>
+
+            <label>Zakład / Dział
+              <input class="input" type="text" placeholder="np. Produkcja / Linia A" />
+            </label>
+
+            <div class="grid-2">
+              <label>Preferowana data dostawy
+                <input class="input" type="date" />
+              </label>
+              <label>Priorytet
+                <select class="input">
+                  <option>Standard</option>
+                  <option>Wysoki</option>
+                  <option>Krytyczny</option>
+                </select>
+              </label>
+            </div>
+
+            <label>Numer referencyjny Klienta (opcjonalnie)
+              <input class="input" type="text" placeholder="np. MPK-2025-082" />
+            </label>
+
+            <label>Komentarz do zamówienia
+              <textarea class="input" rows="3" placeholder="Instrukcje dla magazynu / kompletacji…"></textarea>
+            </label>
+          </form>
+
+          <h4 style="margin-top:12px;">Szybkie podsumowanie (statyczne do makiety)</h4>
+          <div class="kpis" role="region" aria-label="Podsumowanie zamówienia">
+            <div class="kpi"><h3>Pozycje</h3><div class="value">0</div></div>
+            <div class="kpi"><h3>Sztuki</h3><div class="value">0</div></div>
+            <div class="kpi"><h3>Pracownicy</h3><div class="value">0</div></div>
+            <div class="kpi"><h3>Adres</h3><div class="value">—</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2) POZYCJE ZAMÓWIENIA (pełna szerokość) -->
+      <section class="card items-card" aria-label="Pozycje zamówienia">
+        <header class="card-header">
+          <h2>Pozycje zamówienia</h2>
+        </header>
+
+        <div class="items-toolbar">
+          <input class="input" style="max-width:420px" type="search" placeholder="Szybkie wyszukiwanie (pracownik / nr artykułu / opis)…" />
+          <span class="hint">Foto pochodzi z bazy odzieży — wybór produktu z katalogu.</span>
+        </div>
+
+        <div class="items-scroll">
+          <table class="table items" aria-describedby="items-help">
+            <thead>
+              <tr>
+                <th style="width:260px;">Pracownik (imię i nazwisko)</th>
+                <th style="width:180px;">Nr artykułu</th>
+                <th class="photo-cell">Foto (z bazy)</th>
+                <th>Opis / Wariant</th>
+                <th style="width:140px;">Rozmiar</th>
+                <th style="width:110px;">Ilość</th>
+                <th>Uwagi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- statyczne wiersze do prezentacji -->
+              <tr>
+                <td><input class="input" type="text" value="Jan Kowalski" /></td>
+                <td><input class="input" type="text" value="MOT-TRS-001" /></td>
+                <td class="photo-cell">
+                  <!-- W realu tutaj renderuje się zdjęcie z bazy po wyborze artykułu -->
+                  <img class="photo" alt="Spodnie Motion" src="https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=800&auto=format&fit=crop" />
+                </td>
+                <td><input class="input" type="text" value="Spodnie Motion" /></td>
+                <td><input class="input" type="text" value="L / 182–190" /></td>
+                <td><input class="input" type="number" min="1" value="1" /></td>
+                <td><input class="input" type="text" placeholder="Uwagi (opcjonalnie)" /></td>
+              </tr>
+
+              <tr>
+                <td><input class="input" type="text" value="Agnieszka Nowak" /></td>
+                <td><input class="input" type="text" value="FR-JKT-220" /></td>
+                <td class="photo-cell">
+                  <img class="photo" alt="Kurtka FR" src="https://images.unsplash.com/photo-1520975922284-5f7f3e8b24f3?q=80&w=800&auto=format&fit=crop" />
+                </td>
+                <td><input class="input" type="text" value="Kurtka FR" /></td>
+                <td><input class="input" type="text" value="M" /></td>
+                <td><input class="input" type="number" min="1" value="1" /></td>
+                <td><input class="input" type="text" value="dla UR" /></td>
+              </tr>
+            </tbody>
+          </table>
+          <p id="items-help" class="muted" style="padding:12px 16px;">
+            * W docelowym systemie kolumna „Foto” renderuje miniaturę z bazy po wyborze nr artykułu / pozycji z katalogu.
+          </p>
+        </div>
+      </section>
+
+      <!-- 3) PODSUMOWANIE -->
+      <section class="card" aria-label="Podsumowanie">
+        <header class="card-header">
+          <h2>Podsumowanie</h2>
+        </header>
+        <div class="card-content">
+          <div class="grid-2">
+            <div>
+              <h4>Adres dostawy</h4>
+              <p class="muted">Kielce — Zakład 1 • Magazyn</p>
+            </div>
+            <div>
+              <h4>Parametry</h4>
+              <ul class="list">
+                <li>Pozycji: <strong>2</strong></li>
+                <li>Łączna ilość szt.: <strong>2</strong></li>
+                <li>Priorytet: <strong>Standard</strong></li>
+                <li>ETA: <strong>—</strong></li>
+              </ul>
+            </div>
+          </div>
+
+          <h4 style="margin-top:14px;">Uwagi do zamówienia</h4>
+          <div class="card" style="border-style:dashed;">
+            <div class="card-content">
+              <p class="muted">Instrukcje dla magazynu / kompletacji (puste).</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4) AKCJE -->
+      <section class="card" aria-label="Akcje">
+        <header class="card-header">
+          <h2>Akcje</h2>
+        </header>
+        <div class="card-content" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" type="button">Zapisz szkic</button>
+          <button class="btn" type="button">Wyślij zamówienie</button>
+          <a class="btn btn-secondary" href="zamowienia.html" role="button">Anuluj</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="page-footer" role="contentinfo">
+    <div class="container">
+      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
+    </div>
+  </footer>
+</body>
+</html>
