@@ -136,3 +136,61 @@ document.addEventListener('click', (e) => {
     }
   }
 });
+
+// ===== LIVE SEARCH (Table Filtering) =====
+document.addEventListener('input', (e) => {
+  if (e.target.matches('input[type="search"]')) {
+    const query = e.target.value.toLowerCase();
+    // Find closest section/card and then table
+    const container = e.target.closest('section.card') || document;
+    const table = container.querySelector('table.table');
+    if (!table) return;
+
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(query) ? '' : 'none';
+    });
+  }
+});
+
+// ===== BUTTON LOADING STATES =====
+document.addEventListener('click', (e) => {
+  // Ignore clicks on links that actually navigate or open modals
+  const btn = e.target.closest('button.btn, a.btn');
+  if (!btn) return;
+  
+  // If it's a link to another page, let it navigate (don't prevent default unless it's a demo)
+  // For demo purposes, we add loading state to buttons that trigger actions
+  if (btn.tagName === 'BUTTON' && btn.type !== 'submit') {
+    if (btn.hasAttribute('data-open-modal') || btn.hasAttribute('data-modal-close')) return;
+    
+    // Add loading class
+    const originalText = btn.innerHTML;
+    btn.classList.add('is-loading');
+    
+    setTimeout(() => {
+      btn.classList.remove('is-loading');
+      // Show dummy toast
+      showToast('Akcja wykonana pomyślnie (demo).');
+    }, 600);
+  }
+});
+
+// Expose showToast globally if needed by form submissions
+window.showToast = function(msg){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'18px', right:'18px', background:'var(--nav-bg)',
+    color:'var(--nav-text)', padding:'10px 14px', borderRadius:'12px', zIndex:9999,
+    boxShadow:'0 8px 30px rgba(0,0,0,.15)', opacity:'0', transition:'opacity .2s ease'
+  });
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.style.opacity='1');
+  setTimeout(()=>{
+    t.style.opacity='0';
+    setTimeout(()=> t.remove(), 250);
+  }, 1500);
+};

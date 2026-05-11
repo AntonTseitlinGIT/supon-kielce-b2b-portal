@@ -38,27 +38,7 @@
 </head>
 <body>
   <!-- NAV -->
-  <nav class="topbar" aria-label="Główna nawigacja">
-    <div class="container">
-      <a class="brand" href="index.html" aria-label="SUPON Kielce">
-        <img src="logo.png" alt="" class="brand-logo" />
-        <span class="brand-name">SUPON Kielce</span>
-      </a>
-      <ul class="nav-list" role="list">
-        <li><a class="nav-link" href="index.html">Strona główna</a></li>
-        <li><a class="nav-link active" href="zamowienia.html" aria-current="page">Zamówienia</a></li>
-        <li><a class="nav-link" href="serwis.html">Serwis Odzieży</a></li>
-        <li><a class="nav-link" href="zgloszenia.html">Zgłoszenia</a></li>
-        <li><a class="nav-link" href="personel.html">Personel</a></li>
-        <li><a class="nav-link" href="raporty.html">Raporty</a></li>
-        <li><a class="nav-link" href="faktury.html">Faktury</a></li>
-      </ul>
-      <form class="search" role="search" onsubmit="event.preventDefault();" aria-label="Szukaj w platformie">
-        <label for="q" class="sr-only">Szukaj</label>
-        <input id="q" name="q" type="search" placeholder="Szukaj…" />
-      </form>
-    </div>
-  </nav>
+  <app-nav></app-nav>
 
   <!-- HEADER -->
   <header class="page-header">
@@ -159,11 +139,7 @@
     </div> <!-- /container -->
   </main>
 
-  <footer class="page-footer" role="contentinfo">
-    <div class="container">
-      <small>© 2025 — SUPON Kielce — Platforma obsługi klienta</small>
-    </div>
-  </footer>
+  <app-footer></app-footer>
 
   <!-- MODAL: szczegóły -->
   <div class="modal-backdrop" id="modal-backdrop"></div>
@@ -276,6 +252,7 @@
       });
     })();
   </script>
+  <script src="components.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
