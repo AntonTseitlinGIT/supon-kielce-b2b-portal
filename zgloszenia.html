@@ -3,95 +3,519 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SUPON Kielce — Zgłoszenia (QR / Service Desk)</title>
+  <title>SUPON Kielce — Twoje Zgłoszenia</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Reuse consistent patterns from Zamówienia */
+    .controls-row {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .search-bar-container {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+    }
+    
+    .search-input-wrapper input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px 0 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--page-bg);
+      font-family: var(--font);
+      font-size: 15px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    
+    .search-input-wrapper input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 10%, transparent);
+    }
+    
+    .search-icon-svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    
+    .status-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-chip {
+      padding: 8px 18px;
+      border-radius: 99px;
+      background: var(--page-bg);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .filter-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .filter-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
+
+    .zgłoszenie-row {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .zgłoszenie-row:hover {
+      background: color-mix(in oklab, var(--accent) 4%, transparent) !important;
+    }
+
+    /* Form Styles for Modal */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+    
+    /* Modal Improvements */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(2,6,23,.45);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      display: none; z-index: 1000;
+    }
+    .modal {
+      position: fixed; inset: 0; display: none; place-items: center; z-index: 1001;
+      padding: 20px;
+    }
+    .modal.open, .modal-backdrop.open { display: grid; }
+    
+    .modal-card { 
+      background: var(--page-bg);
+      border-radius: 24px; 
+      width: min(800px, 100%); 
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .modal-head { padding: 24px 32px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .modal-body { padding: 32px; }
+    .modal-actions { padding: 20px 32px 32px; border-top: none;
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    .modal-close { background:transparent; border:0; font-weight:800; font-size:18px; cursor:pointer; color:var(--muted); }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+    .dot.active { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent); }
+    .dot.done { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 20%, transparent); }
+  </style>
 </head>
 <body>
-<app-nav></app-nav>
+  <app-nav></app-nav>
+
   <header class="page-header">
     <div class="container header-grid">
       <div>
-        <h1>Zgłoszenia (QR / Service Desk)</h1>
-        <p class="subtitle">Lista i tworzenie zgłoszeń</p>
+        <h1>Twoje Zgłoszenia</h1>
+        <p class="subtitle">Zgłaszaj serwis, monitoruj naprawy и przeglądaj historię serwisową</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="newRequestBtn">+ Nowe zgłoszenie</button>
       </div>
     </div>
   </header>
-  <main class="page-main">
 
-    <div class="container layout-2cols">
-      <div class="card">
-        <header class="card-header">
-          <h2>Zgłoszenia serwisowe</h2>
-          <div class="tools">
-            <input class="input" type="search" placeholder="Filtruj…">
+  <main class="page-main">
+    <div class="container">
+      
+      <!-- CONTROLS -->
+      <div class="controls-row">
+        <div class="status-filters" id="statusFilters">
+          <button class="filter-chip active" data-status="">Wszystkie</button>
+          <button class="filter-chip" data-status="Nowe">Nowe</button>
+          <button class="filter-chip" data-status="W toku">W toku</button>
+          <button class="filter-chip" data-status="Do oceny">Do oceny</button>
+          <button class="filter-chip" data-status="Zakończone">Zakończone</button>
+        </div>
+        
+        <div class="search-bar-container" style="display:flex; gap:10px;">
+          <div class="search-input-wrapper" style="flex:1;">
+            <svg class="search-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="zgłoszeniaSearch" placeholder="Szukaj po numerze zgłoszenia, pracowniku lub asortymencie...">
           </div>
-        </header>
-        <div class="card-content">
-          <table class="table">
+          <button class="btn" id="btnFilterZgl" style="height:48px; padding:0 24px;">Filtruj</button>
+          <button class="adv-toggle" id="advToggle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            Filtry
+          </button>
+        </div>
+
+        <div class="advanced-filters-panel" id="advPanel">
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data od</label>
+            <input class="input" type="date" id="f-od" style="display:block; width:100%; margin-top:4px;">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data do</label>
+            <input class="input" type="date" id="f-do" style="display:block; width:100%; margin-top:4px;">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Kategoria</label>
+            <select class="input" id="f-cat" style="display:block; width:100%; margin-top:4px;">
+              <option value="">Wszystkie</option>
+              <option>Serwisowe</option>
+              <option>Reklamacyjne</option>
+              <option>Wymiana</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button class="btn" id="btnFilterAdv" style="width:100%; height:40px;">Filtruj wyniki</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST -->
+      <section class="card">
+        <div class="card-content" style="padding:0; overflow-x: auto;">
+          <table class="table" id="zgłoszenia-table">
             <thead>
-              <tr><th>ID</th><th>Typ</th><th>Pracownik</th><th>Asortyment</th><th>Utworzono</th><th>Status</th></tr>
+              <tr>
+                <th>ID Zgłoszenia</th>
+                <th>Typ</th>
+                <th>Pracownik</th>
+                <th>Asortyment</th>
+                <th>Data utworzenia</th>
+                <th>Status</th>
+              </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>SRV-2025-0145</td><td>Serwisowe</td><td>Jan Kowalski</td><td>Spodnie Motion</td><td>19.08.2025 10:12</td>
-                <td><span class="badge new">Nowe</span></td>
-              </tr>
-              <tr>
-                <td>SRV-2025-0139</td><td>Reklamacyjne</td><td>Agnieszka Nowak</td><td>Bluza Hi-Vis</td><td>19.08.2025 08:27</td>
-                <td><span class="badge info">W toku</span></td>
-              </tr>
-              <tr>
-                <td>SRV-2025-0132</td><td>Serwisowe</td><td>Piotr Zieliński</td><td>Kurtka FR</td><td>18.08.2025 15:02</td>
-                <td><span class="badge rate">Do oceny</span></td>
-              </tr>
-              <tr>
-                <td>SRV-2025-0121</td><td>Serwisowe</td><td>Anna Wiśniewska</td><td>Fartuch Food Safety</td><td>17.08.2025 11:49</td>
-                <td><span class="badge ok">Zakończone</span></td>
-              </tr>
+            <tbody id="zgłoszenia-tbody">
+              <!-- Dynamically rendered -->
             </tbody>
           </table>
         </div>
-      </div>
+        
+        <!-- Pagination UI -->
+        <div class="pagination-container">
+          <div class="page-size-selector">
+            <span>Pokaż:</span>
+            <select id="pageSize">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="page-info" id="pageInfo">Pokazano 1-10 z 25</div>
+          <div class="pagination-controls" id="pagination">
+            <!-- Buttons rendered here -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
 
-      <div class="card">
-        <header class="card-header">
-          <h2>Nowe zgłoszenie</h2>
-        </header>
-        <div class="card-content">
-          <form class="form" onsubmit="event.preventDefault();">
+  <app-footer></app-footer>
+
+  <!-- MODAL: NOWE ZGŁOSZENIE -->
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal" id="newRequestModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Nowe zgłoszenie serwisowe</h3>
+        <button class="modal-close" data-close>×</button>
+      </div>
+      <div class="modal-body">
+        <form class="form" id="newRequestForm">
+          <div class="form-grid">
             <label>Pracownik
-              <input class="input" type="text" placeholder="np. Jan Kowalski">
-            </label>
-            <label>Szafka/Skrytka
-              <input class="input" type="text" placeholder="np. A-12 / 03">
+              <input class="input" id="reqPerson" type="text" placeholder="Imię i Nazwisko" required>
             </label>
             <label>Typ zgłoszenia
-              <select class="input">
+              <select class="input" id="reqType">
                 <option>Serwisowe</option>
                 <option>Reklamacyjne</option>
+                <option>Wymiana</option>
               </select>
             </label>
             <label>Asortyment
-              <input class="input" type="text" placeholder="np. Spodnie Motion">
+              <input class="input" id="reqItem" type="text" placeholder="np. Spodnie Motion" required>
             </label>
-            <label>Nr CHIP (3 ostatnie cyfry)
-              <input class="input" type="text" placeholder="np. 532" maxlength="3">
+            <label>Nr szafki / Skrytka
+              <input class="input" id="reqCabinet" type="text" placeholder="np. A-12 / 03">
             </label>
-            <label>Opis
-              <textarea class="input" rows="4" placeholder="Krótki opis problemu…"></textarea>
-            </label>
-            <div class="form-actions">
-              <button class="btn" type="submit">Wyślij zgłoszenie</button>
-              <button class="btn btn-secondary" type="reset">Wyczyść</button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <label style="margin-top:12px">Opis problemu
+            <textarea class="input" id="reqDesc" rows="4" placeholder="Opisz dokładnie co wymaga naprawy..." required></textarea>
+          </label>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" data-close>Anuluj</button>
+        <button class="btn" type="submit" form="newRequestForm">Wyślij zgłoszenie</button>
       </div>
     </div>
-  
-  </main>
-  <app-footer></app-footer>
+  </div>
+
+  <!-- MODAL: SZCZEGÓŁY -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="detTitle">Szczegóły zgłoszenia</h3>
+        <button class="modal-close" data-close>×</button>
+      </div>
+      <div class="modal-body">
+        <div id="detMeta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; background: var(--section-bg); padding: 20px; border-radius: 16px;"></div>
+        <h4>Opis zgłoszenia</h4>
+        <p id="detDesc" style="line-height: 1.6; color: var(--muted); background: var(--page-bg); padding: 16px; border: 1px solid var(--line); border-radius: 12px;"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary">Drukuj etykietę QR</button>
+        <button class="btn" data-close>Zamknij</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = (s, r=document)=>r.querySelector(s);
+      const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+      // MOCK DATA (Expanded) + LocalStorage
+      const DEFAULT_DATA = [
+        {id:"SRV-2025-0145", type:"Serwisowe", person:"Jan Kowalski", item:"Spodnie Motion", date:"19.08.2025 10:12", status:"Nowe", desc:"Rozdarcie на prawym kolanie."},
+        {id:"SRV-2025-0139", type:"Reklamacyjne", person:"Agnieszka Nowak", item:"Bluza Hi-Vis", date:"19.08.2025 08:27", status:"W toku", desc:"Problem z zamkiem błyskawicznym."},
+        {id:"SRV-2025-0132", type:"Serwisowe", person:"Piotr Zieliński", item:"Kurtka FR", date:"18.08.2025 15:02", status:"Do oceny", desc:"Wymiana odblasków."},
+        {id:"SRV-2025-0121", type:"Serwisowe", person:"Anna Wiśniewska", item:"Fartuch Food Safety", date:"17.08.2025 11:49", status:"Zakończone", desc:"Naprawa szwów bocznych."},
+        {id:"SRV-2025-0118", type:"Serwisowe", person:"Marek Lewand", item:"Buty S3", date:"16.08.2025 09:15", status:"Zakończone", desc:"Wymiana sznurowadeł."},
+        {id:"SRV-2025-0115", type:"Wymiana", person:"Ewa Kasprzyk", item:"T-shirt Cotton", date:"15.08.2025 14:30", status:"W toku", desc:"Zmiana rozmiaru na L."},
+        {id:"SRV-2025-0110", type:"Serwisowe", person:"Tomasz Kot", item:"Polary Polar", date:"14.08.2025 10:00", status:"Nowe", desc:"Dziura w kieszeni."},
+        {id:"SRV-2025-0105", type:"Reklamacyjne", person:"Karol Świerk", item:"Kask ochronny", date:"12.08.2025 08:45", status:"Do oceny", desc:"Pęknięcie skorupy."},
+        {id:"SRV-2025-0099", type:"Serwisowe", person:"Beata Tyszkiewicz", item:"Spodnie robocze", date:"10.08.2025 16:20", status:"Zakończone", desc:"Skrócenie nogawek."},
+        {id:"SRV-2025-0092", type:"Serwisowe", person:"Adam Małysz", item:"Kurtka zimowa", date:"08.08.2025 12:10", status:"W toku", desc:"Wymiana podpinki."},
+        {id:"SRV-2025-0085", type:"Wymiana", person:"Robert Lewandowski", item:"Bluza dresowa", date:"05.08.2025 09:30", status:"Nowe", desc:"Zły kolor."},
+        {id:"SRV-2025-0078", type:"Serwisowe", person:"Iga Świątek", item:"Opaska", date:"03.08.2025 11:15", status:"Zakończone", desc:"Poprawienie rzepów."},
+        {id:"SRV-2025-0070", type:"Serwisowe", person:"Hubert Hurkacz", item:"Czapka z daszkiem", date:"01.08.2025 14:00", status:"W toku", desc:"Pranie chemiczne."},
+        {id:"SRV-2025-0065", type:"Reklamacyjne", person:"Krzysztof Piątek", item:"Rękawice", date:"28.07.2025 10:20", status:"Do oceny", desc:"Rozprucie."},
+        {id:"SRV-2025-0060", type:"Serwisowe", person:"Arkadiusz Milik", item:"Ochraniacze", date:"25.07.2025 08:15", status:"Zakończone", desc:"Wymiana gumek."},
+        {id:"SRV-2025-0055", type:"Serwisowe", person:"Grzegorz Krychowiak", item:"Koszulka polo", date:"22.07.2025 13:40", status:"Nowe", desc:"Plama."},
+        {id:"SRV-2025-0050", type:"Wymiana", person:"Wojciech Szczęsny", item:"Spodenki", date:"20.07.2025 15:50", status:"W toku", desc:"Za małe."},
+        {id:"SRV-2025-0045", type:"Serwisowe", person:"Kamil Glik", item:"Getry", date:"18.07.2025 11:10", status:"Zakończone", desc:"Zacerowanie."},
+        {id:"SRV-2025-0040", type:"Serwisowe", person:"Jakub Błaszczykowski", item:"Wiatrówka", date:"15.07.2025 09:20", status:"Do oceny", desc:"Brak guzika."},
+        {id:"SRV-2025-0035", type:"Reklamacyjne", person:"Łukasz Piszczek", item:"Torba sportowa", date:"12.07.2025 12:30", status:"Nowe", desc:"Uszkodzony pasek."},
+        {id:"SRV-2025-0030", type:"Serwisowe", person:"Maciej Rybus", item:"Skarpety", date:"10.07.2025 14:45", status:"Zakończone", desc:"Dziura."},
+        {id:"SRV-2025-0025", type:"Serwisowe", person:"Jan Bednarek", item:"Komin", date:"08.07.2025 10:05", status:"W toku", desc:"Rozciągnięcie."},
+        {id:"SRV-2025-0020", type:"Wymiana", person:"Karol Linetty", item:"Bluza z kapturem", date:"05.07.2025 08:10", status:"Do oceny", desc:"Błąd nadruku."},
+        {id:"SRV-2025-0015", type:"Serwisowe", person:"Przemysław Frankowski", item:"Dresy", date:"03.07.2025 16:30", status:"Nowe", desc:"Wymiana sznurka."},
+        {id:"SRV-2025-0010", type:"Serwisowe", person:"Nicola Zalewski", item:"Koszulka termiczna", date:"01.07.2025 11:55", status:"Zakończone", desc:"Naprawa szwu."}
+      ];
+
+      let DATA = JSON.parse(localStorage.getItem('portal_requests')) || DEFAULT_DATA;
+
+      function saveData() {
+        localStorage.setItem('portal_requests', JSON.stringify(DATA));
+      }
+
+      let currentPage = 1;
+      let pageSize = 10;
+      let currentFilter = "";
+      let searchQuery = "";
+
+      const tbody = $("#zgłoszenia-tbody");
+      const pagination = $("#pagination");
+      const pageInfo = $("#pageInfo");
+      const pageSizeSelect = $("#pageSize");
+      const search = $("#zgłoszeniaSearch");
+      const chips = $$(".filter-chip");
+
+      function getBadge(type) {
+        if(type === "Reklamacyjne") return "badge warn";
+        if(type === "Wymiana") return "badge ok";
+        return "badge info";
+      }
+
+      function getStatusDot(status) {
+        if(status === "Nowe") return `<div class="status-indicator"><span class="dot active"></span><span>Nowe</span></div>`;
+        if(status === "W toku") return `<div class="status-indicator"><span class="dot active"></span><span class="dot active"></span><span>W toku</span></div>`;
+        if(status === "Do oceny") return `<div class="status-indicator"><span class="dot active"></span><span class="dot active"></span><span class="dot active"></span><span>Do oceny</span></div>`;
+        if(status === "Zakończone") return `<div class="status-indicator"><span class="dot done"></span><span style="color:var(--ok)">Zakończone</span></div>`;
+        return status;
+      }
+
+      function render() {
+        const dateFrom = $("#f-od").value;
+        const dateTo = $("#f-do").value;
+        const catFilter = $("#f-cat").value;
+
+        const filtered = DATA.filter(item => {
+          const matchesFilter = !currentFilter || item.status === currentFilter;
+          const matchesSearch = !searchQuery || Object.values(item).join(" ").toLowerCase().includes(searchQuery);
+          
+          // Date Filter
+          // Expecting format "DD.MM.YYYY HH:MM"
+          const parts = item.date.split(" ")[0].split(".");
+          const itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          
+          const matchFrom = !dateFrom || itemDate >= new Date(dateFrom);
+          const matchTo = !dateTo || itemDate <= new Date(dateTo);
+          const matchCat = !catFilter || item.type === catFilter;
+
+          return matchesFilter && matchesSearch && matchFrom && matchTo && matchCat;
+        });
+
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / pageSize);
+        if(currentPage > totalPages) currentPage = Math.max(1, totalPages);
+
+        const start = (currentPage - 1) * pageSize;
+        const slice = filtered.slice(start, start + pageSize);
+
+        tbody.innerHTML = slice.map(item => `
+          <tr class="zgłoszenie-row" data-info='${JSON.stringify(item)}'>
+            <td><strong>${item.id}</strong></td>
+            <td><span class="${getBadge(item.type)}">${item.type}</span></td>
+            <td>${item.person}</td>
+            <td>${item.item}</td>
+            <td>${item.date.split(" ")[0]}</td>
+            <td>${getStatusDot(item.status)}</td>
+          </tr>
+        `).join("");
+
+        pageInfo.textContent = `Pokazano ${total === 0 ? 0 : start + 1}-${Math.min(start + pageSize, total)} z ${total}`;
+        
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        let html = `
+          <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.setPage(${currentPage - 1})">Poprzednia</button>
+        `;
+        
+        for(let i=1; i<=totalPages; i++) {
+          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="window.setPage(${i})">${i}</button>`;
+        }
+
+        html += `
+          <button class="page-btn" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''} onclick="window.setPage(${currentPage + 1})">Następna</button>
+        `;
+        pagination.innerHTML = html;
+      }
+
+      window.setPage = (p) => { currentPage = p; render(); };
+
+      pageSizeSelect.addEventListener("change", (e) => {
+        pageSize = parseInt(e.target.value);
+        currentPage = 1;
+        render();
+      });
+
+      const applyFilters = () => {
+        searchQuery = search.value.toLowerCase();
+        currentPage = 1;
+        render();
+      };
+
+      $("#btnFilterZgl").addEventListener("click", applyFilters);
+      $("#btnFilterAdv").addEventListener("click", applyFilters);
+      
+      const advToggle = $("#advToggle");
+      const advPanel = $("#advPanel");
+      advToggle.addEventListener("click", () => advPanel.classList.toggle("open"));
+
+      search.addEventListener("keypress", (e) => {
+        if(e.key === "Enter") applyFilters();
+      });
+
+      chips.forEach(c => {
+        c.addEventListener("click", () => {
+          chips.forEach(x => x.classList.remove("active"));
+          c.classList.add("active");
+          currentFilter = c.getAttribute("data-status");
+          currentPage = 1;
+          render();
+        });
+      });
+
+      // Modals
+      const backdrop = $("#modalBackdrop");
+      const newModal = $("#newRequestModal");
+      const detModal = $("#detailsModal");
+      const open = (m) => { backdrop.classList.add("open"); m.classList.add("open"); document.body.style.overflow = "hidden"; };
+      const close = () => { backdrop.classList.remove("open"); $$(".modal").forEach(m=>m.classList.remove("open")); document.body.style.overflow = ""; };
+
+      $("#newRequestBtn").addEventListener("click", () => open(newModal));
+      backdrop.addEventListener("click", close);
+      $$("[data-close]").forEach(b => b.addEventListener("click", close));
+
+      tbody.addEventListener("click", (e) => {
+        const tr = e.target.closest("tr[data-info]");
+        if(!tr) return;
+        const info = JSON.parse(tr.getAttribute("data-info"));
+        $("#detTitle").textContent = `Zgłoszenie ${info.id}`;
+        $("#detMeta").innerHTML = `
+          <div><label class="label-caps" style="display:block">Status</label><b>${info.status}</b></div>
+          <div><label class="label-caps" style="display:block">Data</label><b>${info.date}</b></div>
+          <div><label class="label-caps" style="display:block">Typ</label><b>${info.type}</b></div>
+          <div><label class="label-caps" style="display:block">Pracownik</label><b>${info.person}</b></div>
+        `;
+        $("#detDesc").textContent = info.desc;
+        open(detModal);
+      });
+
+      $("#newRequestForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        
+        const newReq = {
+          id: `SRV-2025-${(DATA.length + 100).toString().padStart(4, '0')}`,
+          type: $("#reqType").value,
+          person: $("#reqPerson").value,
+          item: $("#reqItem").value,
+          date: new Date().toLocaleString('pl-PL').replace(',', ''),
+          status: "Nowe",
+          desc: $("#reqDesc").value
+        };
+
+        DATA.unshift(newReq);
+        saveData();
+        render();
+        
+        alert("Zgłoszenie zostało wysłane pomyślnie!");
+        e.target.reset();
+        close();
+      });
+
+      render();
+    })();
+  </script>
   <script src="components.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>

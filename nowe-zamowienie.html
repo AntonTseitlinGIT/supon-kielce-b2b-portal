@@ -50,7 +50,7 @@
         <div class="card-content">
           <form class="form" onsubmit="event.preventDefault();">
             <label>Adres dostawy
-              <select class="input">
+              <select class="input" id="ordAddr">
                 <option value="">— Wybierz adres —</option>
                 <option>Kielce — Zakład 1 • Magazyn</option>
                 <option>Kielce — Zakład 2 • Portiernia</option>
@@ -59,7 +59,7 @@
             </label>
 
             <label>Zakład / Dział
-              <input class="input" type="text" placeholder="np. Produkcja / Linia A" />
+              <input class="input" type="text" id="ordDept" placeholder="np. Produkcja / Linia A" />
             </label>
 
             <div class="grid-2">
@@ -190,10 +190,37 @@
         </header>
         <div class="card-content" style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn-secondary" type="button">Zapisz szkic</button>
-          <button class="btn" type="button">Wyślij zamówienie</button>
+          <button class="btn" type="button" id="submitOrder">Wyślij zamówienie</button>
           <a class="btn btn-secondary" href="zamowienia.html" role="button">Anuluj</a>
         </div>
       </section>
+
+      <script>
+        document.getElementById('submitOrder').addEventListener('click', () => {
+          const addr = document.getElementById('ordAddr').value;
+          const dept = document.getElementById('ordDept').value;
+          
+          if(!addr) { alert('Proszę wybrać adres dostawy'); return; }
+
+          const orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
+          const newOrder = {
+            id: `Z-2025-${(orders.length + 1048).toString()}`,
+            created: new Date().toISOString().split('T')[0],
+            eta: "Do ustalenia",
+            addr: addr + (dept ? ' — ' + dept : ''),
+            status: "Nowe",
+            items: [
+              {produkt: "Zamówienie z formularza", nr: "—", rozmiar: "—", ilosc: 1, osoba: "Zleceniodawca", foto: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=400&auto=format&fit=crop"}
+            ]
+          };
+
+          orders.unshift(newOrder);
+          localStorage.setItem('portal_orders', JSON.stringify(orders));
+          
+          alert('Zamówienie zostało wysłane!');
+          window.location.href = 'zamowienia.html';
+        });
+      </script>
 
     </div>
   </main>

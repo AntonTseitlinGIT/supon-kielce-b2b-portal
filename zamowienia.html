@@ -3,145 +3,244 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SUPON Kielce — Zamówienia</title>
+  <title>SUPON Kielce — Twoje Zamówienia</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* Lokalne dodatki tylko dla tej podstrony */
-    .table th, .table td{ padding: 10px 12px; }
-    .table tbody tr[data-order]{ cursor: pointer; }
-    .table tbody tr[data-order]:hover{ background:#f3f6ff; }
+    /* Modern Navigation for Orders */
+    .orders-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .search-bar-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+    }
+    
+    .search-wrapper input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px 0 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--page-bg);
+      font-family: var(--font);
+      font-size: 15px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    
+    .search-wrapper input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 10%, transparent);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    
+    /* Status Chips */
+    .status-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    
+    .chip-filter {
+      padding: 8px 16px;
+      border-radius: 99px;
+      background: var(--page-bg);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .chip-filter:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .chip-filter.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px color-mix(in oklab, var(--accent) 25%, transparent);
+    }
 
-    /* MODAL — zawsze idealnie wycentrowany */
-    .modal-backdrop{
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Order Table Improvements */
+    .order-row {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .order-row:hover {
+      background: color-mix(in oklab, var(--accent) 4%, transparent) !important;
+    }
+    
+    .status-tracker {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .tracker-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--line);
+    }
+    
+    .tracker-dot.active { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent); }
+
+    /* Modal improvements */
+    .modal-backdrop {
       position: fixed; inset: 0; background: rgba(2,6,23,.45);
       backdrop-filter: blur(2px); display:none; z-index:1000;
     }
-    .modal{
+    .modal {
       position: fixed; inset: 0; display:none; place-items:center; z-index:1001;
     }
-    .modal.open, .modal-backdrop.open{ display:grid; }
-    .modal-card{
-      width: min(920px, 96vw); background:#fff; border:1px solid var(--line);
-      border-radius:16px; box-shadow: 0 20px 60px rgba(2,6,23,.35); overflow:hidden;
+    .modal.open, .modal-backdrop.open { display:grid; }
+    .modal-card {
+      width: min(920px, 96vw); background: var(--page-bg); border:1px solid var(--line);
+      border-radius:24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow:hidden;
     }
-    .modal-head{ padding:14px 16px; border-bottom:1px solid var(--line);
-      display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .modal-body{ padding:12px 16px; }
-    .modal-actions{ padding:12px 16px; border-top:1px solid var(--line);
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-    .modal-close{ background:transparent; border:0; font-weight:800; font-size:18px; cursor:pointer; color:var(--muted); }
-
-    .meta{ display:flex; gap:18px; flex-wrap:wrap; color:var(--muted); font-size:13px; }
-    .meta b{ color: var(--text); }
-    .item-photo{ width:64px; height:64px; border:1px solid var(--line); border-radius:10px; object-fit:cover; background:#fafbfe; }
+    .modal-head { padding: 24px 32px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .modal-body { padding: 32px; }
+    .modal-actions { padding: 20px 32px 32px; border-top: none;
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+    .modal-close { background:transparent; border:0; font-weight:800; font-size:18px; cursor:pointer; color:var(--muted); }
+    .item-photo { width:64px; height:64px; border:1px solid var(--line); border-radius:12px; object-fit:cover; background:#fafbfe; }
+    .meta b { color: var(--text); }
   </style>
 </head>
 <body>
-  <!-- NAV -->
   <app-nav></app-nav>
 
-  <!-- HEADER -->
   <header class="page-header">
     <div class="container header-grid">
       <div>
-        <h1>Zamówienia</h1>
-        <p class="subtitle">Rejestr zamówień, statusy i dostawy — SUPON</p>
+        <h1>Twoje Zamówienia</h1>
+        <p class="subtitle">Zarządzaj swoimi zamówieniami, śledź dostawy i pobieraj dokumenty</p>
+      </div>
+      <div class="header-actions">
+        <a href="nowe-zamowienie.html" class="btn">Nowe zamówienie</a>
       </div>
     </div>
   </header>
 
   <main class="page-main">
-    <!-- TEN SAM CONTAINER co filtry: szerokość = var(--container) -->
-    <div class="container stack">
+    <div class="container">
+      
+      <!-- CONTROLS SECTION -->
+      <div class="orders-controls">
+        <div class="status-chips" id="statusChips">
+          <button class="chip-filter active" data-status="">Wszystkie</button>
+          <button class="chip-filter" data-status="Nowe">Nowe</button>
+          <button class="chip-filter" data-status="W realizacji">W realizacji</button>
+          <button class="chip-filter" data-status="Wysłane">Wysłane</button>
+          <button class="chip-filter" data-status="Dostarczone">Dostarczone</button>
+        </div>
+        
+        <div class="search-bar-row">
+          <div class="search-wrapper">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="mainSearch" placeholder="Szukaj po numerze zamówienia, produkcie lub pracowniku...">
+          </div>
+          <button class="btn" id="btnFilterMain" style="height:48px; padding:0 24px;">Filtruj</button>
+          <button class="adv-toggle" id="advToggle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            Filtry
+          </button>
+        </div>
 
-      <!-- FILTRY -->
-      <section class="card" aria-label="Filtry listy">
-        <header class="card-header"><h2>Filtry</h2></header>
-        <div class="card-content">
-          <form class="form filters" id="filtersForm" onsubmit="event.preventDefault();">
-            <div class="filters-row">
-              <label>Numer pracownika
-                <input class="input" type="text" id="f-nr" placeholder="np. 004215">
-              </label>
-              <label>Imię i nazwisko
-                <input class="input" type="text" id="f-osoba" placeholder="np. Jan Kowalski">
-              </label>
-              <label>Zakład / Dział
-                <input class="input" type="text" id="f-dept" placeholder="np. Kielce — Zakład 1">
-              </label>
-              <label>Status
-                <select class="input" id="f-status">
-                  <option value="">Wszystkie</option>
-                  <option>Nowe</option>
-                  <option>W realizacji</option>
-                  <option>Wysłane</option>
-                  <option>Gotowe do dostawy</option>
-                  <option>Dostarczone</option>
-                  <option>Anulowane</option>
-                </select>
-              </label>
-              <label>Data od
-                <input class="input" type="date" id="f-od">
-              </label>
-              <label>Data do
-                <input class="input" type="date" id="f-do">
-              </label>
-            </div>
-            <div class="form-actions">
-              <button class="btn" id="applyBtn" type="button">Zastosuj</button>
-              <button class="btn btn-secondary" id="clearBtn" type="reset">Wyczyść</button>
-            </div>
-          </form>
+        <div class="advanced-filters-panel" id="advPanel">
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data od</label>
+            <input class="input" type="date" id="f-od" style="display:block; width:100%; margin-top:4px;">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data do</label>
+            <input class="input" type="date" id="f-do" style="display:block; width:100%; margin-top:4px;">
+          </div>
+          <div class="form-group">
+            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Zakład / Dział</label>
+            <input class="input" type="text" id="f-dept" placeholder="Wszystkie" style="display:block; width:100%; margin-top:4px;">
+          </div>
+          <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button class="btn" id="btnFilterAdv" style="width:100%; height:40px;">Filtruj wyniki</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLE SECTION -->
+      <section class="card">
+        <div class="card-content" style="padding: 0; overflow-x: auto;">
+          <table class="table" id="orders-table">
+            <thead>
+              <tr>
+                <th>Numer zamówienia</th>
+                <th>Data</th>
+                <th>Zakład / Dział</th>
+                <th>Zawartość</th>
+                <th>Status</th>
+                <th>Dostawa (ETA)</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination UI -->
+        <div class="pagination-container">
+          <div class="page-size-selector">
+            <span>Pokaż:</span>
+            <select id="pageSize">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="page-info" id="pageInfo">Pokazano 1-10 z 25</div>
+          <div class="pagination-controls" id="pagination">
+            <!-- Buttons rendered here -->
+          </div>
         </div>
       </section>
 
-      <!-- LISTA ZAMÓWIEŃ (ta sama szerokość co filtry) -->
-      <!-- LISTA ZAMÓWIEŃ (ta sama szerokość co filtry) -->
-<section class="card" aria-label="Tabela zamówień">
-  <header class="card-header">
-    <h2>Lista zamówień</h2>
-    <a href="nowe-zamowienie.html" class="btn">Nowe zamówienie</a>
-  </header>
-  <div class="card-content">
-    <table class="table" id="orders-table">
-      <thead>
-        <tr>
-          <th>#</th><th>Utworzono</th><th>Zakład / Dział</th><th>Pozycje (skrót)</th><th>Status</th><th>Dostawa (ETA)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- wiersze demo -->
-        <tr data-order='{
-          "id":"Z-2025-1048",
-          "created":"2025-08-19 08:10",
-          "eta":"2025-08-21 10:00",
-          "addr":"Kielce — Zakład 1",
-          "status":"W realizacji",
-          "items":[
-            {"produkt":"Spodnie Motion","nr":"MOT-TRS-001","rozmiar":"L / 182–190","ilosc":1,"osoba":"Jan Kowalski (004215)","foto":"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
-            {"produkt":"Bluza Hi-Vis","nr":"HIV-BLS-110","rozmiar":"M","ilosc":1,"osoba":"Jan Kowalski (004215)","foto":"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
-          ]
-        }'>
-          <td><strong>Z-2025-1048</strong></td>
-          <td>19.08.2025</td>
-          <td>Kielce — Zakład 1</td>
-          <td>Spodnie Motion, Bluza Hi-Vis</td>
-          <td><span class="badge info">W realizacji</span></td>
-          <td>21.08.2025</td>
-        </tr>
-        <!-- ... kolejne zamówienia ... -->
-      </tbody>
-    </table>
-  </div>
-</section>
-
-
-    </div> <!-- /container -->
+    </div>
   </main>
 
   <app-footer></app-footer>
 
-  <!-- MODAL: szczegóły -->
+  <!-- MODAL -->
   <div class="modal-backdrop" id="modal-backdrop"></div>
   <div class="modal" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-title">
     <div class="modal-card">
@@ -150,109 +249,222 @@
         <button class="modal-close" aria-label="Zamknij" data-close>×</button>
       </div>
       <div class="modal-body">
-        <div class="meta" id="order-meta"></div>
+        <div id="order-meta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; background: var(--section-bg); padding: 16px; border-radius: 12px;"></div>
 
-        <h4 style="margin:12px 0 8px;">Pozycje w zamówieniu</h4>
-        <table class="table">
-          <thead>
-            <tr><th>Foto</th><th>Produkt</th><th>Nr artykułu</th><th>Rozmiar</th><th>Ilość</th><th>Przeznaczone dla</th></tr>
-          </thead>
-          <tbody id="order-items"></tbody>
-        </table>
-        <p class="muted" style="margin-top:8px;">* Zdjęcia pochodzą z bazy asortymentowej.</p>
+        <h4 style="margin:0 0 12px;">Szczegóły zamówienia</h4>
+        <div style="overflow-x: auto;">
+          <table class="table">
+            <thead>
+              <tr><th>Foto</th><th>Produkt</th><th>Nr artykułu</th><th>Rozmiar</th><th>Ilość</th><th>Przeznaczone dla</th></tr>
+            </thead>
+            <tbody id="order-items"></tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" type="button">Pobierz potwierdzenie (PDF)</button>
-        <button class="btn btn-secondary" type="button">Zmień zamówienie</button>
-        <button class="btn btn-secondary" type="button">Reklamacja</button>
-        <button class="btn" type="button">Wyślij do realizacji</button>
+        <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
+        <button class="btn btn-secondary" type="button">Powtórz zamówienie</button>
+        <button class="btn" type="button" data-close>Zamknij</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Filtry + modal (dopasowane do pól Numer/Osoba/Status/Daty)
     (function(){
       const $ = (s, r=document)=>r.querySelector(s);
       const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
 
-      const nr = $("#f-nr");
-      const osoba = $("#f-osoba");
-      const statusSel = $("#f-status");
-      const od = $("#f-od");
-      const doD = $("#f-do");
-      const rows = $$("#orders-table tbody tr");
+      // MOCK DATA (Expanded) + LocalStorage
+      const DEFAULT_DATA = [
+        {id:"Z-2025-1048", created:"2025-08-19", eta:"21.08.2025", addr:"Kielce — Zakład 1", status:"W realizacji", items:[
+          {produkt:"Spodnie Motion", nr:"MOT-TRS-001", rozmiar:"L / 182–190", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
+          {produkt:"Bluza Hi-Vis", nr:"HIV-BLS-110", rozmiar:"M", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
+        ]},
+        {id:"Z-2025-1052", created:"2025-08-18", eta:"18.08.2025", addr:"Kielce — Zakład 2", status:"Dostarczone", items:[
+          {produkt:"Buty ochronne", nr:"BUT-002", rozmiar:"42", ilosc:1, osoba:"Anna Nowak (004218)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+        ]},
+        {id:"Z-2025-1060", created:"2025-08-17", eta:"20.08.2025", addr:"Warszawa — Filia", status:"Nowe", items:[{produkt:"Kask", nr:"K-10", rozmiar:"Uni", ilosc:5, osoba:"Ekipa A", foto:"https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1065", created:"2025-08-16", eta:"19.08.2025", addr:"Gdańsk — Magazyn", status:"Wysłane", items:[{produkt:"Rękawice", nr:"R-20", rozmiar:"10", ilosc:20, osoba:"Magazynierzy", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1070", created:"2025-08-15", eta:"17.08.2025", addr:"Kraków — Produkcja", status:"Dostarczone", items:[{produkt:"Kamizelka", nr:"KAM-01", rozmiar:"XL", ilosc:2, osoba:"Marek P.", foto:"https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1075", created:"2025-08-14", eta:"16.08.2025", addr:"Kielce — Zakład 1", status:"W realizacji", items:[{produkt:"Okulary", nr:"OKU-99", rozmiar:"Uni", ilosc:10, osoba:"Różni", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1080", created:"2025-08-13", eta:"15.08.2025", addr:"Wrocław — Biuro", status:"Nowe", items:[{produkt:"Polar", nr:"POL-05", rozmiar:"M", ilosc:1, osoba:"Anna K.", foto:"https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1085", created:"2025-08-12", eta:"14.08.2025", addr:"Poznań — Budowa", status:"Wysłane", items:[{produkt:"Kombinezon", nr:"KOM-12", rozmiar:"L", ilosc:5, osoba:"Technicy", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1090", created:"2025-08-11", eta:"13.08.2025", addr:"Łódź — Zakład", status:"Dostarczone", items:[{produkt:"Czapka", nr:"CZ-02", rozmiar:"Uni", ilosc:2, osoba:"Adam G.", foto:"https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1095", created:"2025-08-10", eta:"12.08.2025", addr:"Kielce — Zakład 3", status:"W realizacji", items:[{produkt:"Kurtka", nr:"KUR-88", rozmiar:"S", ilosc:1, osoba:"Ewa M.", foto:"https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1100", created:"2025-08-09", eta:"11.08.2025", addr:"Lublin — Punkt", status:"Nowe", items:[{produkt:"Półbuty", nr:"PB-44", rozmiar:"43", ilosc:1, osoba:"Jan B.", foto:"https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1105", created:"2025-08-08", eta:"10.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[{produkt:"Pas", nr:"P-03", rozmiar:"100", ilosc:1, osoba:"Piotr Z.", foto:"https://images.unsplash.com/photo-1624222247344-550fb60583dc?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1110", created:"2025-08-07", eta:"09.08.2025", addr:"Białystok — Filia", status:"Dostarczone", items:[{produkt:"Maska", nr:"M-01", rozmiar:"Uni", ilosc:50, osoba:"Magazyn", foto:"https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1115", created:"2025-08-06", eta:"08.08.2025", addr:"Kielce — Zakład 2", status:"W realizacji", items:[{produkt:"Rękawiczki", nr:"RE-09", rozmiar:"9", ilosc:10, osoba:"Różni", foto:"https://images.unsplash.com/photo-1588850567047-1849a444555d?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1120", created:"2025-08-05", eta:"07.08.2025", addr:"Katowice — Biuro", status:"Nowe", items:[{produkt:"Kurtka FR", nr:"FR-101", rozmiar:"L", ilosc:1, osoba:"Tomek L.", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1125", created:"2025-08-04", eta:"06.08.2025", addr:"Kraków — Magazyn", status:"Wysłane", items:[{produkt:"T-shirt", nr:"T-SH-05", rozmiar:"M", ilosc:3, osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1130", created:"2025-08-03", eta:"05.08.2025", addr:"Szczecin — Port", status:"Dostarczone", items:[{produkt:"Sztormiak", nr:"SZ-09", rozmiar:"XL", ilosc:2, osoba:"Załoga", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1135", created:"2025-08-02", eta:"04.08.2025", addr:"Kielce — Zakład 3", status:"W realizacji", items:[{produkt:"Spodnie", nr:"SP-02", rozmiar:"52", ilosc:1, osoba:"Karol K.", foto:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1140", created:"2025-08-01", eta:"03.08.2025", addr:"Warszawa — Biuro", status:"Nowe", items:[{produkt:"Bluza", nr:"BL-03", rozmiar:"M", ilosc:1, osoba:"Ola S.", foto:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1145", created:"2025-07-31", eta:"02.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[{produkt:"Buty", nr:"BU-01", rozmiar:"44", ilosc:1, osoba:"Marek O.", foto:"https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1150", created:"2025-07-30", eta:"01.08.2025", addr:"Gdynia — Stocznia", status:"Dostarczone", items:[{produkt:"Kask S3", nr:"K-S3", rozmiar:"Uni", ilosc:10, osoba:"Stoczniowcy", foto:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1155", created:"2025-07-29", eta:"31.07.2025", addr:"Kielce — Zakład 2", status:"W realizacji", items:[{produkt:"Rękawice FR", nr:"RFR-10", rozmiar:"10", ilosc:5, osoba:"Spawacze", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1160", created:"2025-07-28", eta:"30.07.2025", addr:"Radom — Punkt", status:"Nowe", items:[{produkt:"Płaszcz", nr:"PL-01", rozmiar:"L", ilosc:1, osoba:"Krzysztof J.", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1165", created:"2025-07-27", eta:"29.07.2025", addr:"Lublin — Magazyn", status:"Wysłane", items:[{produkt:"Spodnie robocze", nr:"SR-02", rozmiar:"54", ilosc:2, osoba:"Magazynier", foto:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1170", created:"2025-07-26", eta:"28.07.2025", addr:"Kielce — Zakład 1", status:"Dostarczone", items:[{produkt:"Okulary BHP", nr:"BHP-01", rozmiar:"Uni", ilosc:15, osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}]}
+      ];
 
-      function norm(v){ return (v||"").toString().trim().toLowerCase(); }
-      function inRange(dateStr, from, to){
-        if(!from && !to) return true;
-        const d = new Date((dateStr||"").replace(" ", "T"));
-        if(from && d < new Date(from)) return false;
-        if(to && d > new Date(to)) return false;
-        return true;
+      let DATA = JSON.parse(localStorage.getItem('portal_orders')) || DEFAULT_DATA;
+      
+      let currentPage = 1;
+      let pageSize = 10;
+      let currentStatus = "";
+      let searchQuery = "";
+
+      const tbody = $("#orders-tbody");
+      const pagination = $("#pagination");
+      const pageInfo = $("#pageInfo");
+      const pageSizeSelect = $("#pageSize");
+      const mainSearch = $("#mainSearch");
+      const chips = $$(".chip-filter");
+      const advToggle = $("#advToggle");
+      const advPanel = $("#advPanel");
+
+      function getStatusHTML(status) {
+        let activeDots = 1;
+        let color = "";
+        if(status === "W realizacji") activeDots = 2;
+        if(status === "Wysłane") activeDots = 3;
+        if(status === "Dostarczone") { activeDots = 3; color = "color: var(--ok)"; }
+
+        return `
+          <div class="status-tracker">
+            <span class="tracker-dot active"></span>
+            <span class="tracker-dot ${activeDots >= 2 ? 'active' : ''}"></span>
+            <span class="tracker-dot ${activeDots >= 3 ? 'active' : ''}"></span>
+            <span style="margin-left:4px; ${color}">${status}</span>
+          </div>
+        `;
       }
-      function apply(){
-        const fNr = norm(nr.value);
-        const fOs = norm(osoba.value);
-        const fSt = norm(statusSel.value);
-        const fOd = od.value || null;
-        const fDo = doD.value || null;
 
-        rows.forEach(tr=>{
-          let p={};
-          try{ p = JSON.parse(tr.getAttribute("data-order")); }catch(e){}
-          const people = (p.items||[]).map(it => (it.osoba||"").toLowerCase());
-          const matchNr = !fNr || people.some(s => s.includes(fNr));
-          const matchOs = !fOs || people.some(s => s.includes(fOs));
-          const matchSt = !fSt || norm(p.status||"") === fSt;
-          const matchDate = inRange(p.created, fOd, fDo);
-          tr.style.display = (matchNr && matchOs && matchSt && matchDate) ? "" : "none";
+      function render() {
+        const dateFrom = $("#f-od").value;
+        const dateTo = $("#f-do").value;
+        const deptFilter = $("#f-dept").value.toLowerCase();
+
+        const filtered = DATA.filter(p => {
+          const text = (p.id + p.addr + p.status + p.items.map(i=>i.produkt+i.osoba).join("")).toLowerCase();
+          const matchQuery = !searchQuery || text.includes(searchQuery);
+          const matchStatus = !currentStatus || p.status === currentStatus;
+          
+          // Date Filter
+          const orderDate = new Date(p.created);
+          const matchFrom = !dateFrom || orderDate >= new Date(dateFrom);
+          const matchTo = !dateTo || orderDate <= new Date(dateTo);
+          
+          // Dept Filter
+          const matchDept = !deptFilter || p.addr.toLowerCase().includes(deptFilter);
+
+          return matchQuery && matchStatus && matchFrom && matchTo && matchDept;
         });
-      }
-      [nr, osoba].forEach(el => el && el.addEventListener("input", apply));
-      $("#applyBtn")?.addEventListener("click", apply);
-      $("#clearBtn")?.addEventListener("click", ()=>setTimeout(apply,0));
-      apply();
 
-      // Modal
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / pageSize);
+        if(currentPage > totalPages) currentPage = Math.max(1, totalPages);
+
+        const start = (currentPage - 1) * pageSize;
+        const slice = filtered.slice(start, start + pageSize);
+
+        tbody.innerHTML = slice.map(p => `
+          <tr class="order-row" data-order='${JSON.stringify(p)}'>
+            <td><strong>${p.id}</strong></td>
+            <td>${p.created}</td>
+            <td>${p.addr}</td>
+            <td><span class="muted">${p.items.length} poz: ${p.items[0].produkt}...</span></td>
+            <td>${getStatusHTML(p.status)}</td>
+            <td>${p.eta}</td>
+          </tr>
+        `).join("");
+
+        pageInfo.textContent = `Pokazano ${total === 0 ? 0 : start + 1}-${Math.min(start + pageSize, total)} z ${total}`;
+        renderPagination(totalPages);
+      }
+
+      function renderPagination(totalPages) {
+        let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.setPage(${currentPage - 1})">Poprzednia</button>`;
+        for(let i=1; i<=totalPages; i++) {
+          html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="window.setPage(${i})">${i}</button>`;
+        }
+        html += `<button class="page-btn" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''} onclick="window.setPage(${currentPage + 1})">Następna</button>`;
+        pagination.innerHTML = html;
+      }
+
+      window.setPage = (p) => { currentPage = p; render(); };
+
+      pageSizeSelect.addEventListener("change", (e) => {
+        pageSize = parseInt(e.target.value);
+        currentPage = 1;
+        render();
+      });
+
+      const applyFilters = () => {
+        searchQuery = mainSearch.value.toLowerCase();
+        currentPage = 1;
+        render();
+      };
+
+      $("#btnFilterMain").addEventListener("click", applyFilters);
+      $("#btnFilterAdv").addEventListener("click", applyFilters);
+      
+      mainSearch.addEventListener("keypress", (e) => {
+        if(e.key === "Enter") applyFilters();
+      });
+
+      chips.forEach(chip => {
+        chip.addEventListener("click", () => {
+          chips.forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          currentStatus = chip.getAttribute("data-status");
+          currentPage = 1;
+          render();
+        });
+      });
+
+      advToggle.addEventListener("click", () => advPanel.classList.toggle("open"));
+
+      // Modal Logic
       const modal = $("#order-modal");
       const backdrop = $("#modal-backdrop");
       const itemsBox = $("#order-items");
       const metaBox = $("#order-meta");
       const title = $("#order-title");
-      const openM = ()=>{ modal.classList.add("open"); backdrop.classList.add("open"); };
-      const closeM = ()=>{ modal.classList.remove("open"); backdrop.classList.remove("open"); };
+      const openM = ()=> { modal.classList.add("open"); backdrop.classList.add("open"); document.body.style.overflow = "hidden"; };
+      const closeM = ()=> { modal.classList.remove("open"); backdrop.classList.remove("open"); document.body.style.overflow = ""; };
+      
       modal.addEventListener("click", e=>{ if(e.target.matches("[data-close]")) closeM(); });
       backdrop.addEventListener("click", closeM);
-      document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeM(); });
 
-      $("#orders-table").addEventListener("click", (e)=>{
+      tbody.addEventListener("click", (e)=>{
         const tr = e.target.closest("tr[data-order]");
         if(!tr) return;
-        let p={};
-        try{ p = JSON.parse(tr.getAttribute("data-order")); }catch(e){}
-        title.textContent = `Zamówienie ${p.id||""}`;
+        const p = JSON.parse(tr.getAttribute("data-order"));
+        title.textContent = `Szczegóły zamówienia ${p.id}`;
         metaBox.innerHTML = `
-          <span>Status: <b>${p.status||"—"}</b></span>
-          <span>Utworzono: <b>${p.created||"—"}</b></span>
-          <span>Adres dostawy: <b>${p.addr||"—"}</b></span>
-          <span>ETA: <b>${p.eta||"—"}</b></span>
+          <div><label class="label-caps" style="display:block">Status</label><b>${p.status}</b></div>
+          <div><label class="label-caps" style="display:block">Data</label><b>${p.created}</b></div>
+          <div><label class="label-caps" style="display:block">Dostawa</label><b>${p.addr}</b></div>
+          <div><label class="label-caps" style="display:block">ETA</label><b>${p.eta}</b></div>
         `;
-        itemsBox.innerHTML = (p.items||[]).map(it=>`
+        itemsBox.innerHTML = p.items.map(it=>`
           <tr>
-            <td><img class="item-photo" src="${it.foto||''}" alt=""></td>
-            <td>${it.produkt||''}</td>
-            <td>${it.nr||''}</td>
-            <td>${it.rozmiar||''}</td>
-            <td>${it.ilosc||''}</td>
-            <td>${it.osoba||''}</td>
+            <td><img class="item-photo" src="${it.foto}" alt="" width="50"></td>
+            <td><b>${it.produkt}</b></td>
+            <td>${it.nr}</td>
+            <td>${it.rozmiar}</td>
+            <td>${it.ilosc}</td>
+            <td>${it.osoba}</td>
           </tr>
         `).join("");
         openM();
       });
+
+      render();
     })();
   </script>
   <script src="components.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
