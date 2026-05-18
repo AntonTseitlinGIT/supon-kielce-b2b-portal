@@ -514,6 +514,22 @@
       });
 
       render();
+
+      // Automatically open and pre-fill "Nowe zgłoszenie" modal if query parameters are present
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("new") === "true") {
+        if (urlParams.get("person")) {
+          $("#reqPerson").value = urlParams.get("person");
+        }
+        if (urlParams.get("item")) {
+          $("#reqItem").value = urlParams.get("item");
+        }
+        const orderId = urlParams.get("order");
+        if (orderId) {
+          $("#reqDesc").value = `Zgłoszenie dotyczy zamówienia ${orderId}.\n`;
+        }
+        open(newModal);
+      }
     })();
   </script>
   <script src="components.js"></script>

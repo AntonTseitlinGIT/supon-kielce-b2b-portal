@@ -6,23 +6,180 @@
   <title>SUPON Kielce — Nowe zamówienie</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
-    /* Drobne uzupełnienia tylko dla tej strony (wizual, bez JS) */
     .page-main { background: var(--bg); }
     .container-narrow { max-width: var(--container); margin-inline: auto; padding: 0 16px; }
-    .items-card .card-content{ padding:0; }
-    .items-toolbar{ display:flex; gap:10px; padding: 12px 16px; border-bottom:1px solid var(--line); }
-    .items-scroll{ max-height: 72vh; overflow:auto; }
-    .table.items td, .table.items th{ vertical-align: top; }
-    .photo-cell{ width: 140px; }
-    .photo{
-      width: 110px; height: 110px; border:1px solid var(--line); border-radius: 10px;
-      object-fit: cover; background:#fafbfe;
+    .items-card .card-content { padding: 0; }
+    .items-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+    .items-scroll { max-height: 72vh; overflow: auto; }
+    
+    .table.items th {
+      padding: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      background: var(--section-bg);
+      border-bottom: 2px solid var(--line);
     }
-    .kpis{ display:grid; gap:10px; grid-template-columns: repeat(4, minmax(140px,1fr)); }
-    .kpi{ border:1px dashed var(--line); border-radius: 12px; padding:10px; background:#fff; }
-    .kpi h3{ margin:0; font-size:12px; color:var(--muted); font-weight:800; letter-spacing:.2px; }
-    .kpi .value{ font-weight: 800; font-size: 20px; }
-    .hint{ font-size:12px; color:var(--muted); }
+    
+    .table.items td {
+      padding: 12px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--line);
+    }
+    
+    .photo-cell { width: 100px; text-align: center; }
+    .photo {
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      object-fit: cover;
+      background: #fafbfe;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .photo:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+    
+    .kpis { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(140px, 1fr)); margin-top: 16px; }
+    .kpi {
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--page-bg);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(2,6,23,0.02);
+    }
+    .kpi:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    :root[data-theme="dark"] .kpi {
+      background: var(--section-bg);
+    }
+    .kpi h3 { margin: 0 0 4px; font-size: 11px; color: var(--muted); font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+    .kpi .value { font-weight: 800; font-size: 22px; color: var(--text); }
+    .hint { font-size: 12px; color: var(--muted); }
+    
+    /* Dynamic row animations */
+    .table tbody tr {
+      animation: rowAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes rowAppear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .table tbody tr.removing {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .art-code-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      background: var(--section-bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+    
+    /* Custom delete button */
+    .btn-delete-row {
+      height: 36px;
+      width: 36px;
+      padding: 0;
+      border: 1px solid color-mix(in oklab, var(--err) 20%, transparent);
+      color: var(--err);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-delete-row:hover {
+      background: var(--err);
+      color: #fff;
+      border-color: var(--err);
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px color-mix(in oklab, var(--err) 25%, transparent);
+    }
+    .btn-delete-row:active {
+      transform: scale(0.95);
+    }
+
+    .list-summary {
+      padding-left: 20px;
+      margin: 8px 0;
+      display: grid;
+      gap: 6px;
+    }
+    .list-summary li {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* Styled Toggle Switch */
+    .switch-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--line);
+      transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 24px;
+      border: 1px solid var(--line);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
   </style>
 </head>
 <body>
@@ -48,13 +205,13 @@
           <h2>Dane zamówienia</h2>
         </header>
         <div class="card-content">
-          <form class="form" onsubmit="event.preventDefault();">
+          <form class="form" id="orderMainForm" onsubmit="event.preventDefault();">
             <label>Adres dostawy
-              <select class="input" id="ordAddr">
+              <select class="input" id="ordAddr" required>
                 <option value="">— Wybierz adres —</option>
-                <option>Kielce — Zakład 1 • Magazyn</option>
-                <option>Kielce — Zakład 2 • Portiernia</option>
-                <option>Zakład 3 • Dział Produkcji</option>
+                <option value="Kielce — Zakład 1 • Magazyn">Kielce — Zakład 1 • Magazyn</option>
+                <option value="Kielce — Zakład 2 • Portiernia">Kielce — Zakład 2 • Portiernia</option>
+                <option value="Zakład 3 • Dział Produkcji">Zakład 3 • Dział Produkcji</option>
               </select>
             </label>
 
@@ -64,32 +221,32 @@
 
             <div class="grid-2">
               <label>Preferowana data dostawy
-                <input class="input" type="date" />
+                <input class="input" type="date" id="ordDate" />
               </label>
               <label>Priorytet
-                <select class="input">
-                  <option>Standard</option>
-                  <option>Wysoki</option>
-                  <option>Krytyczny</option>
+                <select class="input" id="ordPriority">
+                  <option value="Standard">Standard</option>
+                  <option value="Wysoki">Wysoki</option>
+                  <option value="Krytyczny">Krytyczny</option>
                 </select>
               </label>
             </div>
 
             <label>Numer referencyjny Klienta (opcjonalnie)
-              <input class="input" type="text" placeholder="np. MPK-2025-082" />
+              <input class="input" type="text" id="ordRef" placeholder="np. MPK-2026-082" />
             </label>
 
             <label>Komentarz do zamówienia
-              <textarea class="input" rows="3" placeholder="Instrukcje dla magazynu / kompletacji…"></textarea>
+              <textarea class="input" id="ordComments" rows="3" placeholder="Instrukcje dla magazynu / kompletacji…"></textarea>
             </label>
           </form>
 
-          <h4 style="margin-top:12px;">Szybkie podsumowanie (statyczne do makiety)</h4>
+          <h4 style="margin-top:20px; font-weight: 700;">Podsumowanie parametrów</h4>
           <div class="kpis" role="region" aria-label="Podsumowanie zamówienia">
-            <div class="kpi"><h3>Pozycje</h3><div class="value">0</div></div>
-            <div class="kpi"><h3>Sztuki</h3><div class="value">0</div></div>
-            <div class="kpi"><h3>Pracownicy</h3><div class="value">0</div></div>
-            <div class="kpi"><h3>Adres</h3><div class="value">—</div></div>
+            <div class="kpi"><h3>Pozycje</h3><div class="value" id="kpiItems">0</div></div>
+            <div class="kpi"><h3>Sztuki</h3><div class="value" id="kpiQty">0</div></div>
+            <div class="kpi"><h3>Pracownicy</h3><div class="value" id="kpiEmployees">0</div></div>
+            <div class="kpi"><h3>Adres</h3><div class="value" id="kpiAddr" style="font-size:12px; line-height:1.3; font-weight:700; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">—</div></div>
           </div>
         </div>
       </section>
@@ -100,55 +257,48 @@
           <h2>Pozycje zamówienia</h2>
         </header>
 
-        <div class="items-toolbar">
-          <input class="input" style="max-width:420px" type="search" placeholder="Szybkie wyszukiwanie (pracownik / nr artykułu / opis)…" />
-          <span class="hint">Foto pochodzi z bazy odzieży — wybór produktu z katalogu.</span>
+        <div class="items-toolbar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <input class="input" id="tableSearch" style="max-width:380px; margin-top:0;" type="search" placeholder="Filtruj dodane pozycje..." />
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label class="switch-container">
+              <span style="color: var(--muted); font-size: 13px;">Zamówienie zbiorcze (brak przypisania do pracowników)</span>
+              <label class="switch">
+                <input type="checkbox" id="bulkOrderToggle" />
+                <span class="slider"></span>
+              </label>
+            </label>
+          </div>
         </div>
 
         <div class="items-scroll">
-          <table class="table items" aria-describedby="items-help">
+          <table class="table items" id="itemsTable">
             <thead>
               <tr>
-                <th style="width:260px;">Pracownik (imię i nazwisko)</th>
-                <th style="width:180px;">Nr artykułu</th>
-                <th class="photo-cell">Foto (z bazy)</th>
-                <th>Opis / Wariant</th>
+                <th style="width:230px;">Pracownik</th>
+                <th style="width:230px;">Produkt z katalogu</th>
+                <th style="width:140px;">Kod art.</th>
+                <th class="photo-cell" style="width:90px;">Foto</th>
                 <th style="width:140px;">Rozmiar</th>
-                <th style="width:110px;">Ilość</th>
+                <th style="width:90px;">Ilość</th>
                 <th>Uwagi</th>
+                <th style="width:60px; text-align:center;">Akcja</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- statyczne wiersze do prezentacji -->
-              <tr>
-                <td><input class="input" type="text" value="Jan Kowalski" /></td>
-                <td><input class="input" type="text" value="MOT-TRS-001" /></td>
-                <td class="photo-cell">
-                  <!-- W realu tutaj renderuje się zdjęcie z bazy po wyborze artykułu -->
-                  <img class="photo" alt="Spodnie Motion" src="https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=800&auto=format&fit=crop" />
-                </td>
-                <td><input class="input" type="text" value="Spodnie Motion" /></td>
-                <td><input class="input" type="text" value="L / 182–190" /></td>
-                <td><input class="input" type="number" min="1" value="1" /></td>
-                <td><input class="input" type="text" placeholder="Uwagi (opcjonalnie)" /></td>
-              </tr>
-
-              <tr>
-                <td><input class="input" type="text" value="Agnieszka Nowak" /></td>
-                <td><input class="input" type="text" value="FR-JKT-220" /></td>
-                <td class="photo-cell">
-                  <img class="photo" alt="Kurtka FR" src="https://images.unsplash.com/photo-1520975922284-5f7f3e8b24f3?q=80&w=800&auto=format&fit=crop" />
-                </td>
-                <td><input class="input" type="text" value="Kurtka FR" /></td>
-                <td><input class="input" type="text" value="M" /></td>
-                <td><input class="input" type="number" min="1" value="1" /></td>
-                <td><input class="input" type="text" value="dla UR" /></td>
-              </tr>
+            <tbody id="itemsTbody">
+              <!-- Dynamically populated rows -->
             </tbody>
           </table>
-          <p id="items-help" class="muted" style="padding:12px 16px;">
-            * W docelowym systemie kolumna „Foto” renderuje miniaturę z bazy po wyborze nr artykułu / pozycji z katalogu.
-          </p>
+        </div>
+
+        <div class="card-content" style="padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 12px; justify-content: flex-end;">
+          <button class="btn btn-secondary" type="button" id="btnClearItems">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            Wyczyść wszystko
+          </button>
+          <button class="btn" type="button" id="btnAddItem">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Dodaj pozycję
+          </button>
         </div>
       </section>
 
@@ -160,24 +310,24 @@
         <div class="card-content">
           <div class="grid-2">
             <div>
-              <h4>Adres dostawy</h4>
-              <p class="muted">Kielce — Zakład 1 • Magazyn</p>
+              <h4 style="margin-bottom: 8px;">Adres dostawy</h4>
+              <p class="muted" id="summaryAddr" style="font-weight: 600;">—</p>
             </div>
             <div>
-              <h4>Parametry</h4>
-              <ul class="list">
-                <li>Pozycji: <strong>2</strong></li>
-                <li>Łączna ilość szt.: <strong>2</strong></li>
-                <li>Priorytet: <strong>Standard</strong></li>
-                <li>ETA: <strong>—</strong></li>
+              <h4 style="margin-bottom: 8px;">Podsumowanie ilościowe</h4>
+              <ul class="list-summary">
+                <li>Pozycji w tabeli: <strong id="summaryItems">0</strong></li>
+                <li>Łączna ilość sztuk: <strong id="summaryQty">0</strong></li>
+                <li>Priorytet zamówienia: <strong id="summaryPriority" style="color: var(--accent);">Standard</strong></li>
+                <li>Szacowana dostawa (ETA): <strong id="summaryETA">—</strong></li>
               </ul>
             </div>
           </div>
 
-          <h4 style="margin-top:14px;">Uwagi do zamówienia</h4>
-          <div class="card" style="border-style:dashed;">
-            <div class="card-content">
-              <p class="muted">Instrukcje dla magazynu / kompletacji (puste).</p>
+          <h4 style="margin-top:16px; margin-bottom: 8px;">Uwagi do zamówienia</h4>
+          <div class="card" style="border-style:dashed; background: var(--section-bg);">
+            <div class="card-content" style="padding: 12px 16px;">
+              <p class="muted" id="summaryComments" style="margin: 0; font-style: italic;">Brak instrukcji dodatkowych.</p>
             </div>
           </div>
         </div>
@@ -188,43 +338,513 @@
         <header class="card-header">
           <h2>Akcje</h2>
         </header>
-        <div class="card-content" style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn btn-secondary" type="button">Zapisz szkic</button>
-          <button class="btn" type="button" id="submitOrder">Wyślij zamówienie</button>
+        <div class="card-content" style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" type="button" id="btnSaveDraft">Zapisz szkic</button>
+          <button class="btn" type="button" id="btnSubmitOrder">Wyślij zamówienie</button>
           <a class="btn btn-secondary" href="zamowienia.html" role="button">Anuluj</a>
         </div>
       </section>
-
-      <script>
-        document.getElementById('submitOrder').addEventListener('click', () => {
-          const addr = document.getElementById('ordAddr').value;
-          const dept = document.getElementById('ordDept').value;
-          
-          if(!addr) { alert('Proszę wybrać adres dostawy'); return; }
-
-          const orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
-          const newOrder = {
-            id: `Z-2025-${(orders.length + 1048).toString()}`,
-            created: new Date().toISOString().split('T')[0],
-            eta: "Do ustalenia",
-            addr: addr + (dept ? ' — ' + dept : ''),
-            status: "Nowe",
-            items: [
-              {produkt: "Zamówienie z formularza", nr: "—", rozmiar: "—", ilosc: 1, osoba: "Zleceniodawca", foto: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=400&auto=format&fit=crop"}
-            ]
-          };
-
-          orders.unshift(newOrder);
-          localStorage.setItem('portal_orders', JSON.stringify(orders));
-          
-          alert('Zamówienie zostało wysłane!');
-          window.location.href = 'zamowienia.html';
-        });
-      </script>
 
     </div>
   </main>
 
   <app-footer></app-footer>
+
+  <!-- Autocomplete employee datalist -->
+  <datalist id="employeesList">
+    <option value="Jan Kowalski">Jan Kowalski (NP-0001) — Operator (Produkcja)</option>
+    <option value="Anna Nowak">Anna Nowak (NP-0002) — Magazynier (Magazyn)</option>
+    <option value="Piotr Wiśniewski">Piotr Wiśniewski (NP-0015) — Kierowca (Logistyka)</option>
+    <option value="Katarzyna Mazur">Katarzyna Mazur (NP-0021) — Technik UR (Utrzymanie Ruchu)</option>
+    <option value="Marek Piasecki">Marek Piasecki (NP-0030) — Tokarz (Produkcja)</option>
+    <option value="Tomasz Lewandowski">Tomasz Lewandowski (NP-0045) — Spawacz (Produkcja)</option>
+  </datalist>
+
+  <script>
+    // PRODUCT CATALOG
+    const PRODUCT_CATALOG = {
+      "MOT-TRS-001": {
+        name: "Spodnie Motion",
+        code: "MOT-TRS-001",
+        photo: "https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=800&auto=format&fit=crop",
+        sizes: ["S (164–172)", "M (172–180)", "L (180–188)", "XL (188–196)", "XXL (196+)"]
+      },
+      "FR-JKT-220": {
+        name: "Kurtka FR (Trudnopalna)",
+        code: "FR-JKT-220",
+        photo: "https://images.unsplash.com/photo-1520975922284-5f7f3e8b24f3?q=80&w=800&auto=format&fit=crop",
+        sizes: ["S", "M", "L", "XL", "XXL"]
+      },
+      "HIV-BLS-110": {
+        name: "Bluza Hi-Vis",
+        code: "HIV-BLS-110",
+        photo: "https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=800&auto=format&fit=crop",
+        sizes: ["S", "M", "L", "XL", "XXL"]
+      },
+      "BUT-002": {
+        name: "Buty ochronne S3",
+        code: "BUT-002",
+        photo: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=800&auto=format&fit=crop",
+        sizes: ["39", "40", "41", "42", "43", "44", "45"]
+      },
+      "K-10": {
+        name: "Kask ochronny BHP",
+        code: "K-10",
+        photo: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=800&auto=format&fit=crop",
+        sizes: ["Uniwersalny"]
+      },
+      "R-20": {
+        name: "Rękawice robocze Grip",
+        code: "R-20",
+        photo: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800&auto=format&fit=crop",
+        sizes: ["8 (S)", "9 (M)", "10 (L)", "11 (XL)"]
+      }
+    };
+
+    // DOM ELEMENTS
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+    const itemsTbody = $("#itemsTbody");
+    const btnAddItem = $("#btnAddItem");
+    const btnClearItems = $("#btnClearItems");
+    const btnSubmitOrder = $("#btnSubmitOrder");
+    const btnSaveDraft = $("#btnSaveDraft");
+    const tableSearch = $("#tableSearch");
+
+    // Address & parameters input listeners for calculations
+    const ordAddr = $("#ordAddr");
+    const ordDept = $("#ordDept");
+    const ordDate = $("#ordDate");
+    const ordPriority = $("#ordPriority");
+    const ordComments = $("#ordComments");
+
+    // Default dates setup (today + 5 days default for standard)
+    const today = new Date().toISOString().split('T')[0];
+    ordDate.value = today;
+
+    // EVENT LISTENERS FOR DYNAMIC UPDATES
+    ordAddr.addEventListener("change", updateCalculations);
+    ordDept.addEventListener("input", updateCalculations);
+    ordPriority.addEventListener("change", updateCalculations);
+    ordComments.addEventListener("input", updateCalculations);
+
+    const bulkOrderToggle = $("#bulkOrderToggle");
+    bulkOrderToggle.addEventListener("change", () => {
+      const isBulk = bulkOrderToggle.checked;
+      const empInputs = $$(".emp-input", itemsTbody);
+      empInputs.forEach(input => {
+        if (isBulk) {
+          input.disabled = true;
+          input.value = "";
+          input.placeholder = "— (Zamówienie zbiorcze)";
+          input.removeAttribute("required");
+        } else {
+          input.disabled = false;
+          input.placeholder = "Wyszukaj pracownika...";
+          input.setAttribute("required", "");
+        }
+      });
+      updateCalculations();
+    });
+    
+    // Add item listener
+    btnAddItem.addEventListener("click", () => {
+      addNewRow();
+      updateCalculations();
+    });
+
+    // Clear all items
+    btnClearItems.addEventListener("click", () => {
+      if (itemsTbody.children.length === 0) return;
+      if (confirm("Czy na pewno chcesz usunąć wszystkie pozycje z tabeli?")) {
+        const rows = $$("tr", itemsTbody);
+        rows.forEach(row => row.classList.add("removing"));
+        setTimeout(() => {
+          itemsTbody.innerHTML = "";
+          updateCalculations();
+        }, 250);
+      }
+    });
+
+    // Live search inside active table
+    tableSearch.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      const rows = $$("tr", itemsTbody);
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+
+    // Helper: calculate ETA based on priority
+    function getETAString(priority) {
+      const date = new Date();
+      let days = 5;
+      if (priority === "Wysoki") days = 2;
+      if (priority === "Krytyczny") days = 1;
+      
+      let count = 0;
+      while (count < days) {
+        date.setDate(date.getDate() + 1);
+        const day = date.getDate();
+        const dow = date.getDay();
+        // Skip Saturday (6) and Sunday (0) for workdays
+        if (dow !== 0 && dow !== 6) {
+          count++;
+        }
+      }
+      const formatted = date.toLocaleDateString("pl-PL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+      return `${priority === "Krytyczny" ? "Ekspres (24h) — " : ""}${formatted}`;
+    }
+
+    // UPDATE CALCULATIONS FUNCTION
+    function updateCalculations() {
+      const rows = $$("tr", itemsTbody);
+      const totalItems = rows.length;
+      
+      let totalQty = 0;
+      const employees = new Set();
+
+      rows.forEach(row => {
+        const qtyVal = parseInt($(".qty-input", row).value) || 0;
+        totalQty += qtyVal;
+
+        const empName = $(".emp-input", row).value.trim();
+        if (empName) {
+          employees.add(empName);
+        }
+      });
+
+      const selectedAddress = ordAddr.value;
+      const deptValue = ordDept.value.trim();
+      const addressDisplay = selectedAddress 
+        ? `${selectedAddress}${deptValue ? ' • ' + deptValue : ''}`
+        : "—";
+
+      // Update KPI
+      $("#kpiItems").textContent = totalItems;
+      $("#kpiQty").textContent = totalQty;
+      $("#kpiEmployees").textContent = $("#bulkOrderToggle").checked ? "Zbiorcze" : employees.size;
+      $("#kpiAddr").textContent = addressDisplay;
+      $("#kpiAddr").title = addressDisplay;
+
+      // Update Summary Card
+      $("#summaryAddr").textContent = addressDisplay;
+      $("#summaryItems").textContent = totalItems;
+      $("#summaryQty").textContent = totalQty;
+      
+      const priority = ordPriority.value;
+      $("#summaryPriority").textContent = priority;
+      if (priority === "Standard") {
+        $("#summaryPriority").style.color = "var(--accent)";
+      } else if (priority === "Wysoki") {
+        $("#summaryPriority").style.color = "var(--warn)";
+      } else if (priority === "Krytyczny") {
+        $("#summaryPriority").style.color = "var(--err)";
+      }
+
+      $("#summaryETA").textContent = getETAString(priority);
+
+      const comments = ordComments.value.trim();
+      $("#summaryComments").textContent = comments ? comments : "Brak instrukcji dodatkowych.";
+    }
+
+    // ADD NEW ROW METHOD
+    function addNewRow(employee = "", productCode = "MOT-TRS-001", size = "", qty = 1, remarks = "") {
+      const tr = document.createElement("tr");
+      
+      // Build options list for product dropdown
+      let productOptions = "";
+      Object.keys(PRODUCT_CATALOG).forEach(code => {
+        const prod = PRODUCT_CATALOG[code];
+        const selected = code === productCode ? "selected" : "";
+        productOptions += `<option value="${code}" ${selected}>${prod.name}</option>`;
+      });
+
+      tr.innerHTML = `
+        <td>
+          <input class="input emp-input" type="text" list="employeesList" value="${employee}" placeholder="Wyszukaj pracownika..." required style="margin-top:0;" />
+        </td>
+        <td>
+          <select class="input prod-select" style="margin-top:0;">
+            ${productOptions}
+          </select>
+        </td>
+        <td>
+          <span class="art-code-badge art-code-text">${productCode}</span>
+        </td>
+        <td class="photo-cell">
+          <img class="photo" src="${PRODUCT_CATALOG[productCode].photo}" alt="Zdjęcie produktu" />
+        </td>
+        <td>
+          <select class="input size-select" style="margin-top:0;">
+            <!-- Dynamically populated size choices -->
+          </select>
+        </td>
+        <td>
+          <input class="input qty-input" type="number" min="1" value="${qty}" style="margin-top:0;" required />
+        </td>
+        <td>
+          <input class="input remarks-input" type="text" value="${remarks}" placeholder="np. wymiana, nowa osoba" style="margin-top:0;" />
+        </td>
+        <td style="text-align:center;">
+          <button class="btn-delete-row" type="button" title="Usuń pozycję">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+          </button>
+        </td>
+      `;
+
+      itemsTbody.appendChild(tr);
+
+      // DOM selections inside row
+      const prodSelect = $(".prod-select", tr);
+      const sizeSelect = $(".size-select", tr);
+      const photoImg = $(".photo", tr);
+      const codeText = $(".art-code-text", tr);
+      const empInput = $(".emp-input", tr);
+      const qtyInput = $(".qty-input", tr);
+      const btnDelete = $(".btn-delete-row", tr);
+
+      // Check if bulk order is active and disable the input
+      if ($("#bulkOrderToggle").checked) {
+        empInput.disabled = true;
+        empInput.value = "";
+        empInput.placeholder = "— (Zamówienie zbiorcze)";
+        empInput.removeAttribute("required");
+      }
+
+      // Populate dynamic sizes for chosen product
+      function populateSizes(code, selectedSize = "") {
+        const prod = PRODUCT_CATALOG[code];
+        sizeSelect.innerHTML = prod.sizes.map(sz => {
+          const isSel = sz === selectedSize ? "selected" : "";
+          return `<option value="${sz}" ${isSel}>${sz}</option>`;
+        }).join("");
+      }
+
+      populateSizes(productCode, size);
+
+      // Handle product select change
+      prodSelect.addEventListener("change", (e) => {
+        const code = e.target.value;
+        const prod = PRODUCT_CATALOG[code];
+
+        // Animate image load with class trigger
+        photoImg.style.opacity = "0.3";
+        setTimeout(() => {
+          photoImg.src = prod.photo;
+          photoImg.style.opacity = "1";
+        }, 150);
+
+        codeText.textContent = code;
+        populateSizes(code);
+        updateCalculations();
+      });
+
+      // Handle inputs change
+      empInput.addEventListener("input", updateCalculations);
+      qtyInput.addEventListener("input", updateCalculations);
+
+      // Delete action with premium fade out animation
+      btnDelete.addEventListener("click", () => {
+        tr.classList.add("removing");
+        setTimeout(() => {
+          tr.remove();
+          updateCalculations();
+        }, 220);
+      });
+    }
+
+    // INIT & LOADING DRAFT
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+
+    if (editId) {
+      let orders = [];
+      try {
+        orders = JSON.parse(localStorage.getItem("portal_orders")) || [];
+      } catch (e) {}
+
+      const orderToEdit = orders.find(o => o.id === editId);
+      if (orderToEdit) {
+        // Change headers to show edit mode
+        const isDraft = orderToEdit.status === "Szkic";
+        $("h1").textContent = isDraft ? `Edycja szkicu ${editId}` : `Edycja zamówienia ${editId}`;
+        $(".subtitle").textContent = isDraft 
+          ? `Wprowadź poprawki w szkicu zamówienia zapisanym w dniu ${orderToEdit.created}` 
+          : `Wprowadź poprawki w zamówieniu złożonym w dniu ${orderToEdit.created}`;
+        
+        // Parse address
+        const parts = orderToEdit.addr.split(" • ");
+        ordAddr.value = parts[0] || "";
+        ordDept.value = parts[1] || "";
+        
+        // Populate priority and comments if saved
+        if (orderToEdit.priority) {
+          ordPriority.value = orderToEdit.priority;
+        }
+        if (orderToEdit.comments) {
+          ordComments.value = orderToEdit.comments;
+        }
+
+        // Set bulk toggle
+        const isBulk = orderToEdit.bulk || orderToEdit.items.every(it => it.osoba.startsWith("Zamówienie zbiorcze"));
+        bulkOrderToggle.checked = isBulk;
+
+        // Clear default rows
+        itemsTbody.innerHTML = "";
+
+        // Populate items
+        orderToEdit.items.forEach(it => {
+          let empName = it.osoba || "";
+          let remarks = "";
+          if (empName.endsWith(")") && empName.includes(" (")) {
+            const lastOpenParen = empName.lastIndexOf(" (");
+            remarks = empName.substring(lastOpenParen + 2, empName.length - 1);
+            empName = empName.substring(0, lastOpenParen);
+          }
+          if (empName === "Zamówienie zbiorcze") {
+            empName = "";
+          }
+          addNewRow(empName, it.nr, it.rozmiar, it.ilosc, remarks);
+        });
+
+        updateCalculations();
+      } else {
+        // Fallback to default rows
+        addNewRow("Jan Kowalski", "MOT-TRS-001", "L (180–188)", 1);
+        addNewRow("Anna Nowak", "BUT-002", "42", 1);
+        updateCalculations();
+      }
+    } else {
+      // Default initial rows
+      addNewRow("Jan Kowalski", "MOT-TRS-001", "L (180–188)", 1);
+      addNewRow("Anna Nowak", "BUT-002", "42", 1);
+      updateCalculations();
+    }
+
+    // SAVE & SEND ORDER
+    function processOrderSave(status) {
+      const addrValue = ordAddr.value;
+      const deptValue = ordDept.value.trim();
+
+      if (!addrValue) {
+        alert("Proszę wybrać adres dostawy!");
+        ordAddr.focus();
+        return;
+      }
+
+      const rows = $$("tr", itemsTbody);
+      if (rows.length === 0) {
+        alert("Proszę dodać przynajmniej jedną pozycję do zamówienia!");
+        return;
+      }
+
+      // Check employee name filled
+      let validationOk = true;
+      const orderItems = [];
+      const isBulk = $("#bulkOrderToggle").checked;
+
+      rows.forEach((row, idx) => {
+        const emp = isBulk ? "Zamówienie zbiorcze" : $(".emp-input", row).value.trim();
+        const code = $(".prod-select", row).value;
+        const prodData = PRODUCT_CATALOG[code];
+        const size = $(".size-select", row).value;
+        const qty = parseInt($(".qty-input", row).value) || 0;
+        const remarks = $(".remarks-input", row).value.trim();
+
+        if (!isBulk && !emp) {
+          alert(`Proszę uzupełnić imię i nazwisko pracownika w pozycji nr ${idx + 1}!`);
+          $(".emp-input", row).focus();
+          validationOk = false;
+          return;
+        }
+
+        if (qty <= 0) {
+          alert(`Ilość w pozycji nr ${idx + 1} musi być większa od 0!`);
+          $(".qty-input", row).focus();
+          validationOk = false;
+          return;
+        }
+
+        orderItems.push({
+          produkt: prodData.name,
+          nr: code,
+          rozmiar: size,
+          ilosc: qty,
+          osoba: emp + (remarks ? ` (${remarks})` : ""),
+          foto: prodData.photo
+        });
+      });
+
+      if (!validationOk) return;
+
+      const priority = ordPriority.value;
+      const eta = getETAString(priority);
+
+      // Save order
+      let orders = [];
+      try {
+        orders = JSON.parse(localStorage.getItem("portal_orders")) || [];
+      } catch (e) {}
+
+      let currentId = editId;
+      let originalCreated = today;
+      let orderIndex = -1;
+
+      if (editId) {
+        orderIndex = orders.findIndex(o => o.id === editId);
+      }
+
+      if (orderIndex !== -1) {
+        currentId = editId;
+        originalCreated = orders[orderIndex].created;
+      } else {
+        currentId = `Z-2026-${(orders.length + 1048).toString()}`;
+        originalCreated = today;
+      }
+
+      const newOrder = {
+        id: currentId,
+        created: originalCreated,
+        eta: status === "Szkic" ? "Do ustalenia" : eta,
+        addr: addrValue + (deptValue ? ' • ' + deptValue : ''),
+        status: status,
+        items: orderItems,
+        priority: priority,
+        comments: ordComments.value.trim(),
+        bulk: isBulk
+      };
+
+      if (orderIndex !== -1) {
+        orders[orderIndex] = newOrder;
+      } else {
+        orders.unshift(newOrder);
+      }
+
+      localStorage.setItem("portal_orders", JSON.stringify(orders));
+
+      // Show beautiful success Toast notification
+      if (window.showToast) {
+        window.showToast(status === "Szkic" ? "Szkic został zapisany pomyślnie!" : "Zamówienie zostało pomyślnie wysłane!");
+      } else {
+        alert(status === "Szkic" ? "Szkic został zapisany!" : "Zamówienie zostało wysłane!");
+      }
+
+      // Redirect after animation delay
+      setTimeout(() => {
+        window.location.href = "zamowienia.html";
+      }, 700);
+    }
+
+    btnSubmitOrder.addEventListener("click", () => processOrderSave("Nowe"));
+    btnSaveDraft.addEventListener("click", () => processOrderSave("Szkic"));
+
+  </script>
 </body>
 </html>

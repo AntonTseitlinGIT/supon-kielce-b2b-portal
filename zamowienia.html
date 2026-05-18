@@ -160,11 +160,13 @@
       <!-- CONTROLS SECTION -->
       <div class="orders-controls">
         <div class="status-chips" id="statusChips">
-          <button class="chip-filter active" data-status="">Wszystkie</button>
-          <button class="chip-filter" data-status="Nowe">Nowe</button>
+          <button class="chip-filter active" data-status="Nowe">Nowe</button>
           <button class="chip-filter" data-status="W realizacji">W realizacji</button>
           <button class="chip-filter" data-status="Wysłane">Wysłane</button>
           <button class="chip-filter" data-status="Dostarczone">Dostarczone</button>
+          <button class="chip-filter" data-status="Zatwierdzone">Zatwierdzone</button>
+          <button class="chip-filter" data-status="">Wszystkie</button>
+          <button class="chip-filter" data-status="Szkic">Szkice</button>
         </div>
         
         <div class="search-bar-row">
@@ -210,6 +212,7 @@
                 <th>Zawartość</th>
                 <th>Status</th>
                 <th>Dostawa (ETA)</th>
+                <th style="width:120px;">Akcja</th>
               </tr>
             </thead>
             <tbody id="orders-tbody">
@@ -276,6 +279,18 @@
 
       // MOCK DATA (Expanded) + LocalStorage
       const DEFAULT_DATA = [
+        {id:"Z-2025-1190", created:"2025-08-22", eta:"—", addr:"Warszawa — Biuro", status:"Szkic", items:[
+          {produkt:"Okulary ochronne uvex", nr:"UVX-GLS-009", rozmiar:"Uni", ilosc:3, osoba:"Tomasz Karolak (004230)", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}
+        ]},
+        {id:"Z-2025-1185", created:"2025-08-21", eta:"—", addr:"Kielce — Zakład 1", status:"Szkic", items:[
+          {produkt:"Kurtka softshell", nr:"SFT-JAC-101", rozmiar:"XL", ilosc:1, osoba:"Robert Więckiewicz (004231)", foto:"https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400&auto=format&fit=crop"}
+        ]},
+        {id:"Z-2025-1180", created:"2025-08-20", eta:"20.08.2025", addr:"Gdańsk — Magazyn", status:"Zatwierdzone", items:[
+          {produkt:"Kombinezon BHP", nr:"BHP-COM-050", rozmiar:"L", ilosc:2, osoba:"Michał Wiśniewski (004232)", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}
+        ]},
+        {id:"Z-2025-1175", created:"2025-08-19", eta:"19.08.2025", addr:"Lublin — Magazyn", status:"Zatwierdzone", items:[
+          {produkt:"Trzewiki skórzane S3", nr:"SHO-LEA-333", rozmiar:"43", ilosc:1, osoba:"Paweł Małaszyński (004233)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+        ]},
         {id:"Z-2025-1048", created:"2025-08-19", eta:"21.08.2025", addr:"Kielce — Zakład 1", status:"W realizacji", items:[
           {produkt:"Spodnie Motion", nr:"MOT-TRS-001", rozmiar:"L / 182–190", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
           {produkt:"Bluza Hi-Vis", nr:"HIV-BLS-110", rozmiar:"M", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
@@ -308,11 +323,31 @@
         {id:"Z-2025-1170", created:"2025-07-26", eta:"28.07.2025", addr:"Kielce — Zakład 1", status:"Dostarczone", items:[{produkt:"Okulary BHP", nr:"BHP-01", rozmiar:"Uni", ilosc:15, osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}]}
       ];
 
-      let DATA = JSON.parse(localStorage.getItem('portal_orders')) || DEFAULT_DATA;
+      let stored = [];
+      try {
+        stored = JSON.parse(localStorage.getItem('portal_orders')) || [];
+      } catch (e) {}
+
+      // Merge mock data with stored data, avoiding duplicate IDs
+      const storedIds = new Set(stored.map(s => s.id));
+      const merged = [...stored];
+      DEFAULT_DATA.forEach(d => {
+        if (!storedIds.has(d.id)) {
+          merged.push(d);
+        }
+      });
+
+      // Sort by ID descending so newly created orders (with higher numbers) are at the top
+      merged.sort((a, b) => b.id.localeCompare(a.id));
+
+      // Save back to localStorage so both pages share the updated merged state
+      localStorage.setItem('portal_orders', JSON.stringify(merged));
+
+      let DATA = merged;
       
       let currentPage = 1;
       let pageSize = 10;
-      let currentStatus = "";
+      let currentStatus = "Nowe";
       let searchQuery = "";
 
       const tbody = $("#orders-tbody");
@@ -330,13 +365,16 @@
         if(status === "W realizacji") activeDots = 2;
         if(status === "Wysłane") activeDots = 3;
         if(status === "Dostarczone") { activeDots = 3; color = "color: var(--ok)"; }
+        if(status === "Zatwierdzone") { activeDots = 3; color = "color: var(--accent); font-weight: 700;"; }
+        if(status === "Szkic") { activeDots = 0; color = "color: var(--muted);"; }
 
+        const isZatwierdzone = status === "Zatwierdzone";
         return `
           <div class="status-tracker">
-            <span class="tracker-dot active"></span>
-            <span class="tracker-dot ${activeDots >= 2 ? 'active' : ''}"></span>
-            <span class="tracker-dot ${activeDots >= 3 ? 'active' : ''}"></span>
-            <span style="margin-left:4px; ${color}">${status}</span>
+            <span class="tracker-dot ${activeDots >= 1 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
+            <span class="tracker-dot ${activeDots >= 2 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
+            <span class="tracker-dot ${activeDots >= 3 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
+            <span style="margin-left:4px; ${color}">${isZatwierdzone ? '✓ ' + status : status}</span>
           </div>
         `;
       }
@@ -377,6 +415,20 @@
             <td><span class="muted">${p.items.length} poz: ${p.items[0].produkt}...</span></td>
             <td>${getStatusHTML(p.status)}</td>
             <td>${p.eta}</td>
+            <td>
+              ${p.status === "Szkic" || p.status === "Nowe"
+                ? `<div style="display: flex; gap: 6px; align-items: center;">
+                     <a class="btn btn-secondary edit-btn" style="height:28px; padding: 0 10px; font-size:12px;" href="nowe-zamowienie.html?edit=${p.id}" data-edit-btn>Edytuj</a>
+                     <button class="btn btn-secondary delete-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--err); border-color: color-mix(in oklab, var(--err) 35%, transparent);" data-id="${p.id}" data-delete-btn>Usuń</button>
+                   </div>`
+                : p.status === "W realizacji"
+                ? `<a class="btn btn-secondary" style="height:28px; padding: 0 10px; font-size:12px; color: #d97706; border-color: color-mix(in oklab, #d97706 35%, transparent); display: inline-flex; align-items: center;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Zgłoszenie</a>`
+                : p.status === "Wysłane"
+                ? `<button class="btn btn-secondary confirm-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--ok); border-color: color-mix(in oklab, var(--ok) 35%, transparent);" data-id="${p.id}" data-confirm-delivery-btn>Potwierdź odbiór</button>`
+                : p.status === "Dostarczone"
+                ? `<button class="btn btn-secondary accept-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--accent); border-color: color-mix(in oklab, var(--accent) 35%, transparent);" data-id="${p.id}" data-accept-order-btn>Zatwierdź</button>`
+                : '—'}
+            </td>
           </tr>
         `).join("");
 
@@ -435,10 +487,118 @@
       const openM = ()=> { modal.classList.add("open"); backdrop.classList.add("open"); document.body.style.overflow = "hidden"; };
       const closeM = ()=> { modal.classList.remove("open"); backdrop.classList.remove("open"); document.body.style.overflow = ""; };
       
-      modal.addEventListener("click", e=>{ if(e.target.matches("[data-close]")) closeM(); });
+      modal.addEventListener("click", e=>{ 
+        if(e.target.matches("[data-close]")) closeM(); 
+        if(e.target.closest("[data-delete-modal-btn]")) {
+          const btn = e.target.closest("[data-delete-modal-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz trwale usunąć zamówienie ${orderId}?`)) {
+            closeM();
+            DATA = DATA.filter(o => o.id !== orderId);
+            localStorage.setItem('portal_orders', JSON.stringify(DATA));
+            if (window.showToast) {
+              window.showToast(`Zamówienie ${orderId} zostało pomyślnie usunięte.`);
+            } else {
+              alert(`Zamówienie ${orderId} zostało usunięte.`);
+            }
+            render();
+          }
+        }
+        if(e.target.closest("[data-confirm-modal-btn]")) {
+          const btn = e.target.closest("[data-confirm-modal-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz potwierdzić odbiór zamówienia ${orderId}?`)) {
+            closeM();
+            const orderIndex = DATA.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+              DATA[orderIndex].status = "Dostarczone";
+              localStorage.setItem('portal_orders', JSON.stringify(DATA));
+              if (window.showToast) {
+                window.showToast(`Odbiór zamówienia ${orderId} został potwierdzony!`);
+              } else {
+                alert(`Odbiór zamówienia ${orderId} został potwierdzony!`);
+              }
+              render();
+            }
+          }
+        }
+        if(e.target.closest("[data-accept-modal-btn]")) {
+          const btn = e.target.closest("[data-accept-modal-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz zatwierdzić i zamknąć zamówienie ${orderId}? Status zmieni się na Zatwierdzone.`)) {
+            closeM();
+            const orderIndex = DATA.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+              DATA[orderIndex].status = "Zatwierdzone";
+              localStorage.setItem('portal_orders', JSON.stringify(DATA));
+              if (window.showToast) {
+                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+              } else {
+                alert(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+              }
+              render();
+            }
+          }
+        }
+      });
       backdrop.addEventListener("click", closeM);
-
+ 
       tbody.addEventListener("click", (e)=>{
+        if (e.target.closest("[data-accept-order-btn]")) {
+          const btn = e.target.closest("[data-accept-order-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz zatwierdzić i zamknąć zamówienie ${orderId}? Status zmieni się na Zatwierdzone.`)) {
+            const orderIndex = DATA.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+              DATA[orderIndex].status = "Zatwierdzone";
+              localStorage.setItem('portal_orders', JSON.stringify(DATA));
+              if (window.showToast) {
+                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+              } else {
+                alert(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+              }
+              render();
+            }
+          }
+          return;
+        }
+        if (e.target.closest("[data-confirm-delivery-btn]")) {
+          const btn = e.target.closest("[data-confirm-delivery-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz potwierdzić odbiór zamówienia ${orderId}?`)) {
+            const orderIndex = DATA.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+              DATA[orderIndex].status = "Dostarczone";
+              localStorage.setItem('portal_orders', JSON.stringify(DATA));
+              if (window.showToast) {
+                window.showToast(`Odbiór zamówienia ${orderId} został potwierdzony!`);
+              } else {
+                alert(`Odbiór zamówienia ${orderId} został potwierdzony!`);
+              }
+              render();
+            }
+          }
+          return;
+        }
+        if (e.target.closest("[data-delete-btn]")) {
+          const btn = e.target.closest("[data-delete-btn]");
+          const orderId = btn.getAttribute("data-id");
+          if (confirm(`Czy na pewno chcesz trwale usunąć zamówienie ${orderId}?`)) {
+            DATA = DATA.filter(o => o.id !== orderId);
+            localStorage.setItem('portal_orders', JSON.stringify(DATA));
+            if (window.showToast) {
+              window.showToast(`Zamówienie ${orderId} zostało pomyślnie usunięte.`);
+            } else {
+              alert(`Zamówienie ${orderId} zostało usunięte.`);
+            }
+            render();
+          }
+          return;
+        }
+        if (e.target.closest("[data-edit-btn]")) {
+          // Allow the edit click to proceed naturally
+          return;
+        }
         const tr = e.target.closest("tr[data-order]");
         if(!tr) return;
         const p = JSON.parse(tr.getAttribute("data-order"));
@@ -459,6 +619,41 @@
             <td>${it.osoba}</td>
           </tr>
         `).join("");
+ 
+        // Update modal actions dynamically
+        const modalActions = $(".modal-actions", modal);
+        if (p.status === "Szkic" || p.status === "Nowe") {
+          modalActions.innerHTML = `
+            <a class="btn" href="nowe-zamowienie.html?edit=${p.id}">Edytuj zamówienie</a>
+            <button class="btn btn-secondary" style="color: var(--err); border-color: color-mix(in oklab, var(--err) 35%, transparent);" type="button" data-delete-modal-btn data-id="${p.id}">Usuń zamówienie</button>
+            <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
+          `;
+        } else if (p.status === "W realizacji") {
+          modalActions.innerHTML = `
+            <a class="btn" style="background: #d97706; border-color: #d97706;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Utwórz zgłoszenie</a>
+            <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
+            <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
+          `;
+        } else if (p.status === "Wysłane") {
+          modalActions.innerHTML = `
+            <button class="btn" style="background: var(--ok); border-color: var(--ok);" type="button" data-confirm-modal-btn data-id="${p.id}">Potwierdź odbiór</button>
+            <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
+            <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
+          `;
+        } else if (p.status === "Dostarczone") {
+          modalActions.innerHTML = `
+            <button class="btn" style="background: var(--accent); border-color: var(--accent);" type="button" data-accept-modal-btn data-id="${p.id}">Zatwierdź zamówienie</button>
+            <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
+            <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
+          `;
+        } else {
+          modalActions.innerHTML = `
+            <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
+            <button class="btn btn-secondary" type="button">Powtórz zamówienie</button>
+            <button class="btn" type="button" data-close>Zamknij</button>
+          `;
+        }
+
         openM();
       });
 
