@@ -126,7 +126,7 @@
     }
     .modal.open, .modal-backdrop.open { display:grid; }
     .modal-card {
-      width: min(920px, 96vw); background: var(--page-bg); border:1px solid var(--line);
+      width: min(1080px, 96vw); background: var(--page-bg); border:1px solid var(--line);
       border-radius:24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow:hidden;
     }
     .modal-head { padding: 24px 32px; border-bottom: 1px solid var(--line);
@@ -137,6 +137,225 @@
     .modal-close { background:transparent; border:0; font-weight:800; font-size:18px; cursor:pointer; color:var(--muted); }
     .item-photo { width:64px; height:64px; border:1px solid var(--line); border-radius:12px; object-fit:cover; background:#fafbfe; }
     .meta b { color: var(--text); }
+
+    /* Prevent text wrapping and bounds overflow inside detail modal */
+    #order-modal .modal-card {
+      width: min(1080px, 96vw);
+    }
+    #order-modal .modal-body {
+      padding: 24px;
+    }
+    #order-modal .table {
+      font-size: 13px;
+      width: 100%;
+    }
+    #order-modal .table th {
+      font-size: 11px;
+      white-space: nowrap;
+      padding: 10px 8px;
+      letter-spacing: 0.3px;
+    }
+    #order-modal .table td {
+      padding: 8px 8px;
+      white-space: nowrap;
+    }
+    #order-modal .table td b, 
+    #order-modal .table td strong {
+      white-space: normal;
+      display: inline-block;
+      max-width: 180px;
+    }
+    #order-modal .item-photo {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #order-modal .item-photo:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    #order-modal .badge {
+      font-size: 10px !important;
+      padding: 3px 6px !important;
+      white-space: nowrap;
+    }
+    #order-modal .btn {
+      padding: 10px 18px;
+      font-size: 13px;
+    }
+    
+    /* Stepper styles */
+    .order-stepper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding: 16px 24px;
+      background: var(--section-bg);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      flex: 1;
+      text-align: center;
+    }
+    .step-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    .step-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+    .step-connector {
+      height: 2px;
+      background: var(--line);
+      flex: 1;
+      max-width: 12%;
+      transition: all 0.3s ease;
+    }
+    .step.active .step-icon {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 20%, transparent);
+    }
+    .step.active .step-label {
+      color: var(--text);
+    }
+    .step.current .step-icon {
+      animation: pulseActive 1.8s infinite alternate;
+      border-color: var(--accent);
+    }
+    .step-connector.active {
+      background: var(--accent);
+    }
+    
+    @keyframes pulseActive {
+      0% {
+        box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 15%, transparent);
+      }
+      100% {
+        box-shadow: 0 0 0 8px color-mix(in oklab, var(--accent) 45%, transparent);
+      }
+    }
+
+    .order-banner {
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+    .order-banner.info {
+      background: color-mix(in oklab, var(--accent) 8%, transparent);
+      border-color: color-mix(in oklab, var(--accent) 25%, transparent);
+      color: var(--text);
+    }
+    .order-banner.success {
+      background: color-mix(in oklab, var(--ok) 8%, transparent);
+      border-color: color-mix(in oklab, var(--ok) 25%, transparent);
+      color: var(--ok);
+    }
+    .order-banner.warning {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.25);
+      color: #b45309;
+    }
+
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .package-card {
+      background: var(--section-bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(2,6,23,0.02);
+    }
+    .package-card:hover {
+      border-color: var(--accent);
+    }
+    .package-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 10px;
+    }
+    .package-carrier-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      background: #020617;
+      color: #fff;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .package-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .detail-row span {
+      color: var(--muted);
+    }
+    .waybill-link {
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .package-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+    .btn-confirm-package {
+      background: var(--accent);
+      color: white;
+      border: 0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .btn-confirm-package:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -164,7 +383,7 @@
           <button class="chip-filter" data-status="W realizacji">W realizacji</button>
           <button class="chip-filter" data-status="Wysłane">Wysłane</button>
           <button class="chip-filter" data-status="Dostarczone">Dostarczone</button>
-          <button class="chip-filter" data-status="Zatwierdzone">Zatwierdzone</button>
+          <button class="chip-filter" data-status="Zatwierdzone">Zamówienia zrealizowane</button>
           <button class="chip-filter" data-status="">Wszystkie</button>
           <button class="chip-filter" data-status="Szkic">Szkice</button>
         </div>
@@ -251,20 +470,58 @@
         <h3 id="order-title" style="margin:0;">Zamówienie</h3>
         <button class="modal-close" aria-label="Zamknij" data-close>×</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+        
+        <!-- STEPPER PIPELINE -->
+        <div class="order-stepper" id="order-stepper">
+          <div class="step" id="step-placed">
+            <div class="step-icon">1</div>
+            <div class="step-label">Złożone</div>
+          </div>
+          <div class="step-connector" id="conn-1"></div>
+          <div class="step" id="step-accepted">
+            <div class="step-icon">2</div>
+            <div class="step-label">Przyjęte</div>
+          </div>
+          <div class="step-connector" id="conn-2"></div>
+          <div class="step" id="step-shipped">
+            <div class="step-icon">3</div>
+            <div class="step-label">W drodze</div>
+          </div>
+          <div class="step-connector" id="conn-3"></div>
+          <div class="step" id="step-delivered">
+            <div class="step-icon">4</div>
+            <div class="step-label">Odebrane</div>
+          </div>
+          <div class="step-connector" id="conn-4"></div>
+          <div class="step" id="step-archived">
+            <div class="step-icon">5</div>
+            <div class="step-label">Zrealizowane</div>
+          </div>
+        </div>
+
+        <!-- DYNAMIC STATUS BANNER -->
+        <div class="order-banner" id="order-banner" style="display:none; align-items:center; gap:12px; padding:14px 20px; border-radius:12px; margin-bottom:20px; font-size:13px; font-weight:600; line-height:1.4;"></div>
+
         <div id="order-meta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; background: var(--section-bg); padding: 16px; border-radius: 12px;"></div>
 
         <h4 style="margin:0 0 12px;">Szczegóły zamówienia</h4>
         <div style="overflow-x: auto;">
           <table class="table">
             <thead>
-              <tr><th>Foto</th><th>Produkt</th><th>Nr artykułu</th><th>Rozmiar</th><th>Ilość</th><th>Przeznaczone dla</th></tr>
+              <tr><th>Foto</th><th>Produkt</th><th>Nr artykułu</th><th>Rozmiar</th><th>Zamówiono</th><th>Dostarczono</th><th>W drodze</th><th>Status</th><th>Przeznaczone dla</th></tr>
             </thead>
             <tbody id="order-items"></tbody>
           </table>
         </div>
+
+        <!-- B2B PACKAGES SECTION -->
+        <div id="shipments-section" style="margin-top: 24px; display: none;">
+          <h4 style="margin:0 0 8px;">Wykaz dostaw (paczki)</h4>
+          <div class="package-grid" id="order-packages-grid"></div>
+        </div>
       </div>
-      <div class="modal-actions">
+      <div class="modal-actions" id="order-modal-actions">
         <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
         <button class="btn btn-secondary" type="button">Powtórz zamówienie</button>
         <button class="btn" type="button" data-close>Zamknij</button>
@@ -279,6 +536,13 @@
 
       // MOCK DATA (Expanded) + LocalStorage
       const DEFAULT_DATA = [
+        {id:"Z-2025-1195", created:"2025-08-23", eta:"25.08.2025", addr:"Kielce — Zakład 2", status:"Częściowo wysłane", items:[
+          {produkt:"Rękawice robocze", nr:"REK-ROB-001", rozmiar:"L", ilosc:10, ilosc_dostarczona:5, ilosc_wyslana:5, status:"Częściowo wysłane", osoba:"Piotr Nowak (004216)", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-99401", data_wysylki:"22.08.2025", kurier:"DHL", nr_listu:"DHL111222333", status:"Dostarczona", pozycje:[{produkt:"Rękawice robocze", nr:"REK-ROB-001", ilosc:5}]},
+          {id_wysylki:"DEL-99402", data_wysylki:"23.08.2025", kurier:"DPD", nr_listu:"DPD333222111", status:"W drodze", pozycje:[{produkt:"Rękawice robocze", nr:"REK-ROB-001", ilosc:5}]}
+        ]},
         {id:"Z-2025-1190", created:"2025-08-22", eta:"—", addr:"Warszawa — Biuro", status:"Szkic", items:[
           {produkt:"Okulary ochronne uvex", nr:"UVX-GLS-009", rozmiar:"Uni", ilosc:3, osoba:"Tomasz Karolak (004230)", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}
         ]},
@@ -286,41 +550,114 @@
           {produkt:"Kurtka softshell", nr:"SFT-JAC-101", rozmiar:"XL", ilosc:1, osoba:"Robert Więckiewicz (004231)", foto:"https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400&auto=format&fit=crop"}
         ]},
         {id:"Z-2025-1180", created:"2025-08-20", eta:"20.08.2025", addr:"Gdańsk — Magazyn", status:"Zatwierdzone", items:[
-          {produkt:"Kombinezon BHP", nr:"BHP-COM-050", rozmiar:"L", ilosc:2, osoba:"Michał Wiśniewski (004232)", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}
+          {produkt:"Kombinezon BHP", nr:"BHP-COM-050", rozmiar:"L", ilosc:2, ilosc_dostarczona:2, ilosc_wyslana:0, status:"Dostarczone", osoba:"Michał Wiśniewski (004232)", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98180", data_wysylki:"19.08.2025", kurier:"DHL", nr_listu:"DHL777555444", status:"Dostarczona", pozycje:[{produkt:"Kombinezon BHP", nr:"BHP-COM-050", ilosc:2}]}
         ]},
         {id:"Z-2025-1175", created:"2025-08-19", eta:"19.08.2025", addr:"Lublin — Magazyn", status:"Zatwierdzone", items:[
-          {produkt:"Trzewiki skórzane S3", nr:"SHO-LEA-333", rozmiar:"43", ilosc:1, osoba:"Paweł Małaszyński (004233)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+          {produkt:"Trzewiki skórzane S3", nr:"SHO-LEA-333", rozmiar:"43", ilosc:1, ilosc_dostarczona:1, ilosc_wyslana:0, status:"Dostarczone", osoba:"Paweł Małaszyński (004233)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98175", data_wysylki:"18.08.2025", kurier:"DPD", nr_listu:"DPD333444555", status:"Dostarczona", pozycje:[{produkt:"Trzewiki skórzane S3", nr:"SHO-LEA-333", ilosc:1}]}
         ]},
-        {id:"Z-2025-1048", created:"2025-08-19", eta:"21.08.2025", addr:"Kielce — Zakład 1", status:"W realizacji", items:[
-          {produkt:"Spodnie Motion", nr:"MOT-TRS-001", rozmiar:"L / 182–190", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
-          {produkt:"Bluza Hi-Vis", nr:"HIV-BLS-110", rozmiar:"M", ilosc:1, osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
+        {id:"Z-2025-1048", created:"2025-08-19", eta:"21.08.2025", addr:"Kielce — Zakład 1", status:"Częściowo wysłane", items:[
+          {produkt:"Spodnie Motion", nr:"MOT-TRS-001", rozmiar:"L / 182–190", ilosc:2, ilosc_dostarczona:1, ilosc_wyslana:0, status:"Częściowo wysłane", osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=400&auto=format&fit=crop"},
+          {produkt:"Bluza Hi-Vis", nr:"HIV-BLS-110", rozmiar:"M", ilosc:1, ilosc_dostarczona:0, ilosc_wyslana:1, status:"W drodze", osoba:"Jan Kowalski (004215)", foto:"https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-99218", data_wysylki:"20.08.2025", kurier:"DPD", nr_listu:"PL123456789", status:"Dostarczona", pozycje:[{produkt:"Spodnie Motion", nr:"MOT-TRS-001", ilosc:1}]},
+          {id_wysylki:"DEL-99342", data_wysylki:"21.08.2025", kurier:"DPD", nr_listu:"PL987654321", status:"W drodze", pozycje:[{produkt:"Bluza Hi-Vis", nr:"HIV-BLS-110", ilosc:1}]}
         ]},
         {id:"Z-2025-1052", created:"2025-08-18", eta:"18.08.2025", addr:"Kielce — Zakład 2", status:"Dostarczone", items:[
-          {produkt:"Buty ochronne", nr:"BUT-002", rozmiar:"42", ilosc:1, osoba:"Anna Nowak (004218)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+          {produkt:"Buty ochronne", nr:"BUT-002", rozmiar:"42", ilosc:1, ilosc_dostarczona:1, ilosc_wyslana:0, status:"Dostarczone", osoba:"Anna Nowak (004218)", foto:"https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98102", data_wysylki:"17.08.2025", kurier:"DPD", nr_listu:"DPD777666555", status:"Dostarczona", pozycje:[{produkt:"Buty ochronne", nr:"BUT-002", ilosc:1}]}
         ]},
         {id:"Z-2025-1060", created:"2025-08-17", eta:"20.08.2025", addr:"Warszawa — Filia", status:"Nowe", items:[{produkt:"Kask", nr:"K-10", rozmiar:"Uni", ilosc:5, osoba:"Ekipa A", foto:"https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1065", created:"2025-08-16", eta:"19.08.2025", addr:"Gdańsk — Magazyn", status:"Wysłane", items:[{produkt:"Rękawice", nr:"R-20", rozmiar:"10", ilosc:20, osoba:"Magazynierzy", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1070", created:"2025-08-15", eta:"17.08.2025", addr:"Kraków — Produkcja", status:"Dostarczone", items:[{produkt:"Kamizelka", nr:"KAM-01", rozmiar:"XL", ilosc:2, osoba:"Marek P.", foto:"https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1065", created:"2025-08-16", eta:"19.08.2025", addr:"Gdańsk — Magazyn", status:"Wysłane", items:[
+          {produkt:"Rękawice", nr:"R-20", rozmiar:"10", ilosc:20, ilosc_dostarczona:0, ilosc_wyslana:20, status:"W drodze", osoba:"Magazynierzy", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98401", data_wysylki:"18.08.2025", kurier:"DHL", nr_listu:"DHL987654321", status:"W drodze", pozycje:[{produkt:"Rękawice", nr:"R-20", ilosc:20}]}
+        ]},
+        {id:"Z-2025-1070", created:"2025-08-15", eta:"17.08.2025", addr:"Kraków — Produkcja", status:"Dostarczone", items:[
+          {produkt:"Kamizelka", nr:"KAM-01", rozmiar:"XL", ilosc:2, ilosc_dostarczona:2, ilosc_wyslana:0, status:"Dostarczone", osoba:"Marek P.", foto:"https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98109", data_wysylki:"15.08.2025", kurier:"DPD", nr_listu:"DPD777111222", status:"Dostarczona", pozycje:[{produkt:"Kamizelka", nr:"KAM-01", ilosc:2}]}
+        ]},
         {id:"Z-2025-1075", created:"2025-08-14", eta:"16.08.2025", addr:"Kielce — Zakład 1", status:"W realizacji", items:[{produkt:"Okulary", nr:"OKU-99", rozmiar:"Uni", ilosc:10, osoba:"Różni", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}]},
         {id:"Z-2025-1080", created:"2025-08-13", eta:"15.08.2025", addr:"Wrocław — Biuro", status:"Nowe", items:[{produkt:"Polar", nr:"POL-05", rozmiar:"M", ilosc:1, osoba:"Anna K.", foto:"https://images.unsplash.com/photo-1544441893-675973e31985?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1085", created:"2025-08-12", eta:"14.08.2025", addr:"Poznań — Budowa", status:"Wysłane", items:[{produkt:"Kombinezon", nr:"KOM-12", rozmiar:"L", ilosc:5, osoba:"Technicy", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1090", created:"2025-08-11", eta:"13.08.2025", addr:"Łódź — Zakład", status:"Dostarczone", items:[{produkt:"Czapka", nr:"CZ-02", rozmiar:"Uni", ilosc:2, osoba:"Adam G.", foto:"https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1085", created:"2025-08-12", eta:"14.08.2025", addr:"Poznań — Budowa", status:"Wysłane", items:[
+          {produkt:"Kombinezon", nr:"KOM-12", rozmiar:"L", ilosc:5, ilosc_dostarczona:0, ilosc_wyslana:5, status:"W drodze", osoba:"Technicy", foto:"https://images.unsplash.com/photo-1516937217094-11910609b552?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98409", data_wysylki:"14.08.2025", kurier:"DHL", nr_listu:"DHL777333222", status:"W drodze", pozycje:[{produkt:"Kombinezon", nr:"KOM-12", ilosc:5}]}
+        ]},
+        {id:"Z-2025-1090", created:"2025-08-11", eta:"13.08.2025", addr:"Łódź — Zakład", status:"Dostarczone", items:[
+          {produkt:"Czapka", nr:"CZ-02", rozmiar:"Uni", ilosc:2, ilosc_dostarczona:2, ilosc_wyslana:0, status:"Dostarczone", osoba:"Adam G.", foto:"https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98090", data_wysylki:"12.08.2025", kurier:"DPD", nr_listu:"DPD111222999", status:"Dostarczona", pozycje:[{produkt:"Czapka", nr:"CZ-02", ilosc:2}]}
+        ]},
         {id:"Z-2025-1095", created:"2025-08-10", eta:"12.08.2025", addr:"Kielce — Zakład 3", status:"W realizacji", items:[{produkt:"Kurtka", nr:"KUR-88", rozmiar:"S", ilosc:1, osoba:"Ewa M.", foto:"https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=400&auto=format&fit=crop"}]},
         {id:"Z-2025-1100", created:"2025-08-09", eta:"11.08.2025", addr:"Lublin — Punkt", status:"Nowe", items:[{produkt:"Półbuty", nr:"PB-44", rozmiar:"43", ilosc:1, osoba:"Jan B.", foto:"https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1105", created:"2025-08-08", eta:"10.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[{produkt:"Pas", nr:"P-03", rozmiar:"100", ilosc:1, osoba:"Piotr Z.", foto:"https://images.unsplash.com/photo-1624222247344-550fb60583dc?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1110", created:"2025-08-07", eta:"09.08.2025", addr:"Białystok — Filia", status:"Dostarczone", items:[{produkt:"Maska", nr:"M-01", rozmiar:"Uni", ilosc:50, osoba:"Magazyn", foto:"https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1105", created:"2025-08-08", eta:"10.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[
+          {produkt:"Pas", nr:"P-03", rozmiar:"100", ilosc:1, ilosc_dostarczona:0, ilosc_wyslana:1, status:"W drodze", osoba:"Piotr Z.", foto:"https://images.unsplash.com/photo-1624222247344-550fb60583dc?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98105", data_wysylki:"09.08.2025", kurier:"DHL", nr_listu:"DHL333444555", status:"W drodze", pozycje:[{produkt:"Pas", nr:"P-03", ilosc:1}]}
+        ]},
+        {id:"Z-2025-1110", created:"2025-08-07", eta:"09.08.2025", addr:"Białystok — Filia", status:"Dostarczone", items:[
+          {produkt:"Maska", nr:"M-01", rozmiar:"Uni", ilosc:50, ilosc_dostarczona:50, ilosc_wyslana:0, status:"Dostarczone", osoba:"Magazyn", foto:"https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98110", data_wysylki:"08.08.2025", kurier:"DPD", nr_listu:"DPD444555666", status:"Dostarczona", pozycje:[{produkt:"Maska", nr:"M-01", ilosc:50}]}
+        ]},
         {id:"Z-2025-1115", created:"2025-08-06", eta:"08.08.2025", addr:"Kielce — Zakład 2", status:"W realizacji", items:[{produkt:"Rękawiczki", nr:"RE-09", rozmiar:"9", ilosc:10, osoba:"Różni", foto:"https://images.unsplash.com/photo-1588850567047-1849a444555d?q=80&w=400&auto=format&fit=crop"}]},
         {id:"Z-2025-1120", created:"2025-08-05", eta:"07.08.2025", addr:"Katowice — Biuro", status:"Nowe", items:[{produkt:"Kurtka FR", nr:"FR-101", rozmiar:"L", ilosc:1, osoba:"Tomek L.", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1125", created:"2025-08-04", eta:"06.08.2025", addr:"Kraków — Magazyn", status:"Wysłane", items:[{produkt:"T-shirt", nr:"T-SH-05", rozmiar:"M", ilosc:3, osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1130", created:"2025-08-03", eta:"05.08.2025", addr:"Szczecin — Port", status:"Dostarczone", items:[{produkt:"Sztormiak", nr:"SZ-09", rozmiar:"XL", ilosc:2, osoba:"Załoga", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1125", created:"2025-08-04", eta:"06.08.2025", addr:"Kraków — Magazyn", status:"Wysłane", items:[
+          {produkt:"T-shirt", nr:"T-SH-05", rozmiar:"M", ilosc:3, ilosc_dostarczona:0, ilosc_wyslana:3, status:"W drodze", osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98425", data_wysylki:"05.08.2025", kurier:"DPD", nr_listu:"DPD888222111", status:"W drodze", pozycje:[{produkt:"T-shirt", nr:"T-SH-05", ilosc:3}]}
+        ]},
+        {id:"Z-2025-1130", created:"2025-08-03", eta:"05.08.2025", addr:"Szczecin — Port", status:"Dostarczone", items:[
+          {produkt:"Sztormiak", nr:"SZ-09", rozmiar:"XL", ilosc:2, ilosc_dostarczona:2, ilosc_wyslana:0, status:"Dostarczone", osoba:"Załoga", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98130", data_wysylki:"04.08.2025", kurier:"DHL", nr_listu:"DHL555666777", status:"Dostarczona", pozycje:[{produkt:"Sztormiak", nr:"SZ-09", ilosc:2}]}
+        ]},
         {id:"Z-2025-1135", created:"2025-08-02", eta:"04.08.2025", addr:"Kielce — Zakład 3", status:"W realizacji", items:[{produkt:"Spodnie", nr:"SP-02", rozmiar:"52", ilosc:1, osoba:"Karol K.", foto:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400&auto=format&fit=crop"}]},
         {id:"Z-2025-1140", created:"2025-08-01", eta:"03.08.2025", addr:"Warszawa — Biuro", status:"Nowe", items:[{produkt:"Bluza", nr:"BL-03", rozmiar:"M", ilosc:1, osoba:"Ola S.", foto:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1145", created:"2025-07-31", eta:"02.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[{produkt:"Buty", nr:"BU-01", rozmiar:"44", ilosc:1, osoba:"Marek O.", foto:"https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1150", created:"2025-07-30", eta:"01.08.2025", addr:"Gdynia — Stocznia", status:"Dostarczone", items:[{produkt:"Kask S3", nr:"K-S3", rozmiar:"Uni", ilosc:10, osoba:"Stoczniowcy", foto:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=400&auto=format&fit=crop"}]},
+        {id:"Z-2025-1145", created:"2025-07-31", eta:"02.08.2025", addr:"Kielce — Zakład 1", status:"Wysłane", items:[
+          {produkt:"Buty", nr:"BU-01", rozmiar:"44", ilosc:1, ilosc_dostarczona:0, ilosc_wyslana:1, status:"W drodze", osoba:"Marek O.", foto:"https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98311", data_wysylki:"01.08.2025", kurier:"DHL", nr_listu:"DHL777888999", status:"W drodze", pozycje:[{produkt:"Buty", nr:"BU-01", ilosc:1}]}
+        ]},
+        {id:"Z-2025-1150", created:"2025-07-30", eta:"01.08.2025", addr:"Gdynia — Stocznia", status:"Dostarczone", items:[
+          {produkt:"Kask S3", nr:"K-S3", rozmiar:"Uni", ilosc:10, ilosc_dostarczona:10, ilosc_wyslana:0, status:"Dostarczone", osoba:"Stoczniowcy", foto:"https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98150", data_wysylki:"31.07.2025", kurier:"DPD", nr_listu:"DPD666777888", status:"Dostarczona", pozycje:[{produkt:"Kask S3", nr:"K-S3", ilosc:10}]}
+        ]},
         {id:"Z-2025-1155", created:"2025-07-29", eta:"31.07.2025", addr:"Kielce — Zakład 2", status:"W realizacji", items:[{produkt:"Rękawice FR", nr:"RFR-10", rozmiar:"10", ilosc:5, osoba:"Spawacze", foto:"https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=400&auto=format&fit=crop"}]},
         {id:"Z-2025-1160", created:"2025-07-28", eta:"30.07.2025", addr:"Radom — Punkt", status:"Nowe", items:[{produkt:"Płaszcz", nr:"PL-01", rozmiar:"L", ilosc:1, osoba:"Krzysztof J.", foto:"https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1165", created:"2025-07-27", eta:"29.07.2025", addr:"Lublin — Magazyn", status:"Wysłane", items:[{produkt:"Spodnie robocze", nr:"SR-02", rozmiar:"54", ilosc:2, osoba:"Magazynier", foto:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400&auto=format&fit=crop"}]},
-        {id:"Z-2025-1170", created:"2025-07-26", eta:"28.07.2025", addr:"Kielce — Zakład 1", status:"Dostarczone", items:[{produkt:"Okulary BHP", nr:"BHP-01", rozmiar:"Uni", ilosc:15, osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}]}
+        {id:"Z-2025-1165", created:"2025-07-27", eta:"29.07.2025", addr:"Lublin — Magazyn", status:"Wysłane", items:[
+          {produkt:"Spodnie robocze", nr:"SR-02", rozmiar:"54", ilosc:2, ilosc_dostarczona:0, ilosc_wyslana:2, status:"W drodze", osoba:"Magazynier", foto:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98165", data_wysylki:"28.07.2025", kurier:"DHL", nr_listu:"DHL999888777", status:"W drodze", pozycje:[{produkt:"Spodnie robocze", nr:"SR-02", ilosc:2}]}
+        ]},
+        {id:"Z-2025-1170", created:"2025-07-26", eta:"28.07.2025", addr:"Kielce — Zakład 1", status:"Dostarczone", items:[
+          {produkt:"Okulary BHP", nr:"BHP-01", rozmiar:"Uni", ilosc:15, ilosc_dostarczona:15, ilosc_wyslana:0, status:"Dostarczone", osoba:"Pracownicy", foto:"https://images.unsplash.com/photo-1511499767390-a7335958beab?q=80&w=400&auto=format&fit=crop"}
+        ],
+        dostawy:[
+          {id_wysylki:"DEL-98170", data_wysylki:"27.07.2025", kurier:"DPD", nr_listu:"DPD999000111", status:"Dostarczona", pozycje:[{produkt:"Okulary BHP", nr:"BHP-01", ilosc:15}]}
+        ]}
       ];
 
       let stored = [];
@@ -328,9 +665,32 @@
         stored = JSON.parse(localStorage.getItem('portal_orders')) || [];
       } catch (e) {}
 
-      // Merge mock data with stored data, avoiding duplicate IDs
+      // Merge mock data with stored data, upgrade outdated default orders, and avoid duplicate IDs
+      const merged = [];
+      const defaultMap = new Map(DEFAULT_DATA.map(d => [d.id, d]));
+      
+      stored.forEach(s => {
+        const defaultItem = defaultMap.get(s.id);
+        if (defaultItem) {
+          const storedDostawy = s.dostawy ? s.dostawy.length : 0;
+          const defaultDostawy = defaultItem.dostawy ? defaultItem.dostawy.length : 0;
+          
+          // Upgrade stored order if shipment counts differ, if it needs "Częściowo wysłane" schema upgrade,
+          // or if shipment data content has changed (e.g., tracking numbers populated).
+          const needsUpgrade = (storedDostawy !== defaultDostawy) ||
+                               (defaultItem.status === 'Częściowo wysłane' && s.status !== 'Częściowo wysłane') ||
+                               (s.status === defaultItem.status && JSON.stringify(s.dostawy) !== JSON.stringify(defaultItem.dostawy));
+          if (needsUpgrade) {
+            merged.push(defaultItem);
+          } else {
+            merged.push(s);
+          }
+        } else {
+          merged.push(s);
+        }
+      });
+
       const storedIds = new Set(stored.map(s => s.id));
-      const merged = [...stored];
       DEFAULT_DATA.forEach(d => {
         if (!storedIds.has(d.id)) {
           merged.push(d);
@@ -363,18 +723,20 @@
         let activeDots = 1;
         let color = "";
         if(status === "W realizacji") activeDots = 2;
+        if(status === "Częściowo wysłane") { activeDots = 2; color = "color: #b45309; font-weight: 700;"; }
         if(status === "Wysłane") activeDots = 3;
         if(status === "Dostarczone") { activeDots = 3; color = "color: var(--ok)"; }
         if(status === "Zatwierdzone") { activeDots = 3; color = "color: var(--accent); font-weight: 700;"; }
         if(status === "Szkic") { activeDots = 0; color = "color: var(--muted);"; }
 
         const isZatwierdzone = status === "Zatwierdzone";
+        const displayText = isZatwierdzone ? "Zrealizowane" : status;
         return `
           <div class="status-tracker">
             <span class="tracker-dot ${activeDots >= 1 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
             <span class="tracker-dot ${activeDots >= 2 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
             <span class="tracker-dot ${activeDots >= 3 ? 'active' : ''}" style="${isZatwierdzone ? 'background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent);' : ''}"></span>
-            <span style="margin-left:4px; ${color}">${isZatwierdzone ? '✓ ' + status : status}</span>
+            <span style="margin-left:4px; ${color}">${isZatwierdzone ? '✓ ' + displayText : displayText}</span>
           </div>
         `;
       }
@@ -387,7 +749,17 @@
         const filtered = DATA.filter(p => {
           const text = (p.id + p.addr + p.status + p.items.map(i=>i.produkt+i.osoba).join("")).toLowerCase();
           const matchQuery = !searchQuery || text.includes(searchQuery);
-          const matchStatus = !currentStatus || p.status === currentStatus;
+          let matchStatus = false;
+          if (!currentStatus) {
+            matchStatus = true;
+          } else if (currentStatus === "Dostarczone") {
+            matchStatus = p.status === "Dostarczone";
+          } else if (currentStatus === "Wysłane") {
+            const hasActiveShipments = p.dostawy && p.dostawy.some(d => d.status === "W drodze");
+            matchStatus = p.status === "Wysłane" || (p.status === "Częściowo wysłane" && hasActiveShipments);
+          } else {
+            matchStatus = p.status === currentStatus;
+          }
           
           // Date Filter
           const orderDate = new Date(p.created);
@@ -407,30 +779,56 @@
         const start = (currentPage - 1) * pageSize;
         const slice = filtered.slice(start, start + pageSize);
 
-        tbody.innerHTML = slice.map(p => `
-          <tr class="order-row" data-order='${JSON.stringify(p)}'>
-            <td><strong>${p.id}</strong></td>
-            <td>${p.created}</td>
-            <td>${p.addr}</td>
-            <td><span class="muted">${p.items.length} poz: ${p.items[0].produkt}...</span></td>
-            <td>${getStatusHTML(p.status)}</td>
-            <td>${p.eta}</td>
-            <td>
-              ${p.status === "Szkic" || p.status === "Nowe"
-                ? `<div style="display: flex; gap: 6px; align-items: center;">
-                     <a class="btn btn-secondary edit-btn" style="height:28px; padding: 0 10px; font-size:12px;" href="nowe-zamowienie.html?edit=${p.id}" data-edit-btn>Edytuj</a>
-                     <button class="btn btn-secondary delete-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--err); border-color: color-mix(in oklab, var(--err) 35%, transparent);" data-id="${p.id}" data-delete-btn>Usuń</button>
-                   </div>`
-                : p.status === "W realizacji"
-                ? `<a class="btn btn-secondary" style="height:28px; padding: 0 10px; font-size:12px; color: #d97706; border-color: color-mix(in oklab, #d97706 35%, transparent); display: inline-flex; align-items: center;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Zgłoszenie</a>`
-                : p.status === "Wysłane"
-                ? `<button class="btn btn-secondary confirm-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--ok); border-color: color-mix(in oklab, var(--ok) 35%, transparent);" data-id="${p.id}" data-confirm-delivery-btn>Potwierdź odbiór</button>`
-                : p.status === "Dostarczone"
-                ? `<button class="btn btn-secondary accept-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--accent); border-color: color-mix(in oklab, var(--accent) 35%, transparent);" data-id="${p.id}" data-accept-order-btn>Zatwierdź</button>`
-                : '—'}
-            </td>
-          </tr>
-        `).join("");
+        tbody.innerHTML = slice.map(p => {
+          let itemsText = `<span class="muted">${p.items.length} poz: ${p.items[0].produkt}...`;
+          const totalQty = p.items.reduce((sum, it) => sum + (it.ilosc || 1), 0);
+          const deliveredQty = p.items.reduce((sum, it) => sum + (it.ilosc_dostarczona || 0), 0);
+          const shippedQty = p.items.reduce((sum, it) => sum + (it.ilosc_wyslana || 0), 0);
+          if (deliveredQty > 0 || shippedQty > 0 || p.status === "Częściowo wysłane") {
+            itemsText += `<br><small style="color:var(--accent); font-weight:600;">Dostarczono: ${deliveredQty}/${totalQty} szt.</small>`;
+          }
+          const activeShipments = p.dostawy ? p.dostawy.filter(d => d.status === "W drodze") : [];
+          if (activeShipments.length > 0) {
+            const shipmentLabels = activeShipments.map(s => `${s.kurier}: ${s.nr_listu}`).join(", ");
+            itemsText += `<br><small style="color:#d97706; font-weight:600;">W drodze: ${shipmentLabels}</small>`;
+          }
+          itemsText += `</span>`;
+
+          const hasActiveShipments = activeShipments.length > 0;
+
+          return `
+            <tr class="order-row" data-order='${JSON.stringify(p)}'>
+              <td><strong>${p.id}</strong></td>
+              <td>${p.created}</td>
+              <td>${p.addr}</td>
+              <td>${itemsText}</td>
+              <td>${getStatusHTML(p.status)}</td>
+              <td>${p.eta}</td>
+              <td>
+                ${p.status === "Szkic" || p.status === "Nowe"
+                  ? `<div style="display: flex; gap: 6px; align-items: center;">
+                       <a class="btn btn-secondary edit-btn" style="height:28px; padding: 0 10px; font-size:12px;" href="nowe-zamowienie.html?edit=${p.id}" data-edit-btn>Edytuj</a>
+                       <button class="btn btn-secondary delete-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--err); border-color: color-mix(in oklab, var(--err) 35%, transparent);" data-id="${p.id}" data-delete-btn>Usuń</button>
+                     </div>`
+                  : p.status === "W realizacji"
+                  ? `<a class="btn btn-secondary" style="height:28px; padding: 0 10px; font-size:12px; color: #d97706; border-color: color-mix(in oklab, #d97706 35%, transparent); display: inline-flex; align-items: center;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Zgłoszenie</a>`
+                  : p.status === "Częściowo wysłane"
+                  ? `<div style="display: flex; gap: 6px; align-items: center;">
+                       <a class="btn btn-secondary" style="height:28px; padding: 0 10px; font-size:12px; color: #d97706; border-color: color-mix(in oklab, #d97706 35%, transparent); display: inline-flex; align-items: center;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Zgłoszenie</a>
+                       ${hasActiveShipments 
+                         ? `<button class="btn btn-secondary confirm-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--ok); border-color: color-mix(in oklab, var(--ok) 35%, transparent);" data-id="${p.id}" data-confirm-delivery-btn>Odbiór</button>`
+                         : ''
+                       }
+                     </div>`
+                  : p.status === "Wysłane"
+                  ? `<button class="btn btn-secondary confirm-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--ok); border-color: color-mix(in oklab, var(--ok) 35%, transparent);" data-id="${p.id}" data-confirm-delivery-btn>Potwierdź odbiór</button>`
+                  : p.status === "Dostarczone"
+                  ? `<button class="btn btn-secondary accept-btn" style="height:28px; padding: 0 10px; font-size:12px; color: var(--accent); border-color: color-mix(in oklab, var(--accent) 35%, transparent);" data-id="${p.id}" data-accept-order-btn>Zatwierdź</button>`
+                  : '—'}
+              </td>
+            </tr>
+          `;
+        }).join("");
 
         pageInfo.textContent = `Pokazano ${total === 0 ? 0 : start + 1}-${Math.min(start + pageSize, total)} z ${total}`;
         renderPagination(totalPages);
@@ -489,6 +887,56 @@
       
       modal.addEventListener("click", e=>{ 
         if(e.target.matches("[data-close]")) closeM(); 
+        
+        // Handle confirm package click
+        if (e.target.closest(".btn-confirm-package-btn")) {
+          const btn = e.target.closest(".btn-confirm-package-btn");
+          const orderId = btn.getAttribute("data-order-id");
+          const packageId = btn.getAttribute("data-package-id");
+          
+          if (confirm(`Czy na pewno chcesz potwierdzić odbiór paczki ${packageId}?`)) {
+            const orderIndex = DATA.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+              const order = DATA[orderIndex];
+              const delivery = order.dostawy.find(d => d.id_wysylki === packageId);
+              if (delivery && delivery.status === "W drodze") {
+                delivery.status = "Dostarczona";
+                
+                // Update quantities
+                delivery.pozycje.forEach(pkgItem => {
+                  const orderItem = order.items.find(it => it.produkt === pkgItem.produkt);
+                  if (orderItem) {
+                    orderItem.ilosc_dostarczona = (orderItem.ilosc_dostarczona || 0) + pkgItem.ilosc;
+                    orderItem.ilosc_wyslana = Math.max(0, (orderItem.ilosc_wyslana || 0) - pkgItem.ilosc);
+                  }
+                });
+                
+                // Recalculate status
+                const totalQty = order.items.reduce((sum, it) => sum + it.ilosc, 0);
+                const totalDelivered = order.items.reduce((sum, it) => sum + (it.ilosc_dostarczona || 0), 0);
+                
+                if (totalDelivered === totalQty) {
+                  order.status = "Dostarczone";
+                } else {
+                  order.status = "Częściowo wysłane";
+                }
+                
+                localStorage.setItem('portal_orders', JSON.stringify(DATA));
+                
+                if (window.showToast) {
+                  window.showToast(`Pomyślnie odebrano paczkę ${packageId}!`);
+                } else {
+                  alert(`Pomyślnie odebrano paczkę ${packageId}!`);
+                }
+                
+                render();
+                populateOrderModal(order);
+              }
+            }
+          }
+          return;
+        }
+
         if(e.target.closest("[data-delete-modal-btn]")) {
           const btn = e.target.closest("[data-delete-modal-btn]");
           const orderId = btn.getAttribute("data-id");
@@ -512,6 +960,16 @@
             const orderIndex = DATA.findIndex(o => o.id === orderId);
             if (orderIndex !== -1) {
               DATA[orderIndex].status = "Dostarczone";
+              DATA[orderIndex].items.forEach(it => {
+                it.ilosc_dostarczona = it.ilosc || 1;
+                it.ilosc_wyslana = 0;
+                it.status = "Dostarczone";
+              });
+              if (DATA[orderIndex].dostawy) {
+                DATA[orderIndex].dostawy.forEach(d => {
+                  d.status = "Dostarczona";
+                });
+              }
               localStorage.setItem('portal_orders', JSON.stringify(DATA));
               if (window.showToast) {
                 window.showToast(`Odbiór zamówienia ${orderId} został potwierdzony!`);
@@ -525,16 +983,21 @@
         if(e.target.closest("[data-accept-modal-btn]")) {
           const btn = e.target.closest("[data-accept-modal-btn]");
           const orderId = btn.getAttribute("data-id");
-          if (confirm(`Czy na pewno chcesz zatwierdzić i zamknąć zamówienie ${orderId}? Status zmieni się na Zatwierdzone.`)) {
+          if (confirm(`Czy na pewno chcesz zatwierdzić i oznaczyć zamówienie ${orderId} jako zrealizowane?`)) {
             closeM();
             const orderIndex = DATA.findIndex(o => o.id === orderId);
             if (orderIndex !== -1) {
               DATA[orderIndex].status = "Zatwierdzone";
+              DATA[orderIndex].items.forEach(it => {
+                it.ilosc_dostarczona = it.ilosc || 1;
+                it.ilosc_wyslana = 0;
+                it.status = "Dostarczone";
+              });
               localStorage.setItem('portal_orders', JSON.stringify(DATA));
               if (window.showToast) {
-                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zrealizowane!`);
               } else {
-                alert(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+                alert(`Zamówienie ${orderId} zostało pomyślnie zrealizowane!`);
               }
               render();
             }
@@ -542,20 +1005,25 @@
         }
       });
       backdrop.addEventListener("click", closeM);
- 
+  
       tbody.addEventListener("click", (e)=>{
         if (e.target.closest("[data-accept-order-btn]")) {
           const btn = e.target.closest("[data-accept-order-btn]");
           const orderId = btn.getAttribute("data-id");
-          if (confirm(`Czy na pewno chcesz zatwierdzić i zamknąć zamówienie ${orderId}? Status zmieni się na Zatwierdzone.`)) {
+          if (confirm(`Czy na pewno chcesz zatwierdzić i oznaczyć zamówienie ${orderId} jako zrealizowane?`)) {
             const orderIndex = DATA.findIndex(o => o.id === orderId);
             if (orderIndex !== -1) {
               DATA[orderIndex].status = "Zatwierdzone";
+              DATA[orderIndex].items.forEach(it => {
+                it.ilosc_dostarczona = it.ilosc || 1;
+                it.ilosc_wyslana = 0;
+                it.status = "Dostarczone";
+              });
               localStorage.setItem('portal_orders', JSON.stringify(DATA));
               if (window.showToast) {
-                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+                window.showToast(`Zamówienie ${orderId} zostało pomyślnie zrealizowane!`);
               } else {
-                alert(`Zamówienie ${orderId} zostało pomyślnie zatwierdzone!`);
+                alert(`Zamówienie ${orderId} zostało pomyślnie zrealizowane!`);
               }
               render();
             }
@@ -569,6 +1037,16 @@
             const orderIndex = DATA.findIndex(o => o.id === orderId);
             if (orderIndex !== -1) {
               DATA[orderIndex].status = "Dostarczone";
+              DATA[orderIndex].items.forEach(it => {
+                it.ilosc_dostarczona = it.ilosc || 1;
+                it.ilosc_wyslana = 0;
+                it.status = "Dostarczone";
+              });
+              if (DATA[orderIndex].dostawy) {
+                DATA[orderIndex].dostawy.forEach(d => {
+                  d.status = "Dostarczona";
+                });
+              }
               localStorage.setItem('portal_orders', JSON.stringify(DATA));
               if (window.showToast) {
                 window.showToast(`Odbiór zamówienia ${orderId} został potwierdzony!`);
@@ -602,33 +1080,227 @@
         const tr = e.target.closest("tr[data-order]");
         if(!tr) return;
         const p = JSON.parse(tr.getAttribute("data-order"));
+        const latestP = DATA.find(o => o.id === p.id) || p;
+        populateOrderModal(latestP);
+        openM();
+      });
+
+      function populateOrderModal(p) {
         title.textContent = `Szczegóły zamówienia ${p.id}`;
+        
+        // Stepper State Logic
+        const stepper = $("#order-stepper");
+        const steps = {
+          placed: $("#step-placed"),
+          accepted: $("#step-accepted"),
+          shipped: $("#step-shipped"),
+          delivered: $("#step-delivered"),
+          archived: $("#step-archived")
+        };
+        const connectors = {
+          c1: $("#conn-1"),
+          c2: $("#conn-2"),
+          c3: $("#conn-3"),
+          c4: $("#conn-4")
+        };
+
+        // Reset classes
+        Object.values(steps).forEach(s => s.classList.remove("active", "current"));
+        Object.values(connectors).forEach(c => c.classList.remove("active"));
+
+        const status = p.status;
+        
+        // 1. Złożone (Szkic or Nowe)
+        steps.placed.classList.add("active");
+        if (status === "Nowe" || status === "Szkic") {
+          steps.placed.classList.add("current");
+        }
+
+        // 2. Przyjęte
+        if (status === "W realizacji" || status === "Wysłane" || status === "Częściowo wysłane" || status === "Dostarczone" || status === "Zatwierdzone") {
+          steps.accepted.classList.add("active");
+          connectors.c1.classList.add("active");
+          if (status === "W realizacji") {
+            steps.accepted.classList.add("current");
+          }
+        }
+
+        // 3. W drodze
+        if (status === "Wysłane" || status === "Częściowo wysłane" || status === "Dostarczone" || status === "Zatwierdzone") {
+          steps.shipped.classList.add("active");
+          connectors.c2.classList.add("active");
+          if (status === "Wysłane" || status === "Częściowo wysłane") {
+            steps.shipped.classList.add("current");
+          }
+        }
+
+        // 4. Odebrane
+        if (status === "Dostarczone" || status === "Zatwierdzone") {
+          steps.delivered.classList.add("active");
+          connectors.c3.classList.add("active");
+          if (status === "Dostarczone") {
+            steps.delivered.classList.add("current");
+          }
+        }
+
+        // 5. Zrealizowane
+        if (status === "Zatwierdzone") {
+          steps.archived.classList.add("active");
+          steps.archived.classList.add("current");
+          connectors.c4.classList.add("active");
+        }
+
+        // Dynamic Status Banner
+        const banner = $("#order-banner");
+        banner.style.display = "flex";
+        banner.className = "order-banner"; // reset class
+
+        const hasActiveShipments = p.dostawy && p.dostawy.some(d => d.status === "W drodze");
+
+        if (status === "Szkic") {
+          banner.classList.add("info");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>To zamówienie jest szkicem. Dokonaj edycji i prześlij je do realizacji.</span>
+          `;
+        } else if (status === "Nowe") {
+          banner.classList.add("info");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>Oczekiwanie na weryfikację przez SUPON. Manager wkrótce przyjmie je do realizacji.</span>
+          `;
+        } else if (status === "W realizacji") {
+          banner.classList.add("info");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Zamówienie zostało zaakceptowane. Trwa kompletowanie odzieży w magazynie SUPON.</span>
+          `;
+        } else if (status === "Wysłane") {
+          banner.classList.add("warning");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+            <span>Zamówienie zostało wysłane. Oczekuje na dostarczenie przesyłki kurierskiej.</span>
+          `;
+        } else if (status === "Częściowo wysłane") {
+          if (hasActiveShipments) {
+            banner.classList.add("warning");
+            banner.innerHTML = `
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+              <span>Odebrano część towaru. Kolejna przesyłka jest w drodze – potwierdź odbiór paczki po dostarczeniu.</span>
+            `;
+          } else {
+            banner.classList.add("info");
+            banner.innerHTML = `
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              <span>Odebrano część towaru. Oczekiwanie na wysyłkę pozostałych pozycji z magazynu.</span>
+            `;
+          }
+        } else if (status === "Dostarczone") {
+          banner.classList.add("success");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Wszystkie pozycje zamówienia zostały dostarczone. Sprawdź ich zgodność i zatwierdź odbiór.</span>
+          `;
+        } else if (status === "Zatwierdzone") {
+          banner.classList.add("success");
+          banner.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span>Zamówienie zostało zrealizowane. Zakończono proces obsługi.</span>
+          `;
+        }
+
         metaBox.innerHTML = `
-          <div><label class="label-caps" style="display:block">Status</label><b>${p.status}</b></div>
+          <div><label class="label-caps" style="display:block">Status</label><b>${status === "Zatwierdzone" ? "Zrealizowane" : status}</b></div>
           <div><label class="label-caps" style="display:block">Data</label><b>${p.created}</b></div>
           <div><label class="label-caps" style="display:block">Dostawa</label><b>${p.addr}</b></div>
           <div><label class="label-caps" style="display:block">ETA</label><b>${p.eta}</b></div>
         `;
-        itemsBox.innerHTML = p.items.map(it=>`
-          <tr>
-            <td><img class="item-photo" src="${it.foto}" alt="" width="50"></td>
-            <td><b>${it.produkt}</b></td>
-            <td>${it.nr}</td>
-            <td>${it.rozmiar}</td>
-            <td>${it.ilosc}</td>
-            <td>${it.osoba}</td>
-          </tr>
-        `).join("");
- 
+
+        itemsBox.innerHTML = p.items.map(it=>{
+          const total = it.ilosc || 1;
+          let delivered = it.ilosc_dostarczona !== undefined ? it.ilosc_dostarczona : (p.status === "Dostarczone" || p.status === "Zatwierdzone" ? total : 0);
+          let shipped = it.ilosc_wyslana !== undefined ? it.ilosc_wyslana : (p.status === "Wysłane" ? total : 0);
+          let itemStatus = it.status || (delivered >= total ? "Dostarczone" : (shipped >= total ? "W drodze" : p.status));
+
+          let statusBadge = `<span class="badge" style="padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; `;
+          if (itemStatus === "Dostarczone" || itemStatus === "Zatwierdzone") {
+            statusBadge += `background: color-mix(in oklab, var(--ok) 15%, transparent); color: var(--ok);`;
+          } else if (itemStatus === "W drodze" || itemStatus === "Wysłane") {
+            statusBadge += `background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent);`;
+          } else if (itemStatus === "Częściowo wysłane") {
+            statusBadge += `background: color-mix(in oklab, #b45309 15%, transparent); color: #b45309;`;
+          } else {
+            statusBadge += `background: var(--line); color: var(--muted);`;
+          }
+          statusBadge += `">${itemStatus === "Zatwierdzone" ? "Dostarczone" : itemStatus}</span>`;
+
+          return `
+            <tr>
+              <td><img class="item-photo" src="${it.foto}" alt="" width="50"></td>
+              <td><b>${it.produkt}</b></td>
+              <td>${it.nr}</td>
+              <td>${it.rozmiar}</td>
+              <td>${total} szt.</td>
+              <td>${delivered} szt.</td>
+              <td>${shipped} szt.</td>
+              <td>${statusBadge}</td>
+              <td>${it.osoba}</td>
+            </tr>
+          `;
+        }).join("");
+
+        // Handle Shipments section (Packages)
+        const shipmentsSec = $("#shipments-section");
+        const packagesGrid = $("#order-packages-grid");
+        if (p.dostawy && p.dostawy.length > 0) {
+          shipmentsSec.style.display = "block";
+          packagesGrid.innerHTML = p.dostawy.map(d => {
+            const isPending = d.status === "W drodze";
+            const statusColor = isPending ? "background: rgba(245, 158, 11, 0.15); color: #b45309;" : "background: color-mix(in oklab, var(--ok) 15%, transparent); color: var(--ok);";
+            
+            return `
+              <div class="package-card">
+                <div class="package-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="package-carrier-badge">${d.kurier}</span>
+                    <b style="font-size:14px; color:var(--text);">Paczka #${d.id_wysylki}</b>
+                  </div>
+                  <span class="badge" style="padding:4px 8px; border-radius:8px; font-weight:700; ${statusColor}">${d.status === "Zatwierdzone" || d.status === "Dostarczona" ? "Dostarczona" : d.status}</span>
+                </div>
+                <div class="package-details">
+                  <div class="detail-row"><span>Data nadania:</span> <b>${d.data_wysylki}</b></div>
+                  <div class="detail-row"><span>List przewozowy:</span> <a href="#" class="waybill-link" onclick="event.preventDefault(); alert('Śledzenie przesyłki ${d.kurier}: ${d.nr_listu}')">${d.nr_listu}</a></div>
+                  <div class="detail-row">
+                    <span>Zawartość:</span> 
+                    <b>${d.pozycje.map(it => `${it.produkt} (${it.ilosc} szt.)`).join(", ")}</b>
+                  </div>
+                </div>
+                ${isPending 
+                  ? `<div class="package-actions">
+                       <button class="btn-confirm-package btn-confirm-package-btn" data-order-id="${p.id}" data-package-id="${d.id_wysylki}">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                         Potwierdź odbiór paczki
+                       </button>
+                     </div>`
+                  : ''
+                }
+              </div>
+            `;
+          }).join("");
+        } else {
+          shipmentsSec.style.display = "none";
+          packagesGrid.innerHTML = "";
+        }
+
         // Update modal actions dynamically
-        const modalActions = $(".modal-actions", modal);
+        const modalActions = $("#order-modal-actions");
         if (p.status === "Szkic" || p.status === "Nowe") {
           modalActions.innerHTML = `
             <a class="btn" href="nowe-zamowienie.html?edit=${p.id}">Edytuj zamówienie</a>
             <button class="btn btn-secondary" style="color: var(--err); border-color: color-mix(in oklab, var(--err) 35%, transparent);" type="button" data-delete-modal-btn data-id="${p.id}">Usuń zamówienie</button>
             <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
           `;
-        } else if (p.status === "W realizacji") {
+        } else if (p.status === "W realizacji" || p.status === "Częściowo wysłane") {
           modalActions.innerHTML = `
             <a class="btn" style="background: #d97706; border-color: #d97706;" href="zgloszenia.html?new=true&order=${p.id}&person=${encodeURIComponent(p.items[0].osoba)}&item=${encodeURIComponent(p.items[0].produkt)}">Utwórz zgłoszenie</a>
             <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
@@ -636,13 +1308,13 @@
           `;
         } else if (p.status === "Wysłane") {
           modalActions.innerHTML = `
-            <button class="btn" style="background: var(--ok); border-color: var(--ok);" type="button" data-confirm-modal-btn data-id="${p.id}">Potwierdź odbiór</button>
+            <button class="btn" style="background: var(--ok); border-color: var(--ok);" type="button" data-confirm-modal-btn data-id="${p.id}">Potwierdź odbiór całości</button>
             <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
             <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
           `;
         } else if (p.status === "Dostarczone") {
           modalActions.innerHTML = `
-            <button class="btn" style="background: var(--accent); border-color: var(--accent);" type="button" data-accept-modal-btn data-id="${p.id}">Zatwierdź zamówienie</button>
+            <button class="btn" style="background: var(--accent); border-color: var(--accent);" type="button" data-accept-modal-btn data-id="${p.id}">Zatwierdź jako zrealizowane</button>
             <button class="btn btn-secondary" type="button">Pobierz WZ (PDF)</button>
             <button class="btn btn-secondary" type="button" data-close>Zamknij</button>
           `;
@@ -653,8 +1325,117 @@
             <button class="btn" type="button" data-close>Zamknij</button>
           `;
         }
+      }
 
-        openM();
+      // Image Lightbox Viewer
+      function showImageLightbox(src, alt = "Zdjęcie produktu") {
+        let overlay = document.getElementById("image-lightbox-overlay");
+        if (!overlay) {
+          overlay = document.createElement("div");
+          overlay.id = "image-lightbox-overlay";
+          overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: zoom-out;
+          `;
+          
+          const container = document.createElement("div");
+          container.style.cssText = `
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            transform: scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          `;
+          
+          const img = document.createElement("img");
+          img.id = "image-lightbox-img";
+          img.style.cssText = `
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            object-fit: contain;
+          `;
+          
+          const caption = document.createElement("div");
+          caption.id = "image-lightbox-caption";
+          caption.style.cssText = `
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 18px;
+            border-radius: 99px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+          `;
+          
+          container.appendChild(img);
+          container.appendChild(caption);
+          overlay.appendChild(container);
+          document.body.appendChild(overlay);
+          
+          overlay.addEventListener("click", () => {
+            overlay.style.opacity = "0";
+            container.style.transform = "scale(0.95)";
+            setTimeout(() => {
+              overlay.style.display = "none";
+            }, 250);
+          });
+        }
+        
+        const imgEl = overlay.querySelector("#image-lightbox-img");
+        const captionEl = overlay.querySelector("#image-lightbox-caption");
+        
+        imgEl.src = src;
+        captionEl.textContent = alt;
+        
+        overlay.style.display = "flex";
+        overlay.offsetHeight; // Force reflow
+        overlay.style.opacity = "1";
+        overlay.querySelector("div").style.transform = "scale(1)";
+      }
+
+      document.body.addEventListener("click", (e) => {
+        const target = e.target.closest(".item-photo, .photo, img.item-photo, img.photo");
+        if (target) {
+          e.stopPropagation();
+          e.preventDefault();
+          
+          let name = "";
+          const tr = target.closest("tr");
+          if (tr) {
+            const secondCell = tr.cells[1];
+            if (secondCell) {
+              name = secondCell.textContent.replace("Dostarczone", "").replace("W drodze", "").replace("Częściowo wysłane", "").trim();
+            }
+          }
+          if (!name) {
+            name = target.alt || "Zdjęcie produktu";
+          }
+          
+          showImageLightbox(target.src, name);
+        }
       });
 
       render();

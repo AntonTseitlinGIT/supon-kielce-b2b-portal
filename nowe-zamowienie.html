@@ -37,6 +37,7 @@
       border-radius: 12px;
       object-fit: cover;
       background: #fafbfe;
+      cursor: pointer;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
@@ -844,6 +845,120 @@
 
     btnSubmitOrder.addEventListener("click", () => processOrderSave("Nowe"));
     btnSaveDraft.addEventListener("click", () => processOrderSave("Szkic"));
+
+    // Image Lightbox Viewer
+    function showImageLightbox(src, alt = "Zdjęcie produktu") {
+      let overlay = document.getElementById("image-lightbox-overlay");
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "image-lightbox-overlay";
+        overlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(15, 23, 42, 0.85);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 99999;
+          opacity: 0;
+          transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: zoom-out;
+        `;
+        
+        const container = document.createElement("div");
+        container.style.cssText = `
+          position: relative;
+          max-width: 90vw;
+          max-height: 90vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          transform: scale(0.95);
+          transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        `;
+        
+        const img = document.createElement("img");
+        img.id = "image-lightbox-img";
+        img.style.cssText = `
+          max-width: 100%;
+          max-height: 80vh;
+          border-radius: 16px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          object-fit: contain;
+        `;
+        
+        const caption = document.createElement("div");
+        caption.id = "image-lightbox-caption";
+        caption.style.cssText = `
+          color: #fff;
+          font-size: 16px;
+          font-weight: 600;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.08);
+          padding: 8px 18px;
+          border-radius: 99px;
+          backdrop-filter: blur(4px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          text-align: center;
+        `;
+        
+        container.appendChild(img);
+        container.appendChild(caption);
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+        
+        overlay.addEventListener("click", () => {
+          overlay.style.opacity = "0";
+          container.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            overlay.style.display = "none";
+          }, 250);
+        });
+      }
+      
+      const imgEl = overlay.querySelector("#image-lightbox-img");
+      const captionEl = overlay.querySelector("#image-lightbox-caption");
+      
+      imgEl.src = src;
+      captionEl.textContent = alt;
+      
+      overlay.style.display = "flex";
+      overlay.offsetHeight; // Force reflow
+      overlay.style.opacity = "1";
+      overlay.querySelector("div").style.transform = "scale(1)";
+    }
+
+    document.body.addEventListener("click", (e) => {
+      const target = e.target.closest(".item-photo, .photo, img.item-photo, img.photo");
+      if (target) {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        let name = "";
+        const tr = target.closest("tr");
+        if (tr) {
+          const selectEl = tr.querySelector(".prod-select");
+          if (selectEl) {
+            const selectedOpt = selectEl.options[selectEl.selectedIndex];
+            if (selectedOpt) {
+              name = selectedOpt.textContent.trim();
+            }
+          }
+        }
+        if (!name) {
+          name = target.alt || "Zdjęcie produktu";
+        }
+        
+        showImageLightbox(target.src, name);
+      }
+    });
 
   </script>
 </body>

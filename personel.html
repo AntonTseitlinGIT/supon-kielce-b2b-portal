@@ -7,6 +7,151 @@
   <link rel="stylesheet" href="styles.css" />
   <style>
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+    
+    /* View Switcher Active Styles */
+    .view-btn.active {
+      background: var(--accent) !important;
+      color: #fff !important;
+      border-color: var(--accent) !important;
+    }
+    
+    /* Employee Card Grid Styles */
+    .employees-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .employee-card {
+      background: var(--page-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+    }
+    .employee-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+      border-color: var(--accent);
+    }
+    .emp-card-header {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .emp-card-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--accent) 12%, var(--page-bg));
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 20px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(2,6,23,0.04);
+    }
+    .emp-card-title {
+      flex: 1;
+    }
+    .emp-card-title h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .emp-card-title p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .emp-card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .emp-card-sizes {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      background: var(--section-bg);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+    .emp-card-size-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .emp-card-size-item span:first-child {
+      color: var(--muted);
+      opacity: 0.8;
+    }
+    .emp-card-size-item span:last-child {
+      font-weight: 700;
+      color: var(--text);
+    }
+    .emp-card-items-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+    .emp-card-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .emp-card-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .emp-card-item-name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+      color: var(--text);
+    }
+    .emp-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+    .emp-card-actions .btn {
+      flex: 1;
+      height: 34px;
+      font-size: 12.5px;
+      padding: 0 10px;
+    }
   </style>
 </head>
 <body>
@@ -32,100 +177,76 @@
     <!-- Utrzymujemy taki sam układ jak na innych podstronach: container + stack -->
     <div class="container stack">
 
-      <!-- Filtry (card #1) -->
-      <section class="card" aria-label="Filtry personelu">
-        <header class="card-header">
-          <h2>Filtry</h2>
-        </header>
-        <div class="card-content">
-          <form class="form" onsubmit="event.preventDefault();">
-            <div class="grid-2">
-              <label>Numer pracownika
-                <input class="input" type="text" placeholder="np. NP-0021" />
-              </label>
-              <label>Imię i/lub nazwisko
-                <input class="input" type="text" placeholder="np. Jan, Kowalski" />
-              </label>
-            </div>
-            <div class="grid-2">
-              <label>Dział
-                <select>
-                  <option>Wszystkie</option>
-                  <option>Produkcja</option>
-                  <option>Magazyn</option>
-                  <option>Logistyka</option>
-                  <option>Utrzymanie Ruchu</option>
-                </select>
-              </label>
-              <div></div>
-            </div>
-            <div class="form-actions">
-              <button class="btn" type="submit">Zastosuj</button>
-              <button class="btn btn-secondary" type="reset">Wyczyść</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <!-- Lista pracowników (card #2) — ta sama szerokość co filtry -->
-      <section class="card" aria-label="Tabela pracowników">
-        <header class="card-header">
-          <h3>Lista pracowników</h3>
-        </header>
-        <div class="card-content">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nr</th>
-                <th>Imię i nazwisko</th>
-                <th>Stanowisko</th>
-                <th>Dział</th>
-                <th>Adres</th>
-                <th>Akcje</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>NP-0001</strong></td>
-                <td>Jan Kowalski</td>
-                <td>Operator</td>
-                <td>Produkcja</td>
-                <td>ul. Główna 12, Kielce</td>
-                <td><a class="btn btn-secondary" href="karta-pracownika.html?id=NP-0001&name=Jan%20Kowalski&role=Operator&dept=Produkcja">Karta</a><td>
-              </tr>
-              <tr>
-                <td><strong>NP-0002</strong></td>
-                <td>Anna Nowak</td>
-                <td>Magazynier</td>
-                <td>Magazyn</td>
-                <td>ul. Zielona 5, Kielce</td>
-                <td><a class="btn btn-secondary" href="karta-pracownika.html?id=NP-0001&name=Jan%20Kowalski&role=Operator&dept=Produkcja">Karta</a></td>
-              </tr>
-              <tr>
-                <td><strong>NP-0015</strong></td>
-                <td>Piotr Wiśniewski</td>
-                <td>Kierowca</td>
-                <td>Logistyka</td>
-                <td>ul. Spacerowa 8, Chęciny</td>
-                <td><a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Karta</a></td>
-              </tr>
-              <tr>
-                <td><strong>NP-0021</strong></td>
-                <td>Katarzyna Mazur</td>
-                <td>Technik UR</td>
-                <td>Utrzymanie Ruchu</td>
-                <td>ul. Fabryczna 1, Kielce</td>
-                <td><a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Karta</a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="card-content" style="display:flex;justify-content:space-between;align-items:center;">
-          <small class="muted">Wyświetlono 1–4 z 86</small>
-          <div class="tools">
-            <a class="btn btn-secondary" href="#" onclick="event.preventDefault();">Poprzednia</a>
-            <a class="btn" href="#" onclick="event.preventDefault();">Następna</a>
+      <!-- Lista i Kartoteka pracowników -->
+      <section class="card" aria-label="Zarządzanie personelem">
+        <header class="card-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <h3 style="margin:0;">Zarządzanie personelem</h3>
+          <div class="tools" style="display:flex; gap:8px;">
+            <button class="btn btn-secondary view-btn active" id="view-cards-btn" style="padding: 0 12px; height: 32px; font-size: 13px;">Kartoteka</button>
+            <button class="btn btn-secondary view-btn" id="view-table-btn" style="padding: 0 12px; height: 32px; font-size: 13px;">Tabela</button>
           </div>
+        </header>
+
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--line);">
+          <div class="orders-controls">
+            <div class="search-bar-row">
+              <div class="search-wrapper">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="mainSearch" placeholder="Szukaj po nazwisku, imieniu lub numerze pracownika...">
+              </div>
+              <button class="btn" id="btnFilterMain" style="height:48px; padding:0 24px;">Filtruj</button>
+              <button class="adv-toggle" id="advToggle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                Filtry
+              </button>
+            </div>
+
+            <div class="advanced-filters-panel" id="advPanel">
+              <div class="form-group">
+                <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Numer pracownika</label>
+                <input class="input" type="text" id="filter-id" placeholder="np. NP-0021" style="display:block; width:100%; height: 38px;">
+              </div>
+              <div class="form-group">
+                <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Dział</label>
+                <select id="filter-dept" class="input" style="display:block; width:100%; height: 38px; padding: 0 10px;">
+                  <option value="Wszystkie">Wszystkie działy</option>
+                  <option value="Produkcja">Produkcja</option>
+                  <option value="Magazyn">Magazyn</option>
+                  <option value="Logistyka">Logistyka</option>
+                  <option value="Utrzymanie Ruchu">Utrzymanie Ruchu</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <!-- Card Grid View -->
+          <div class="employees-grid" id="employees-grid">
+            <!-- Dynamic employee cards -->
+          </div>
+
+          <!-- Table View Container -->
+          <div id="employees-table-container" style="display: none;">
+            <table class="table" id="employees-table">
+              <thead>
+                <tr>
+                  <th>Nr</th>
+                  <th>Imię i nazwisko</th>
+                  <th>Stanowisko</th>
+                  <th>Dział</th>
+                  <th>Adres</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="card-content" style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:10px;">
+          <small class="muted" id="employees-count">Wyświetlono 0 z 0</small>
         </div>
       </section>
 
@@ -138,106 +259,392 @@
   <div class="modal" id="modal-add-employee" aria-hidden="true">
     <div class="modal-backdrop" data-modal-close></div>
 
-    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="add-employee-title">
+    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="add-employee-title" style="max-width: 500px;">
       <header class="modal-header">
         <h2 id="add-employee-title">Dodaj nowego pracownika</h2>
         <button class="modal-close" aria-label="Zamknij" title="Zamknij" data-modal-close>×</button>
       </header>
 
       <div class="modal-content">
-        <form class="form" onsubmit="event.preventDefault();">
-          <div class="grid-2">
-            <label>Numer pracownika
-              <input class="input" type="text" placeholder="NP-0000" />
-            </label>
-            <label>Imię i nazwisko
-              <input class="input" type="text" placeholder="np. Jan Kowalski" />
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Dział
-              <select>
-                <option>Wybierz…</option>
-                <option>Produkcja</option>
-                <option>Magazyn</option>
-                <option>Logistyka</option>
-                <option>Utrzymanie Ruchu</option>
-              </select>
-            </label>
-            <label>Stanowisko
-              <input class="input" type="text" placeholder="np. Operator" />
-            </label>
+        <form class="form" id="form-add-employee" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Sekcja: Dane podstawowe -->
+          <div>
+            <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 4px;">Dane podstawowe</h4>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Numer pracownika (NP-XXXX)
+                <input class="input" type="text" id="add-emp-id" placeholder="np. NP-0087" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Imię i nazwisko
+                <input class="input" type="text" id="add-emp-name" placeholder="np. Jan Kowalski" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div class="grid-2" style="gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Dział
+                <select id="add-emp-dept" class="input" required style="height: 36px; padding: 0 10px; margin-top: 4px; width: 100%;">
+                  <option value="">Wybierz…</option>
+                  <option>Produkcja</option>
+                  <option>Magazyn</option>
+                  <option>Logistyka</option>
+                  <option>Utrzymanie Ruchu</option>
+                </select>
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Stanowisko
+                <input class="input" type="text" id="add-emp-role" placeholder="np. Operator" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
           </div>
 
-          <h4>Wymiary</h4>
-          <div class="grid-2">
-            <label>Wzrost (cm)
-              <input class="input" type="number" placeholder="180" />
-            </label>
-            <label>Obwód klatki  (cm)
-              <input class="input" type="number" placeholder="48" />
-            </label>
-          </div>
-          <div class="grid-2">
-            <label>Obwód pasa (cm)
-              <input class="input" type="number" placeholder="96" />
-            </label>
-            <label>Rozmiar obuwia (EU)
-              <input class="input" type="number" placeholder="42" />
-            </label>
+          <!-- Sekcja: Wymiary i rozmiary -->
+          <div>
+            <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 4px;">Wymiary i rozmiary</h4>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Wzrost (cm)
+                <input class="input" type="number" id="add-emp-height" placeholder="180" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Obwód klatki (cm)
+                <input class="input" type="number" id="add-emp-chest" placeholder="100" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Obwód pasa (cm)
+                <input class="input" type="number" id="add-emp-waist" placeholder="96" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Rozmiar obuwia (EU)
+                <input class="input" type="number" id="add-emp-shoes" placeholder="42" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div style="margin-top: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--accent);">Typowy rozmiar odzieży (S, M, L, XL, XXL)
+                <select id="add-emp-clothing" class="input" required style="height: 36px; padding: 0 10px; margin-top: 4px; width: 100%;">
+                  <option value="">Wybierz rozmiar…</option>
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                  <option value="XXXL">XXXL</option>
+                </select>
+              </label>
+            </div>
           </div>
         </form>
       </div>
 
       <footer class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 16px;border-top:1px solid var(--line);">
         <button class="btn btn-secondary" type="button" data-modal-close>Anuluj</button>
-        <button class="btn" type="submit">Zapisz</button>
+        <button class="btn" type="submit" form="form-add-employee">Zapisz</button>
       </footer>
     </section>
   </div>
 
   <!-- Skrypty -->
+  <script src="mock-data.js"></script>
   <script src="components.js"></script>
   <script src="app.js"></script>
   <script>
-    // CSV (demo)
-    document.getElementById('csv-upload')?.addEventListener('change', (e)=>{
-      if(e.target.files && e.target.files[0]){
-        alert('Wybrano plik: ' + e.target.files[0].name + '\\n(Import to demo)');
-      }
-    });
+    // Local database operations
+    let employees = [];
 
-    // Rezerwowa obsługa modala, jeśli app.js nie zainicjuje
-    (function(){
-      if(window.__modalInit) return;
-      window.__modalInit = true;
-      document.addEventListener('click', (e) => {
-        const openBtn = e.target.closest('[data-open-modal]');
-        if (openBtn) {
-          const sel = openBtn.getAttribute('data-open-modal');
-          const modal = document.querySelector(sel);
-          if (modal) {
-            modal.setAttribute('open', '');
-            document.documentElement.classList.add('has-modal');
-          }
+    function loadEmployees() {
+      try {
+        employees = JSON.parse(localStorage.getItem("portal_employees")) || [];
+      } catch(e) {
+        employees = [];
+      }
+    }
+
+    function saveEmployees() {
+      localStorage.setItem("portal_employees", JSON.stringify(employees));
+    }
+
+    function renderEmployees(dataToRender) {
+      const list = dataToRender || employees;
+      const gridContainer = document.querySelector("#employees-grid");
+      const tbody = document.querySelector("#employees-table tbody");
+      const countEl = document.querySelector("#employees-count");
+
+      // Render Grid
+      if (gridContainer) {
+        if (list.length === 0) {
+          gridContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted);">Brak pracowników spełniających kryteria.</div>`;
+        } else {
+          gridContainer.innerHTML = list.map(emp => {
+            const initials = emp.name.split(' ').map(str => str[0]).slice(0, 2).join('').toUpperCase();
+            const s = emp.sizes || { height: 180, chest: 100, waist: 96, shoes: 42 };
+            const items = emp.items || [];
+            
+            let itemsHtml = "";
+            if (items.length === 0) {
+              itemsHtml = `<div class="muted text-center" style="font-size:12px; padding:10px; border: 1px dashed var(--line); border-radius:6px; background:var(--section-bg);">Brak wydanych rzeczy</div>`;
+            } else {
+              itemsHtml = items.map(it => {
+                return `
+                  <div class="emp-card-item" style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px;">
+                    <span class="emp-card-item-name" title="${it.name} (rozm. ${it.size})" style="font-weight: 500; font-size: 12.5px;">${it.name}</span>
+                    <span class="muted" style="font-size: 11px; font-weight: 600;">rozm. ${it.size}</span>
+                  </div>
+                `;
+              }).join('');
+            }
+
+            return `
+              <div class="employee-card clickable-row" onclick="window.location.href='karta-pracownika.html?id=${emp.id}'" data-id="${emp.id}">
+                <div class="emp-card-header">
+                  <div class="emp-card-avatar">${initials}</div>
+                  <div class="emp-card-title">
+                    <h3>${emp.name}</h3>
+                    <p>${emp.role} • ${emp.dept}</p>
+                  </div>
+                </div>
+                
+                <div class="emp-card-badges">
+                  <span class="chip ${emp.status === 'Aktywny' ? 'ok' : ''}" style="font-size: 11px; padding: 2px 6px;">${emp.status}</span>
+                  <span class="chip" style="font-size: 11px; padding: 2px 6px;">Nr: ${emp.id}</span>
+                </div>
+
+                <div class="emp-card-sizes">
+                  <div class="emp-card-size-item"><span>Wzrost:</span><span>${s.height} cm</span></div>
+                  <div class="emp-card-size-item"><span>Klatka:</span><span>${s.chest} cm</span></div>
+                  <div class="emp-card-size-item"><span>Pas:</span><span>${s.waist} cm</span></div>
+                  <div class="emp-card-size-item"><span>Buty:</span><span>${s.shoes}</span></div>
+                </div>
+                <div style="background: var(--section-bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 12.5px;">
+                  <span style="font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase;">Rozmiar odzieży:</span>
+                  <span class="badge" style="font-weight: 800; font-size: 11px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px;">${s.clothing || 'M'}</span>
+                </div>
+                
+                <div>
+                  <div class="emp-card-items-title">
+                    <span>Wydana odzież</span>
+                    <span>(${items.length})</span>
+                  </div>
+                  <div class="emp-card-items-list">
+                    ${itemsHtml}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
-        const closeBtn = e.target.closest('[data-modal-close]');
-        if (closeBtn) {
-          const modal = closeBtn.closest('.modal');
-          if (modal) {
-            modal.removeAttribute('open');
-            document.documentElement.classList.remove('has-modal');
-          }
+      }
+
+      // Render Table
+      if (tbody) {
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="muted text-center" style="text-align:center; padding:20px;">Brak pracowników spełniających kryteria.</td></tr>`;
+        } else {
+          tbody.innerHTML = list.map(emp => `
+            <tr class="clickable-row" onclick="window.location.href='karta-pracownika.html?id=${emp.id}'">
+              <td><strong>${emp.id}</strong></td>
+              <td>${emp.name}</td>
+              <td>${emp.role}</td>
+              <td>${emp.dept}</td>
+              <td>${emp.addr}</td>
+            </tr>
+          `).join('');
         }
-        if (e.target.classList.contains('modal-backdrop')) {
-          const modal = e.target.closest('.modal');
-          if (modal) {
-            modal.removeAttribute('open');
-            document.documentElement.classList.remove('has-modal');
-          }
+      }
+
+      if (countEl) {
+        countEl.textContent = `Wyświetlono ${list.length} z ${employees.length}`;
+      }
+    }
+
+    // View switcher logic
+    let currentView = "cards";
+    const cardsBtn = document.getElementById("view-cards-btn");
+    const tableBtn = document.getElementById("view-table-btn");
+    const gridContainer = document.getElementById("employees-grid");
+    const tableContainer = document.getElementById("employees-table-container");
+
+    function setView(view) {
+      currentView = view;
+      if (view === "cards") {
+        cardsBtn.classList.add("active");
+        tableBtn.classList.remove("active");
+        gridContainer.style.display = "grid";
+        tableContainer.style.display = "none";
+      } else {
+        cardsBtn.classList.remove("active");
+        tableBtn.classList.add("active");
+        gridContainer.style.display = "none";
+        tableContainer.style.display = "block";
+      }
+      localStorage.setItem("portal_employees_view", view);
+    }
+
+    if (cardsBtn && tableBtn) {
+      cardsBtn.addEventListener("click", () => setView("cards"));
+      tableBtn.addEventListener("click", () => setView("table"));
+      const savedView = localStorage.getItem("portal_employees_view") || "cards";
+      setView(savedView);
+    }
+
+    // Live filtering helper
+    function applyFilters() {
+      const searchVal = document.getElementById("mainSearch").value.trim().toLowerCase();
+      const idVal = document.getElementById("filter-id").value.trim().toLowerCase();
+      const deptVal = document.getElementById("filter-dept").value;
+
+      const filtered = employees.filter(emp => {
+        const matchMain = !searchVal || 
+                          emp.name.toLowerCase().includes(searchVal) || 
+                          emp.id.toLowerCase().includes(searchVal);
+        const matchId = !idVal || emp.id.toLowerCase().includes(idVal);
+        const matchDept = deptVal === "Wszystkie" || emp.dept === deptVal;
+        return matchMain && matchId && matchDept;
+      });
+
+      renderEmployees(filtered);
+    }
+
+    // Toggle advanced filters panel
+    const advToggle = document.getElementById("advToggle");
+    const advPanel = document.getElementById("advPanel");
+    if (advToggle && advPanel) {
+      advToggle.addEventListener("click", () => {
+        advPanel.classList.toggle("open");
+      });
+    }
+
+    // Filter main button
+    const btnFilterMain = document.getElementById("btnFilterMain");
+    if (btnFilterMain) {
+      btnFilterMain.addEventListener("click", applyFilters);
+    }
+
+    // Live typing filters
+    document.getElementById("mainSearch").addEventListener("input", applyFilters);
+    document.getElementById("filter-id").addEventListener("input", applyFilters);
+    document.getElementById("filter-dept").addEventListener("change", applyFilters);
+
+
+    // Add new employee
+    const addForm = document.getElementById("form-add-employee");
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        
+        const newEmp = {
+          id: document.getElementById("add-emp-id").value.trim(),
+          name: document.getElementById("add-emp-name").value.trim(),
+          role: document.getElementById("add-emp-role").value.trim(),
+          dept: document.getElementById("add-emp-dept").value,
+          addr: "—",
+          sizes: {
+            height: parseInt(document.getElementById("add-emp-height").value) || 180,
+            chest: parseInt(document.getElementById("add-emp-chest").value) || 100,
+            waist: parseInt(document.getElementById("add-emp-waist").value) || 96,
+            shoes: parseInt(document.getElementById("add-emp-shoes").value) || 42,
+            clothing: document.getElementById("add-emp-clothing").value || "M"
+          },
+          status: "Aktywny",
+          rfid: "TAK",
+          ppe: "TAK",
+          items: [],
+          history: [
+            { time: "Dzisiaj", desc: "Zarejestrowano nowego pracownika w bazie." }
+          ]
+        };
+
+        // Check for duplicates
+        if (employees.some(emp => emp.id === newEmp.id)) {
+          alert("Pracownik o tym numerze już istnieje!");
+          return;
+        }
+
+        employees.unshift(newEmp);
+        saveEmployees();
+        renderEmployees();
+        addForm.reset();
+
+        // Close modal
+        const modal = document.getElementById("modal-add-employee");
+        if (modal) {
+          modal.removeAttribute("open");
+          document.documentElement.classList.remove("has-modal");
+        }
+
+        if (window.showToast) {
+          window.showToast("Pomyślnie dodano nowego pracownika!");
         }
       });
-    })();
+    }
+
+    // CSV file import parser
+    document.getElementById('csv-upload')?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        const lines = text.split('\n');
+        let added = 0;
+        let skipped = 0;
+
+        lines.forEach((line, index) => {
+          if (index === 0 || !line.trim()) return; // skip header or empty
+          
+          const parts = line.split(/[;,]/);
+          if (parts.length >= 4) {
+            const rawId = parts[0]?.trim() || "";
+            const name = parts[1]?.trim() || "Nieznany";
+            const role = parts[2]?.trim() || "Pracownik";
+            const dept = parts[3]?.trim() || "Produkcja";
+            const addr = parts[4]?.trim() || "Kielce";
+            
+            const empId = rawId ? rawId : `NP-${(employees.length + added + 1048).toString()}`;
+            
+            // Avoid duplicate ids
+            if (employees.some(emp => emp.id === empId)) {
+              skipped++;
+              return;
+            }
+
+            const emp = {
+              id: empId,
+              name: name,
+              role: role,
+              dept: dept,
+              addr: addr,
+              sizes: {
+                height: parseInt(parts[5]) || 180,
+                chest: parseInt(parts[6]) || 100,
+                waist: parseInt(parts[7]) || 90,
+                shoes: parseInt(parts[8]) || 42
+              },
+              status: "Aktywny",
+              rfid: "TAK",
+              ppe: "TAK",
+              items: [],
+              history: [
+                { time: "Dzisiaj", desc: "Zarejestrowano przez import masowy CSV." }
+              ]
+            };
+
+            employees.unshift(emp);
+            added++;
+          }
+        });
+
+        if (added > 0) {
+          saveEmployees();
+          renderEmployees();
+          if (window.showToast) {
+            window.showToast(`Import zakończony! Dodano ${added} pracowników (pominięto: ${skipped}).`);
+          }
+        } else {
+          alert("Błąd importu: brak poprawnych danych lub pracownicy o podanych ID już istnieją.");
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ""; // clear input
+    });
+
+    // Initialize
+    loadEmployees();
+    renderEmployees();
   </script>
 </body>
 </html>

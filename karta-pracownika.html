@@ -49,8 +49,6 @@
           <h2>Profil pracownika</h2>
           <div class="chips">
             <span class="chip ok">Aktywny</span>
-            <span class="chip info">RFID: TAK</span>
-            <span class="chip">PPE: TAK</span>
           </div>
         </header>
         <div class="card-content">
@@ -74,37 +72,20 @@
               <div id="emp-dept"><strong>Produkcja</strong></div>
             </div>
             <div>
-              <div class="label">Adres</div>
-              <div id="emp-addr">ul. Główna 12, Kielce</div>
-            </div>
-            <div>
-              <div class="label">Wymiary</div>
-              <div id="emp-size">Wzrost 180 • Klatka 100 • Pas 96 • Obuwie 42</div>
+              <div class="label">Wymiary i rozmiary</div>
+              <div id="emp-size">Wzrost 180 • Klatka 100 • Pas 96 • Obuwie 42 • Odzież M</div>
             </div>
           </div>
 
           <div class="divider"></div>
 
-          <div class="section-actions">
-            <button class="btn btn-secondary">Edytuj dane</button>
-            <button class="btn btn-secondary">Zgłoś zmianę rozmiaru</button>
-            <a class="btn" href="nowe-zamowienie.html">Nowe zamówienie odzieży</a>
+          <div class="section-actions" style="display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn" data-open-modal="#modal-edit-employee" style="width: 100%; justify-content: center; text-align: center;">Edytuj dane</button>
+            <button class="btn btn-secondary" id="btn-delete-employee" style="width: 100%; justify-content: center; text-align: center; border-color: #ef4444; color: #ef4444; background: transparent; transition: all 0.2s;">Usuń pracownika</button>
           </div>
         </div>
       </section>
 
-      <!-- KPI -->
-      <section class="card" aria-label="Wskaźniki">
-        <header class="card-header"><h2>Wskaźniki</h2></header>
-        <div class="card-content">
-          <div class="kpis">
-            <div class="kpi"><h3>Przypisane sztuki</h3><div class="value">12</div></div>
-            <div class="kpi"><h3>W praniu</h3><div class="value">3</div></div>
-            <div class="kpi"><h3>W szafce</h3><div class="value">7</div></div>
-            <div class="kpi"><h3>Wydania (YTD)</h3><div class="value">9</div></div>
-          </div>
-        </div>
-      </section>
 
       <!-- ASORTYMENT PRZYPISANY -->
       <section class="card" aria-label="Asortyment przypisany">
@@ -115,28 +96,14 @@
           </div>
         </header>
         <div class="card-content">
-          <table class="table">
+          <table class="table" id="assigned-items-table">
             <thead>
               <tr>
-                <th>CHIP</th><th>Nr artykułu</th><th>Nazwa</th><th>Rozmiar</th><th class="status-cell">Status</th><th>Ostatnia operacja</th>
+                <th>Nr artykułu</th><th>Nazwa</th><th>Rozmiar</th><th>Data wydania</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>...532</td><td>MOT-TRS-001</td><td>Spodnie Motion</td><td>L / 182–190</td>
-                <td class="status-cell"><span class="badge">W szafce</span></td>
-                <td>19.08.2025 10:41 — zwrot z prania</td>
-              </tr>
-              <tr>
-                <td>...218</td><td>HIV-BLS-110</td><td>Bluza Hi-Vis</td><td>M</td>
-                <td class="status-cell"><span class="badge info">W praniu</span></td>
-                <td>19.08.2025 09:39 — skan RFID (odbiór)</td>
-              </tr>
-              <tr>
-                <td>...774</td><td>FR-JKT-220</td><td>Kurtka FR</td><td>M</td>
-                <td class="status-cell"><span class="badge ok">Wydane</span></td>
-                <td>18.08.2025 08:12 — wydanie z magazynu</td>
-              </tr>
+              <!-- Dynamic assigned items -->
             </tbody>
           </table>
         </div>
@@ -146,63 +113,278 @@
       <section class="card" aria-label="Zamówienia pracownika">
         <header class="card-header"><h2>Zamówienia — ostatnie</h2></header>
         <div class="card-content">
-          <table class="table">
+          <table class="table" id="emp-orders-table">
             <thead><tr><th>#</th><th>Utworzono</th><th>Pozycje (skrót)</th><th>Status</th><th>ETA</th></tr></thead>
             <tbody>
-              <tr>
-                <td><strong>Z-2025-1048</strong></td>
-                <td>19.08.2025</td>
-                <td>Spodnie Motion, Bluza Hi-Vis</td>
-                <td><span class="badge info">W realizacji</span></td>
-                <td>21.08.2025 10:00</td>
-              </tr>
-              <tr>
-                <td><strong>Z-2025-1007</strong></td>
-                <td>02.08.2025</td>
-                <td>Kurtka FR</td>
-                <td><span class="badge ok">Dostarczone</span></td>
-                <td>05.08.2025</td>
-              </tr>
+              <!-- Dynamic orders -->
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- HISTORIA OPERACJI -->
-      <section class="card" aria-label="Historia operacji">
-        <header class="card-header"><h2>Historia operacji (RFID / wydania / zwroty)</h2></header>
-        <div class="card-content">
-          <ul class="timeline" role="list">
-            <li><span class="tl-dot"></span><div class="tl-item"><strong>10:41</strong> • CHIP <b>...532</b> — <em>zwrot z prania</em></div></li>
-            <li><span class="tl-dot"></span><div class="tl-item"><strong>09:39</strong> • CHIP <b>...218</b> — <em>odbiór do prania</em></div></li>
-            <li><span class="tl-dot"></span><div class="tl-item"><strong>08:12</strong> • CHIP <b>...774</b> — <em>wydanie z magazynu</em></div></li>
-            <li><span class="tl-dot"></span><div class="tl-item"><strong>Wczoraj</strong> • utworzono zamówienie <b>Z-2025-1048</b></div></li>
-          </ul>
-        </div>
-      </section>
 
     </div>
   </main>
 
   <app-footer></app-footer>
 
+  <!-- MODAL: Edytuj dane pracownika -->
+  <div class="modal" id="modal-edit-employee" aria-hidden="true">
+    <div class="modal-backdrop" data-modal-close></div>
+    <section class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-employee-title" style="max-width: 500px;">
+      <header class="modal-header">
+        <h2 id="edit-employee-title">Edytuj dane pracownika</h2>
+        <button class="modal-close" aria-label="Zamknij" title="Zamknij" data-modal-close>×</button>
+      </header>
+      <div class="modal-content">
+        <form class="form" id="form-edit-employee" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Sekcja: Dane podstawowe -->
+          <div>
+            <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 4px;">Dane podstawowe</h4>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Imię i nazwisko
+                <input class="input" type="text" id="edit-emp-name" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Stanowisko
+                <input class="input" type="text" id="edit-emp-role" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div>
+              <label style="font-size: 12px; font-weight: 600;">Dział
+                <select id="edit-emp-dept" class="input" required style="height: 36px; padding: 0 10px; margin-top: 4px; width: 100%;">
+                  <option>Produkcja</option>
+                  <option>Magazyn</option>
+                  <option>Logistyka</option>
+                  <option>Utrzymanie Ruchu</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sekcja: Wymiary i rozmiary -->
+          <div>
+            <h4 style="margin: 0 0 10px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--line); padding-bottom: 4px;">Wymiary i rozmiary</h4>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Wzrost (cm)
+                <input class="input" type="number" id="edit-emp-height" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Obwód klatki (cm)
+                <input class="input" type="number" id="edit-emp-chest" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div class="grid-2" style="margin-bottom: 10px; gap: 12px;">
+              <label style="font-size: 12px; font-weight: 600;">Obwód pasa (cm)
+                <input class="input" type="number" id="edit-emp-waist" required style="height: 36px; margin-top: 4px;" />
+              </label>
+              <label style="font-size: 12px; font-weight: 600;">Rozmiar obuwia (EU)
+                <input class="input" type="number" id="edit-emp-shoes" required style="height: 36px; margin-top: 4px;" />
+              </label>
+            </div>
+            <div style="margin-top: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: var(--accent);">Rozmiar odzieży (S, M, L, XL, XXL)
+                <select id="edit-emp-clothing" class="input" required style="height: 36px; padding: 0 10px; margin-top: 4px; width: 100%;">
+                  <option value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                  <option value="XXXL">XXXL</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <footer class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:14px 16px;border-top:1px solid var(--line);">
+        <button class="btn btn-secondary" type="button" data-modal-close>Anuluj</button>
+        <button class="btn" type="submit" form="form-edit-employee">Zapisz</button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- Skrypty -->
+  <script src="mock-data.js"></script>
   <script src="components.js"></script>
   <script src="app.js"></script>
   <script>
-    // Opcjonalnie: wczytaj dane z query string (?id=NP-0001&name=Jan%20Kowalski)
     (function(){
       const p = new URLSearchParams(location.search);
       const id = p.get('id') || 'NP-0001';
-      const name = p.get('name') || 'Jan Kowalski';
-      const role = p.get('role') || 'Operator';
-      const dept = p.get('dept') || 'Produkcja';
+      
+      let employees = [];
+      let orders = [];
+      let emp = null;
 
-      document.getElementById('emp-id').textContent = 'Nr: ' + id;
-      document.getElementById('emp-name').textContent = name;
-      document.getElementById('emp-role').innerHTML = '<strong>'+role+'</strong>';
-      document.getElementById('emp-dept').innerHTML = '<strong>'+dept+'</strong>';
-      const initials = name.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
-      document.getElementById('avatar').textContent = initials;
+      function loadData() {
+        try {
+          employees = JSON.parse(localStorage.getItem('portal_employees')) || [];
+          orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
+        } catch(e) {}
+        
+        emp = employees.find(e => e.id === id);
+        if (!emp && employees.length > 0) {
+          // fallback to first employee if not found
+          emp = employees[0];
+        }
+      }
+
+      function saveData() {
+        localStorage.setItem('portal_employees', JSON.stringify(employees));
+      }
+
+      function updateUI() {
+        if (!emp) return;
+
+        // Header info
+        document.getElementById('emp-id').textContent = 'Nr: ' + emp.id;
+        document.getElementById('emp-name').textContent = emp.name;
+        document.getElementById('emp-role').innerHTML = '<strong>' + emp.role + '</strong>';
+        document.getElementById('emp-dept').innerHTML = '<strong>' + emp.dept + '</strong>';
+        
+        // Sizes line
+        const s = emp.sizes;
+        document.getElementById('emp-size').textContent = `Wzrost ${s.height} cm • Klatka ${s.chest} cm • Pas ${s.waist} cm • Obuwie ${s.shoes} • Odzież ${s.clothing || 'M'}`;
+        
+        // Avatar initials
+        const initials = emp.name.split(' ').map(str => str[0]).slice(0, 2).join('').toUpperCase();
+        document.getElementById('avatar').textContent = initials;
+
+        // Button link pre-populate
+        const newOrderBtn = document.getElementById('btn-new-order');
+        if (newOrderBtn) {
+          newOrderBtn.href = `nowe-zamowienie.html?name=${encodeURIComponent(emp.name)}`;
+        }
+
+        const items = emp.items || [];
+
+        // Render Assigned Items Table
+        const itemsTableBody = document.querySelector('#assigned-items-table tbody');
+        if (itemsTableBody) {
+          if (items.length === 0) {
+            itemsTableBody.innerHTML = `<tr><td colspan="4" class="muted text-center" style="text-align:center;padding:20px;">Brak przypisanych artykułów</td></tr>`;
+          } else {
+            itemsTableBody.innerHTML = items.map(it => {
+              return `
+                <tr>
+                  <td>${it.nr}</td>
+                  <td>${it.name}</td>
+                  <td>${it.size}</td>
+                  <td>${it.lastOp || '—'}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+
+        // Render Employee Orders Table
+        // Filter orders that belong to this employee name or id
+        const empOrders = orders.filter(o => 
+          o.items && o.items.some(item => 
+            item.osoba && (item.osoba.includes(emp.name) || item.osoba.includes(emp.id.replace('NP-', '')))
+          )
+        );
+
+        const ordersTableBody = document.querySelector('#emp-orders-table tbody');
+        if (ordersTableBody) {
+          if (empOrders.length === 0) {
+            ordersTableBody.innerHTML = `<tr><td colspan="5" class="muted text-center" style="text-align:center;padding:20px;">Brak zamówień dla tego pracownika</td></tr>`;
+          } else {
+            ordersTableBody.innerHTML = empOrders.map(o => {
+              let badgeClass = '';
+              if (o.status === 'Nowe') badgeClass = 'info';
+              else if (o.status === 'W realizacji' || o.status === 'Wysłane' || o.status === 'Częściowo wysłane') badgeClass = 'warn';
+              else if (o.status === 'Dostarczone' || o.status === 'Zatwierdzone') badgeClass = 'ok';
+
+              // Summarize products in order
+              const summaryItems = o.items.map(it => it.produkt).join(', ');
+
+              return `
+                <tr>
+                  <td><strong>${o.id}</strong></td>
+                  <td>${o.created}</td>
+                  <td>${summaryItems}</td>
+                  <td><span class="badge ${badgeClass}">${o.status}</span></td>
+                  <td>${o.eta || '—'}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        }
+
+        // Populate Form Fields
+        // Edit Form (unified with sizing)
+        document.getElementById('edit-emp-name').value = emp.name;
+        document.getElementById('edit-emp-role').value = emp.role;
+        document.getElementById('edit-emp-dept').value = emp.dept;
+
+        document.getElementById('edit-emp-height').value = s.height;
+        document.getElementById('edit-emp-chest').value = s.chest;
+        document.getElementById('edit-emp-waist').value = s.waist;
+        document.getElementById('edit-emp-shoes').value = s.shoes;
+        document.getElementById('edit-emp-clothing').value = s.clothing || "M";
+      }
+
+      // Hook up Form Submissions
+      // Edit Employee Form (unified with sizing)
+      const formEdit = document.getElementById('form-edit-employee');
+      if (formEdit) {
+        formEdit.addEventListener('submit', (e) => {
+          e.preventDefault();
+          emp.name = document.getElementById('edit-emp-name').value.trim();
+          emp.role = document.getElementById('edit-emp-role').value.trim();
+          emp.dept = document.getElementById('edit-emp-dept').value;
+
+          // Save sizes
+          emp.sizes.height = parseInt(document.getElementById('edit-emp-height').value) || emp.sizes.height;
+          emp.sizes.chest = parseInt(document.getElementById('edit-emp-chest').value) || emp.sizes.chest;
+          emp.sizes.waist = parseInt(document.getElementById('edit-emp-waist').value) || emp.sizes.waist;
+          emp.sizes.shoes = parseInt(document.getElementById('edit-emp-shoes').value) || emp.sizes.shoes;
+          emp.sizes.clothing = document.getElementById('edit-emp-clothing').value || emp.sizes.clothing || "M";
+          
+          emp.history.unshift({
+            time: new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
+            desc: "Zaktualizowano dane osobowe oraz wymiary pracownika."
+          });
+
+          saveData();
+          updateUI();
+          
+          // Close modal
+          const modal = document.getElementById('modal-edit-employee');
+          if (modal) {
+            modal.removeAttribute('open');
+            document.documentElement.classList.remove('has-modal');
+          }
+
+          if (window.showToast) {
+            window.showToast("Dane pracownika zostały zaktualizowane!");
+          }
+        });
+      }
+
+      // Delete Employee Action
+      const btnDelete = document.getElementById('btn-delete-employee');
+      if (btnDelete) {
+        btnDelete.addEventListener('click', () => {
+          if (confirm(`Czy na pewno chcesz usunąć pracownika ${emp.name}?`)) {
+            const index = employees.findIndex(e => e.id === emp.id);
+            if (index !== -1) {
+              employees.splice(index, 1);
+              localStorage.setItem('portal_employees', JSON.stringify(employees));
+              if (window.showToast) {
+                window.showToast(`Pracownik ${emp.name} został usunięty.`);
+              }
+              setTimeout(() => {
+                location.href = 'personel.html';
+              }, 1000);
+            }
+          }
+        });
+      }
+
+      // Run
+      loadData();
+      updateUI();
     })();
   </script>
 </body>

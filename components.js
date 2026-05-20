@@ -11,7 +11,8 @@ class AppNav extends HTMLElement {
             <li><a class="nav-link" href="dashboard.html" data-page="dashboard">Pulpit</a></li>
             <li><a class="nav-link" href="zamowienia.html" data-page="zamowienia">Zamówienia</a></li>
             <li><a class="nav-link" href="zgloszenia.html" data-page="zgloszenia">Zgłoszenia</a></li>
-            <li><a class="nav-link" href="#" data-page="wz">WZ</a></li>
+            <li><a class="nav-link" href="personel.html" data-page="personel">Personel</a></li>
+            <li><a class="nav-link" href="wz.html" data-page="wz">WZ</a></li>
             <li><a class="nav-link" href="#" data-page="sklep">Sklep</a></li>
           </ul>
           <div class="nav-actions">
@@ -33,8 +34,9 @@ class AppNav extends HTMLElement {
     let page = path.split('/').pop().replace('.html', '');
     if (!page || page === 'index') page = 'dashboard';
     
-    // Also consider nowe-zamowienie as part of zamowienia
+    // Also consider nowe-zamowienie as part of zamowienia, and karta-pracownika as part of personel
     if (page === 'nowe-zamowienie') page = 'zamowienia';
+    if (page === 'karta-pracownika') page = 'personel';
 
     const activeLink = this.querySelector(`[data-page="${page}"]`);
     if (activeLink) {

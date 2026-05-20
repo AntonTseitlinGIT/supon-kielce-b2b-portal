@@ -20,37 +20,7 @@
       align-items: center;
     }
     
-    .search-input-wrapper {
-      position: relative;
-      flex: 1;
-    }
-    
-    .search-input-wrapper input {
-      width: 100%;
-      height: 48px;
-      padding: 0 16px 0 44px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: var(--page-bg);
-      font-family: var(--font);
-      font-size: 15px;
-      transition: all 0.2s ease;
-      outline: none;
-    }
-    
-    .search-input-wrapper input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 10%, transparent);
-    }
-    
-    .search-icon-svg {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
+
     
     .status-filters {
       display: flex;
@@ -139,6 +109,232 @@
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
     .dot.active { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 20%, transparent); }
     .dot.done { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 20%, transparent); }
+
+    /* Split Details & Chat Layout */
+    .details-split-container {
+      display: flex;
+      height: 60vh;
+      border-bottom: 1px solid var(--line);
+    }
+    @media (max-width: 768px) {
+      .details-split-container {
+        flex-direction: column;
+        height: 70vh;
+        overflow-y: auto;
+      }
+      .details-sidebar {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--line);
+      }
+    }
+    .details-sidebar {
+      width: 320px;
+      padding: 24px;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .details-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--section-bg);
+      position: relative;
+    }
+    .chat-messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-message {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      animation: fadeInMsg 0.2s ease-out;
+    }
+    @keyframes fadeInMsg {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .chat-message.client {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 10px color-mix(in oklab, var(--accent) 15%, transparent);
+    }
+    .chat-message.manager {
+      align-self: flex-start;
+      background: var(--page-bg);
+      color: var(--fg);
+      border: 1px solid var(--line);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+    .chat-message-time {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .chat-message.manager .chat-message-time {
+      color: var(--muted);
+    }
+    .chat-message.client .chat-message-time {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .chat-input-area {
+      padding: 16px 24px;
+      border-top: 1px solid var(--line);
+      background: var(--page-bg);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      height: 44px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--page-bg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.4;
+    }
+    .chat-input-area textarea:focus {
+      border-color: var(--accent);
+    }
+    
+    .chat-attach-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .chat-attach-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .chat-attach-btn:active {
+      transform: translateY(1px);
+    }
+    
+    /* Typing indicator */
+    .typing-indicator {
+      display: none;
+      align-self: flex-start;
+      background: var(--page-bg);
+      border: 1px solid var(--line);
+      padding: 12px 18px;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      margin-left: 24px;
+      margin-bottom: 12px;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    .typing-dot:nth-child(3) { animation-delay: -0.08s; }
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.3); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: color-mix(in oklab, var(--line) 30%, transparent);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+    }
+    .switch-container:hover {
+      background: color-mix(in oklab, var(--line) 50%, transparent);
+    }
+    .switch-label {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: color-mix(in oklab, var(--text) 15%, transparent);
+      transition: .2s ease;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--muted);
+      transition: .2s ease;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -148,7 +344,7 @@
     <div class="container header-grid">
       <div>
         <h1>Twoje Zgłoszenia</h1>
-        <p class="subtitle">Zgłaszaj serwis, monitoruj naprawy и przeglądaj historię serwisową</p>
+        <p class="subtitle">Zgłaszaj reklamacje, wymiany towaru oraz kontaktuj się z nami w sprawach ogólnych</p>
       </div>
       <div class="header-actions">
         <button class="btn" id="newRequestBtn">+ Nowe zgłoszenie</button>
@@ -162,16 +358,14 @@
       <!-- CONTROLS -->
       <div class="controls-row">
         <div class="status-filters" id="statusFilters">
-          <button class="filter-chip active" data-status="">Wszystkie</button>
-          <button class="filter-chip" data-status="Nowe">Nowe</button>
-          <button class="filter-chip" data-status="W toku">W toku</button>
-          <button class="filter-chip" data-status="Do oceny">Do oceny</button>
+          <button class="filter-chip active" data-status="W toku">W toku</button>
           <button class="filter-chip" data-status="Zakończone">Zakończone</button>
+          <button class="filter-chip" data-status="">Wszystkie</button>
         </div>
         
-        <div class="search-bar-container" style="display:flex; gap:10px;">
-          <div class="search-input-wrapper" style="flex:1;">
-            <svg class="search-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <div class="search-bar-row">
+          <div class="search-wrapper">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="zgłoszeniaSearch" placeholder="Szukaj po numerze zgłoszenia, pracowniku lub asortymencie...">
           </div>
           <button class="btn" id="btnFilterZgl" style="height:48px; padding:0 24px;">Filtruj</button>
@@ -194,9 +388,9 @@
             <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Kategoria</label>
             <select class="input" id="f-cat" style="display:block; width:100%; margin-top:4px;">
               <option value="">Wszystkie</option>
-              <option>Serwisowe</option>
-              <option>Reklamacyjne</option>
-              <option>Wymiana</option>
+              <option value="Reklamacja">Reklamacja</option>
+              <option value="Wymiana towaru">Wymiana towaru</option>
+              <option value="Zapytanie ogólne">Zapytanie ogólne</option>
             </select>
           </div>
           <div class="form-group" style="display:flex; align-items:flex-end;">
@@ -213,6 +407,7 @@
               <tr>
                 <th>ID Zgłoszenia</th>
                 <th>Typ</th>
+                <th>Zamówienie</th>
                 <th>Pracownik</th>
                 <th>Asortyment</th>
                 <th>Data utworzenia</th>
@@ -251,31 +446,79 @@
   <div class="modal" id="newRequestModal">
     <div class="modal-card">
       <div class="modal-head">
-        <h3>Nowe zgłoszenie serwisowe</h3>
+        <h3>Nowe zgłoszenie do SUPON</h3>
         <button class="modal-close" data-close>×</button>
       </div>
       <div class="modal-body">
         <form class="form" id="newRequestForm">
-          <div class="form-grid">
-            <label>Pracownik
-              <input class="input" id="reqPerson" type="text" placeholder="Imię i Nazwisko" required>
-            </label>
-            <label>Typ zgłoszenia
-              <select class="input" id="reqType">
-                <option>Serwisowe</option>
-                <option>Reklamacyjne</option>
-                <option>Wymiana</option>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="label-caps" style="display:block; margin-bottom: 6px;">Typ zgłoszenia</label>
+            <select class="input" id="reqType" required>
+              <option value="Reklamacja">Reklamacja</option>
+              <option value="Wymiana towaru">Wymiana towaru</option>
+              <option value="Zapytanie ogólne">Zapytanie ogólne</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px; background: var(--section-bg); padding: 16px 20px; border-radius: 16px; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px;">
+            <label class="label-caps" style="display:block; margin-bottom: 4px; font-weight:700;">Powiązanie zgłoszenia</label>
+            
+            <!-- Toggle 1: Zamówienie -->
+            <div class="switch-container">
+              <span class="switch-label">Powiąż z konkretnym zamówieniem</span>
+              <label class="switch">
+                <input type="checkbox" id="bindOrderToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Toggle 2: Produkt -->
+            <div class="switch-container">
+              <span class="switch-label">Powiąż z konkretnym produktem</span>
+              <label class="switch">
+                <input type="checkbox" id="bindProductToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Toggle 3: Pracownik -->
+            <div class="switch-container">
+              <span class="switch-label">Powiąż z konkretnym pracownikiem</span>
+              <label class="switch">
+                <input type="checkbox" id="bindPersonToggle" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid" id="reqFormGrid" style="margin-top: 12px;">
+            <!-- Order field -->
+            <label id="reqOrderFieldLabel" style="display:none;">Powiązane zamówienie
+              <select class="input" id="reqOrder">
+                <!-- Dynamically populated -->
               </select>
             </label>
-            <label>Asortyment
-              <input class="input" id="reqItem" type="text" placeholder="np. Spodnie Motion" required>
+
+            <!-- Product selector field -->
+            <label id="reqProductSelectLabel" style="display:none;">Wybierz produkt z zamówienia
+              <select class="input" id="reqProductSelect">
+                <!-- Dynamically populated -->
+              </select>
             </label>
-            <label>Nr szafki / Skrytka
-              <input class="input" id="reqCabinet" type="text" placeholder="np. A-12 / 03">
+
+            <!-- Manual Product name input field -->
+            <label id="reqItemLabel" style="display:none;">Produkt / Asortyment
+              <input class="input" id="reqItem" type="text" placeholder="np. Spodnie Motion">
+            </label>
+
+            <!-- Employee name input field -->
+            <label id="reqPersonLabel" style="display:none;">Pracownik
+              <input class="input" id="reqPerson" type="text" placeholder="Imię i Nazwisko">
             </label>
           </div>
-          <label style="margin-top:12px">Opis problemu
-            <textarea class="input" id="reqDesc" rows="4" placeholder="Opisz dokładnie co wymaga naprawy..." required></textarea>
+
+          <label style="margin-top:16px; display:block;">Opis problemu (Rozpocznij konwersację)
+            <textarea class="input" id="reqDesc" rows="4" placeholder="Opisz dokładnie swój problem lub pytanie. Menedżer odpowie na czacie..." required></textarea>
           </label>
         </form>
       </div>
@@ -286,21 +529,54 @@
     </div>
   </div>
 
-  <!-- MODAL: SZCZEGÓŁY -->
+  <!-- MODAL: SZCZEGÓŁY (Chat & Details) -->
   <div class="modal" id="detailsModal">
-    <div class="modal-card">
+    <div class="modal-card" style="width: min(1040px, 98vw); max-height: 90vh; display: flex; flex-direction: column;">
       <div class="modal-head">
         <h3 id="detTitle">Szczegóły zgłoszenia</h3>
         <button class="modal-close" data-close>×</button>
       </div>
-      <div class="modal-body">
-        <div id="detMeta" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; background: var(--section-bg); padding: 20px; border-radius: 16px;"></div>
-        <h4>Opis zgłoszenia</h4>
-        <p id="detDesc" style="line-height: 1.6; color: var(--muted); background: var(--page-bg); padding: 16px; border: 1px solid var(--line); border-radius: 12px;"></p>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-secondary">Drukuj etykietę QR</button>
-        <button class="btn" data-close>Zamknij</button>
+      <div class="details-split-container">
+        <!-- Sidebar: Details -->
+        <div class="details-sidebar">
+          <div id="detMeta" style="display: flex; flex-direction: column; gap: 16px; background: var(--section-bg); padding: 18px; border-radius: 16px;">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;">Drukuj etykietę QR</button>
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" data-close>Zamknij</button>
+          </div>
+        </div>
+        <!-- Right side: Chat -->
+        <div class="details-chat">
+          <div class="chat-messages-container" id="chatMessages">
+            <!-- Messages rendered dynamically -->
+          </div>
+          <div class="typing-indicator" id="typingIndicator">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+          
+          <!-- Attachment Preview Bar -->
+          <div class="chat-attachment-preview" id="chatAttachmentPreview" style="display:none; padding: 8px 16px; background: rgba(255,255,255,0.02); border-top: 1px dashed var(--line); align-items: center; gap: 8px; font-size: 13px; color: var(--fg);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="muted" style="color:var(--accent);"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            <span id="attachedFileName" style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500;"></span>
+            <span id="removeAttachmentBtn" style="cursor:pointer; color:var(--warn); font-size:18px; line-height:1; padding: 0 4px;" title="Usuń załącznik">&times;</span>
+          </div>
+
+          <div class="chat-input-area">
+            <input type="file" id="chatFileInput" style="display:none;">
+            <button class="chat-attach-btn" id="attachFileBtn" title="Załącz plik">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+            </button>
+            <button class="chat-attach-btn" id="attachImageBtn" title="Dodaj zdjęcie">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </button>
+            <textarea id="chatInput" placeholder="Napisz wiadomość do managera SUPON..."></textarea>
+            <button class="btn" id="sendMsgBtn" style="height: 44px; padding: 0 20px;">Wyślij</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -310,36 +586,98 @@
       const $ = (s, r=document)=>r.querySelector(s);
       const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
 
-      // MOCK DATA (Expanded) + LocalStorage
+      // NEW CATEGORIES: "Reklamacja", "Wymiana towaru", "Zapytanie ogólne"
       const DEFAULT_DATA = [
-        {id:"SRV-2025-0145", type:"Serwisowe", person:"Jan Kowalski", item:"Spodnie Motion", date:"19.08.2025 10:12", status:"Nowe", desc:"Rozdarcie на prawym kolanie."},
-        {id:"SRV-2025-0139", type:"Reklamacyjne", person:"Agnieszka Nowak", item:"Bluza Hi-Vis", date:"19.08.2025 08:27", status:"W toku", desc:"Problem z zamkiem błyskawicznym."},
-        {id:"SRV-2025-0132", type:"Serwisowe", person:"Piotr Zieliński", item:"Kurtka FR", date:"18.08.2025 15:02", status:"Do oceny", desc:"Wymiana odblasków."},
-        {id:"SRV-2025-0121", type:"Serwisowe", person:"Anna Wiśniewska", item:"Fartuch Food Safety", date:"17.08.2025 11:49", status:"Zakończone", desc:"Naprawa szwów bocznych."},
-        {id:"SRV-2025-0118", type:"Serwisowe", person:"Marek Lewand", item:"Buty S3", date:"16.08.2025 09:15", status:"Zakończone", desc:"Wymiana sznurowadeł."},
-        {id:"SRV-2025-0115", type:"Wymiana", person:"Ewa Kasprzyk", item:"T-shirt Cotton", date:"15.08.2025 14:30", status:"W toku", desc:"Zmiana rozmiaru na L."},
-        {id:"SRV-2025-0110", type:"Serwisowe", person:"Tomasz Kot", item:"Polary Polar", date:"14.08.2025 10:00", status:"Nowe", desc:"Dziura w kieszeni."},
-        {id:"SRV-2025-0105", type:"Reklamacyjne", person:"Karol Świerk", item:"Kask ochronny", date:"12.08.2025 08:45", status:"Do oceny", desc:"Pęknięcie skorupy."},
-        {id:"SRV-2025-0099", type:"Serwisowe", person:"Beata Tyszkiewicz", item:"Spodnie robocze", date:"10.08.2025 16:20", status:"Zakończone", desc:"Skrócenie nogawek."},
-        {id:"SRV-2025-0092", type:"Serwisowe", person:"Adam Małysz", item:"Kurtka zimowa", date:"08.08.2025 12:10", status:"W toku", desc:"Wymiana podpinki."},
-        {id:"SRV-2025-0085", type:"Wymiana", person:"Robert Lewandowski", item:"Bluza dresowa", date:"05.08.2025 09:30", status:"Nowe", desc:"Zły kolor."},
-        {id:"SRV-2025-0078", type:"Serwisowe", person:"Iga Świątek", item:"Opaska", date:"03.08.2025 11:15", status:"Zakończone", desc:"Poprawienie rzepów."},
-        {id:"SRV-2025-0070", type:"Serwisowe", person:"Hubert Hurkacz", item:"Czapka z daszkiem", date:"01.08.2025 14:00", status:"W toku", desc:"Pranie chemiczne."},
-        {id:"SRV-2025-0065", type:"Reklamacyjne", person:"Krzysztof Piątek", item:"Rękawice", date:"28.07.2025 10:20", status:"Do oceny", desc:"Rozprucie."},
-        {id:"SRV-2025-0060", type:"Serwisowe", person:"Arkadiusz Milik", item:"Ochraniacze", date:"25.07.2025 08:15", status:"Zakończone", desc:"Wymiana gumek."},
-        {id:"SRV-2025-0055", type:"Serwisowe", person:"Grzegorz Krychowiak", item:"Koszulka polo", date:"22.07.2025 13:40", status:"Nowe", desc:"Plama."},
-        {id:"SRV-2025-0050", type:"Wymiana", person:"Wojciech Szczęsny", item:"Spodenki", date:"20.07.2025 15:50", status:"W toku", desc:"Za małe."},
-        {id:"SRV-2025-0045", type:"Serwisowe", person:"Kamil Glik", item:"Getry", date:"18.07.2025 11:10", status:"Zakończone", desc:"Zacerowanie."},
-        {id:"SRV-2025-0040", type:"Serwisowe", person:"Jakub Błaszczykowski", item:"Wiatrówka", date:"15.07.2025 09:20", status:"Do oceny", desc:"Brak guzika."},
-        {id:"SRV-2025-0035", type:"Reklamacyjne", person:"Łukasz Piszczek", item:"Torba sportowa", date:"12.07.2025 12:30", status:"Nowe", desc:"Uszkodzony pasek."},
-        {id:"SRV-2025-0030", type:"Serwisowe", person:"Maciej Rybus", item:"Skarpety", date:"10.07.2025 14:45", status:"Zakończone", desc:"Dziura."},
-        {id:"SRV-2025-0025", type:"Serwisowe", person:"Jan Bednarek", item:"Komin", date:"08.07.2025 10:05", status:"W toku", desc:"Rozciągnięcie."},
-        {id:"SRV-2025-0020", type:"Wymiana", person:"Karol Linetty", item:"Bluza z kapturem", date:"05.07.2025 08:10", status:"Do oceny", desc:"Błąd nadruku."},
-        {id:"SRV-2025-0015", type:"Serwisowe", person:"Przemysław Frankowski", item:"Dresy", date:"03.07.2025 16:30", status:"Nowe", desc:"Wymiana sznurka."},
-        {id:"SRV-2025-0010", type:"Serwisowe", person:"Nicola Zalewski", item:"Koszulka termiczna", date:"01.07.2025 11:55", status:"Zakończone", desc:"Naprawa szwu."}
+        {
+          id: "SRV-2025-0145",
+          type: "Reklamacja",
+          person: "Anna Nowak (004218)",
+          item: "Buty ochronne",
+          date: "19.08.2025 10:12",
+          status: "W toku",
+          orderId: "Z-2025-1052",
+          desc: "Po jednym dniu chodzenia pękła podeszwa w lewym bucie.",
+          messages: [
+            { sender: "client", text: "Dzień dobry, zgłaszam reklamację na buty ochronne z zamówienia Z-2025-1052 dla pracownika Anna Nowak. Po jednym dniu chodzenia pękła podeszwa w lewym bucie.", time: "19.08.2025 10:12" },
+            { sender: "manager", text: "Dzień dobry. Bardzo przepraszamy za tę niedogodność. Proszę o odesłanie wadliwej pary na nasz koszt lub podesłanie zdjęcia pęknięcia. Jeżeli wada jest ewidentna, od razu zlecimy wysyłkę nowej pary.", time: "19.08.2025 10:45" },
+            { sender: "client", text: "Wysłałem zdjęcie pęknięcia na Państwa maila biuro@supon.pl. Proszę o weryfikację.", time: "19.08.2025 11:00" },
+            { sender: "manager", text: "Dziękuję, zdjęcie zostało zweryfikowane przez dział reklamacji. Nowa para butów (rozmiar 42) zostanie wysłana do Państwa dzisiaj popołudniu kurierem DPD.", time: "19.08.2025 11:30" }
+          ]
+        },
+        {
+          id: "SRV-2025-0139",
+          type: "Wymiana towaru",
+          person: "Tomasz Lewandowski",
+          item: "Kombinezon BHP",
+          date: "18.08.2025 09:15",
+          status: "W toku",
+          orderId: "",
+          desc: "Rozmiar L okazał się za ciasny w klatce piersiowej, potrzebujemy XL.",
+          messages: [
+            { sender: "client", text: "Zgłaszam potrzebę wymiany kombinezonu BHP dla pracownika Tomasz Lewandowski. Rozmiar L okazał się za ciasny w klatce piersiowej, potrzebujemy XL. Czy jest możliwość wymiany bez wiązania do konkretnego zamówienia (zwrócimy stary przy odbiorze nowego)?", time: "18.08.2025 09:15" },
+            { sender: "manager", text: "Dzień dobry. Oczywiście, możemy dokonać wymiany w ten sposób. Proszę spakować za mały kombinezon i nakleić etykietę zwrotną, którą właśnie generuję. Nowy rozmiar XL wyślemy zaraz po otrzymaniu paczki zwrotnej.", time: "18.08.2025 09:40" },
+            { sender: "client", text: "Paczka zwrotna została nadana w paczkomacie. Dziękuję!", time: "18.08.2025 10:15" },
+            { sender: "manager", text: "Dziękuję za informację. Widzę paczkę w systemie kurierskim. Spakowaliśmy już kombinezon w rozmiarze XL, kurier DPD odbierze go dzisiaj.", time: "18.08.2025 12:00" }
+          ]
+        },
+        {
+          id: "SRV-2025-0132",
+          type: "Zapytanie ogólne",
+          person: "",
+          item: "",
+          date: "17.08.2025 14:00",
+          status: "Zakończone",
+          orderId: "",
+          desc: "Zapytanie o parametry rękawic zimowych EN 511.",
+          messages: [
+            { sender: "client", text: "Dzień dobry, czy posiadają Państwo w ofercie zimowe rękawice termiczne spełniające normę EN 511 o wysokiej odporności na ścieranie? Chcielibyśmy zamówić około 50 par na kolejny sezon.", time: "17.08.2025 14:00" },
+            { sender: "manager", text: "Dzień dobry. Tak, posiadamy w stałej ofercie model 'Supon IceGrip' (norma EN 511, klasy 2.2.X) oraz 'Tegera 295'. Przesłałem szczegółowe karty techniczne obu modeli na Państwa adres e-mail.", time: "17.08.2025 14:30" },
+            { sender: "client", text: "Dziękuję za odpowiedź. Karty techniczne są w porządku. Zdecydowaliśmy się na model IceGrip. Niedługo prześlemy oficjalne zamówienie.", time: "17.08.2025 15:00" },
+            { sender: "manager", text: "Cieszę się. W razie pytań zapraszam do kontaktu. Zamykam zgłoszenie.", time: "17.08.2025 15:30" }
+          ]
+        },
+        {
+          id: "SRV-2025-0121",
+          type: "Zapytanie ogólne",
+          person: "",
+          item: "",
+          date: "16.08.2025 11:20",
+          status: "Zakończone",
+          orderId: "Z-2025-1080",
+          desc: "Zapytanie o termin dostawy zamówienia Z-2025-1080.",
+          messages: [
+            { sender: "client", text: "Chciałbym zapytać, czy zamówienie Z-2025-1080 jest już spakowane i kiedy możemy spodziewać się wysyłki? Zależy nam na pilnej dostawie.", time: "16.08.2025 11:20" },
+            { sender: "manager", text: "Dzień dobry. Państwa zamówienie zostało już skompletowane i przekazane do działu wysyłek. Paczka wyjdzie dzisiaj kurierem DPD, dostawa powinna nastąpić jutro.", time: "16.08.2025 12:00" },
+            { sender: "client", text: "Doskonale, dziękuję bardzo za przyspieszenie sprawy!", time: "16.08.2025 12:30" },
+            { sender: "manager", text: "Nie ma problemu. Polecam się na przyszłość! Zamykam zgłoszenie.", time: "16.08.2025 13:00" }
+          ]
+        }
       ];
 
-      let DATA = JSON.parse(localStorage.getItem('portal_requests')) || DEFAULT_DATA;
+      // Versioned database loader to show the new rich chat histories and toggle structures
+      const STORAGE_KEY = 'portal_requests';
+      const VERSION_KEY = 'portal_requests_v5'; // V5 representing simplified status workflow (W toku, Zakończone, Wszystkie)
+      
+      let DATA;
+      if (!localStorage.getItem(VERSION_KEY)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+        localStorage.setItem(VERSION_KEY, 'true');
+        DATA = DEFAULT_DATA;
+      } else {
+        DATA = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_DATA;
+      }
+
+      // Normalize statuses (merge "Nowe" and "Do oceny" into "W toku")
+      let migrated = false;
+      DATA.forEach(r => {
+        if (r.status === "Nowe" || r.status === "Do oceny") {
+          r.status = "W toku";
+          migrated = true;
+        }
+      });
+      if (migrated) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
+      }
 
       function saveData() {
         localStorage.setItem('portal_requests', JSON.stringify(DATA));
@@ -347,8 +685,9 @@
 
       let currentPage = 1;
       let pageSize = 10;
-      let currentFilter = "";
+      let currentFilter = "W toku";
       let searchQuery = "";
+      let activeRequestId = null;
 
       const tbody = $("#zgłoszenia-tbody");
       const pagination = $("#pagination");
@@ -358,17 +697,14 @@
       const chips = $$(".filter-chip");
 
       function getBadge(type) {
-        if(type === "Reklamacyjne") return "badge warn";
-        if(type === "Wymiana") return "badge ok";
+        if(type === "Reklamacja") return "badge warn";
+        if(type === "Wymiana towaru") return "badge ok";
         return "badge info";
       }
 
       function getStatusDot(status) {
-        if(status === "Nowe") return `<div class="status-indicator"><span class="dot active"></span><span>Nowe</span></div>`;
-        if(status === "W toku") return `<div class="status-indicator"><span class="dot active"></span><span class="dot active"></span><span>W toku</span></div>`;
-        if(status === "Do oceny") return `<div class="status-indicator"><span class="dot active"></span><span class="dot active"></span><span class="dot active"></span><span>Do oceny</span></div>`;
         if(status === "Zakończone") return `<div class="status-indicator"><span class="dot done"></span><span style="color:var(--ok)">Zakończone</span></div>`;
-        return status;
+        return `<div class="status-indicator"><span class="dot active"></span><span class="dot active"></span><span>W toku</span></div>`;
       }
 
       function render() {
@@ -381,12 +717,17 @@
           const matchesSearch = !searchQuery || Object.values(item).join(" ").toLowerCase().includes(searchQuery);
           
           // Date Filter
-          // Expecting format "DD.MM.YYYY HH:MM"
-          const parts = item.date.split(" ")[0].split(".");
-          const itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          let matchFrom = true;
+          let matchTo = true;
+          if (item.date) {
+            const parts = item.date.split(" ")[0].split(".");
+            if (parts.length === 3) {
+              const itemDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+              matchFrom = !dateFrom || itemDate >= new Date(dateFrom);
+              matchTo = !dateTo || itemDate <= new Date(dateTo);
+            }
+          }
           
-          const matchFrom = !dateFrom || itemDate >= new Date(dateFrom);
-          const matchTo = !dateTo || itemDate <= new Date(dateTo);
           const matchCat = !catFilter || item.type === catFilter;
 
           return matchesFilter && matchesSearch && matchFrom && matchTo && matchCat;
@@ -403,9 +744,10 @@
           <tr class="zgłoszenie-row" data-info='${JSON.stringify(item)}'>
             <td><strong>${item.id}</strong></td>
             <td><span class="${getBadge(item.type)}">${item.type}</span></td>
-            <td>${item.person}</td>
-            <td>${item.item}</td>
-            <td>${item.date.split(" ")[0]}</td>
+            <td>${item.orderId ? `<strong>${item.orderId}</strong>` : '<span class="muted">—</span>'}</td>
+            <td>${item.person || '<span class="muted">—</span>'}</td>
+            <td>${item.item || '<span class="muted">—</span>'}</td>
+            <td>${item.date ? item.date.split(" ")[0] : '—'}</td>
             <td>${getStatusDot(item.status)}</td>
           </tr>
         `).join("");
@@ -465,50 +807,418 @@
         });
       });
 
-      // Modals
+      // Modals Setup
       const backdrop = $("#modalBackdrop");
       const newModal = $("#newRequestModal");
       const detModal = $("#detailsModal");
-      const open = (m) => { backdrop.classList.add("open"); m.classList.add("open"); document.body.style.overflow = "hidden"; };
-      const close = () => { backdrop.classList.remove("open"); $$(".modal").forEach(m=>m.classList.remove("open")); document.body.style.overflow = ""; };
+      
+      const open = (m) => { 
+        backdrop.classList.add("open"); 
+        m.classList.add("open"); 
+        document.body.style.overflow = "hidden"; 
+      };
+      
+      const close = () => { 
+        backdrop.classList.remove("open"); 
+        $$(".modal").forEach(m=>m.classList.remove("open")); 
+        document.body.style.overflow = ""; 
+        activeRequestId = null;
+        if (typeof clearAttachment === "function") clearAttachment();
+      };
 
-      $("#newRequestBtn").addEventListener("click", () => open(newModal));
+      // Order & Product Dynamic Selection
+      const reqOrder = $("#reqOrder");
+      const reqProductSelectLabel = $("#reqProductSelectLabel");
+      const reqProductSelect = $("#reqProductSelect");
+      const reqPerson = $("#reqPerson");
+      const reqItem = $("#reqItem");
+      const reqPersonLabel = $("#reqPersonLabel");
+      const reqItemLabel = $("#reqItemLabel");
+      
+      const bindOrderToggle = $("#bindOrderToggle");
+      const bindProductToggle = $("#bindProductToggle");
+      const bindPersonToggle = $("#bindPersonToggle");
+      const reqOrderFieldLabel = $("#reqOrderFieldLabel");
+
+      function handleTogglesChange() {
+        const orderOn = bindOrderToggle.checked;
+        const productOn = bindProductToggle.checked;
+        const personOn = bindPersonToggle.checked;
+
+        // 1. Handle Order Field
+        if (orderOn) {
+          reqOrderFieldLabel.style.display = "block";
+          reqOrder.setAttribute("required", "required");
+        } else {
+          reqOrderFieldLabel.style.display = "none";
+          reqOrder.removeAttribute("required");
+        }
+
+        // 2. Handle Product Field
+        if (productOn) {
+          if (orderOn) {
+            reqProductSelectLabel.style.display = "block";
+            reqProductSelect.setAttribute("required", "required");
+            reqItemLabel.style.display = "none";
+            reqItem.removeAttribute("required");
+          } else {
+            reqProductSelectLabel.style.display = "none";
+            reqProductSelect.removeAttribute("required");
+            reqItemLabel.style.display = "block";
+            reqItem.setAttribute("required", "required");
+          }
+        } else {
+          reqProductSelectLabel.style.display = "none";
+          reqProductSelect.removeAttribute("required");
+          reqItemLabel.style.display = "none";
+          reqItem.removeAttribute("required");
+        }
+
+        // 3. Handle Employee/Person Field
+        if (personOn) {
+          reqPersonLabel.style.display = "block";
+          if (orderOn && productOn) {
+            reqPerson.readOnly = true;
+            reqPerson.removeAttribute("required");
+          } else {
+            reqPerson.readOnly = false;
+            reqPerson.setAttribute("required", "required");
+          }
+        } else {
+          reqPersonLabel.style.display = "none";
+          reqPerson.removeAttribute("required");
+        }
+
+        // Re-run auto fill logic
+        updateAutoFillValues();
+      }
+
+      function updateAutoFillValues() {
+        const orderOn = bindOrderToggle.checked;
+        const productOn = bindProductToggle.checked;
+        const personOn = bindPersonToggle.checked;
+
+        if (orderOn) {
+          const orderId = reqOrder.value;
+          if (!orderId) {
+            if (productOn) {
+              reqProductSelect.innerHTML = `<option value="">-- Wybierz produkt --</option>`;
+            }
+            if (personOn) {
+              reqPerson.value = "";
+            }
+            return;
+          }
+
+          let orders = [];
+          try {
+            orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
+          } catch(e){}
+          
+          const order = orders.find(o => o.id === orderId);
+          if (order && order.items && order.items.length > 0) {
+            if (productOn) {
+              const prevIndex = reqProductSelect.selectedIndex;
+              
+              reqProductSelect.innerHTML = order.items.map((it, idx) => 
+                `<option value="${idx}" data-person="${it.osoba || ''}" data-name="${it.produkt || ''}">${it.produkt} (${it.osoba || 'Brak przypisania'})</option>`
+              ).join("");
+
+              if (prevIndex >= 0 && prevIndex < reqProductSelect.options.length) {
+                reqProductSelect.selectedIndex = prevIndex;
+              } else {
+                reqProductSelect.selectedIndex = 0;
+              }
+
+              const selectedOpt = reqProductSelect.options[reqProductSelect.selectedIndex];
+              if (selectedOpt) {
+                if (personOn) {
+                  reqPerson.value = selectedOpt.getAttribute("data-person");
+                }
+                reqItem.value = selectedOpt.getAttribute("data-name");
+              }
+            } else {
+              if (personOn) {
+                reqPerson.readOnly = false;
+              }
+            }
+          } else {
+            if (productOn) {
+              reqProductSelect.innerHTML = `<option value="">-- Wybierz produkt --</option>`;
+            }
+            if (personOn) {
+              reqPerson.value = "";
+            }
+          }
+        }
+      }
+
+      function populateOrderDropdown() {
+        let orders = [];
+        try {
+          orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
+        } catch(e){}
+        
+        reqOrder.innerHTML = `
+          <option value="">-- Wybierz zamówienie --</option>
+          ${orders.map(o => `<option value="${o.id}">${o.id} (${o.created}) — ${o.addr.substring(0, 20)}...</option>`).join("")}
+        `;
+        
+        // Reset toggles to checked by default
+        bindOrderToggle.checked = true;
+        bindProductToggle.checked = true;
+        bindPersonToggle.checked = true;
+        
+        reqPerson.value = "";
+        reqItem.value = "";
+        
+        handleTogglesChange();
+      }
+
+      $("#newRequestBtn").addEventListener("click", () => {
+        populateOrderDropdown();
+        open(newModal);
+      });
       backdrop.addEventListener("click", close);
       $$("[data-close]").forEach(b => b.addEventListener("click", close));
 
+      // Bind switch toggle listeners
+      bindOrderToggle.addEventListener("change", handleTogglesChange);
+      bindProductToggle.addEventListener("change", handleTogglesChange);
+      bindPersonToggle.addEventListener("change", handleTogglesChange);
+
+      reqOrder.addEventListener("change", updateAutoFillValues);
+      
+      reqProductSelect.addEventListener("change", () => {
+        const personOn = bindPersonToggle.checked;
+        const selectedOpt = reqProductSelect.options[reqProductSelect.selectedIndex];
+        if (selectedOpt) {
+          if (personOn) {
+            reqPerson.value = selectedOpt.getAttribute("data-person");
+          }
+          reqItem.value = selectedOpt.getAttribute("data-name");
+        }
+      });
+
+      // Chat Render
+      function renderChat(requestId) {
+        const req = DATA.find(r => r.id === requestId);
+        if (!req) return;
+        
+        const container = $("#chatMessages");
+        if (!req.messages) {
+          req.messages = [{ sender: "client", text: req.desc || "Brak opisu.", time: req.date }];
+        }
+        
+        container.innerHTML = req.messages.map(m => `
+          <div class="chat-message ${m.sender}">
+            <div>${m.text}</div>
+            ${m.file ? `
+              <div class="chat-message-attachment" style="display:flex; align-items:center; gap:8px; margin-top:8px; padding:8px 12px; background:rgba(255,255,255,0.08); border-radius:8px; font-size:12px; border:1px solid rgba(255,255,255,0.1); width:fit-content; cursor:pointer;" onclick="alert('Pobieranie pliku: ${m.file.name}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                <span style="text-decoration:underline;">${m.file.name}</span>
+              </div>
+            ` : ""}
+            <div class="chat-message-time">${m.time}</div>
+          </div>
+        `).join("");
+        
+        // Scroll to bottom
+        setTimeout(() => {
+          container.scrollTop = container.scrollHeight;
+        }, 50);
+      }
+
+      let attachedFile = null;
+
+      function clearAttachment() {
+        attachedFile = null;
+        $("#chatFileInput").value = "";
+        $("#chatAttachmentPreview").style.display = "none";
+      }
+
+      // Chat Message Sending & Manager reply simulation
+      function sendChatMessage() {
+        const input = $("#chatInput");
+        const text = input.value.trim();
+        if (!text || !activeRequestId) return;
+        
+        const req = DATA.find(r => r.id === activeRequestId);
+        if (!req) return;
+        
+        const now = new Date().toLocaleString('pl-PL').replace(',', '');
+        const newMsg = {
+          sender: "client",
+          text: text,
+          time: now
+        };
+
+        if (attachedFile) {
+          newMsg.file = { name: attachedFile.name };
+          clearAttachment();
+        }
+        
+        if (!req.messages) {
+          req.messages = [{ sender: "client", text: req.desc || "Brak opisu.", time: req.date }];
+        }
+        
+        req.messages.push(newMsg);
+        input.value = "";
+        
+        saveData();
+        renderChat(activeRequestId);
+        
+        // Trigger simulated manager reply
+        const typingIndicator = $("#typingIndicator");
+        typingIndicator.style.display = "flex";
+        
+        const chatContainer = $("#chatMessages");
+        setTimeout(() => {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 50);
+        
+        let replyText = "Dziękuję za wiadomość. Przekazałem sprawę do naszego działu technicznego. Odpowiemy najszybciej jak to możliwe.";
+        if (req.type === "Reklamacja") {
+          replyText = "Otrzymaliśmy Państwa informację dotyczącą reklamacji. Dział reklamacji SUPON analizuje sprawę. Powiadomimy o decyzji.";
+        } else if (req.type === "Wymiana towaru") {
+          replyText = "Dziękuję za odpowiedź. Sprawdzam aktualną dostępność zamiennika w naszym magazynie. Dam znać za moment.";
+        } else if (req.type === "Zapytanie ogólne") {
+          replyText = "Rozumiem. Przesłałem to zapytanie do właściwego doradcy handlowego. Powróci do Pana z ofertą/odpowiedzią.";
+        }
+        
+        setTimeout(() => {
+          typingIndicator.style.display = "none";
+          
+          const managerNow = new Date().toLocaleString('pl-PL').replace(',', '');
+          req.messages.push({
+            sender: "manager",
+            text: replyText,
+            time: managerNow
+          });
+          
+          saveData();
+          renderChat(activeRequestId);
+        }, 1500);
+      }
+
+      $("#sendMsgBtn").addEventListener("click", sendChatMessage);
+      $("#chatInput").addEventListener("keypress", (e) => {
+        if(e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+
+      // Attachment Listeners
+      const chatFileInput = $("#chatFileInput");
+      const chatAttachmentPreview = $("#chatAttachmentPreview");
+      const attachedFileName = $("#attachedFileName");
+      const removeAttachmentBtn = $("#removeAttachmentBtn");
+
+      $("#attachFileBtn").addEventListener("click", () => {
+        chatFileInput.setAttribute("accept", "*/*");
+        chatFileInput.click();
+      });
+
+      $("#attachImageBtn").addEventListener("click", () => {
+        chatFileInput.setAttribute("accept", "image/*");
+        chatFileInput.click();
+      });
+
+      chatFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          attachedFile = file;
+          attachedFileName.textContent = file.name;
+          chatAttachmentPreview.style.display = "flex";
+        }
+      });
+
+      removeAttachmentBtn.addEventListener("click", clearAttachment);
+
+      // Show Details Row Click
       tbody.addEventListener("click", (e) => {
         const tr = e.target.closest("tr[data-info]");
         if(!tr) return;
         const info = JSON.parse(tr.getAttribute("data-info"));
+        activeRequestId = info.id;
+        
         $("#detTitle").textContent = `Zgłoszenie ${info.id}`;
+        
         $("#detMeta").innerHTML = `
           <div><label class="label-caps" style="display:block">Status</label><b>${info.status}</b></div>
           <div><label class="label-caps" style="display:block">Data</label><b>${info.date}</b></div>
           <div><label class="label-caps" style="display:block">Typ</label><b>${info.type}</b></div>
-          <div><label class="label-caps" style="display:block">Pracownik</label><b>${info.person}</b></div>
+          <div><label class="label-caps" style="display:block">Pracownik</label><b>${info.person ? info.person : '<span class="muted">—</span>'}</b></div>
+          <div><label class="label-caps" style="display:block">Asortyment</label><b>${info.item ? info.item : '<span class="muted">—</span>'}</b></div>
+          <div><label class="label-caps" style="display:block">Zamówienie</label><b>${info.orderId ? `<a href="zamowienia.html?search=${info.orderId}" style="color:var(--accent); font-weight:700;">${info.orderId}</a>` : '<span class="muted">—</span>'}</b></div>
         `;
-        $("#detDesc").textContent = info.desc;
+        
+        renderChat(info.id);
         open(detModal);
       });
 
+      // Submit New Request Form
       $("#newRequestForm").addEventListener("submit", (e) => {
         e.preventDefault();
         
+        const type = $("#reqType").value;
+        const desc = $("#reqDesc").value;
+        const nowStr = new Date().toLocaleString('pl-PL').replace(',', '');
+        
+        const orderOn = bindOrderToggle.checked;
+        const productOn = bindProductToggle.checked;
+        const personOn = bindPersonToggle.checked;
+
+        let orderId = "";
+        let person = "";
+        let item = "";
+
+        if (orderOn) {
+          orderId = reqOrder.value;
+        }
+        
+        if (productOn) {
+          if (orderOn) {
+            const selectedOpt = reqProductSelect.options[reqProductSelect.selectedIndex];
+            if (selectedOpt) {
+              item = selectedOpt.getAttribute("data-name");
+            }
+          } else {
+            item = reqItem.value;
+          }
+        }
+
+        if (personOn) {
+          if (orderOn && productOn) {
+            const selectedOpt = reqProductSelect.options[reqProductSelect.selectedIndex];
+            if (selectedOpt) {
+              person = selectedOpt.getAttribute("data-person");
+            }
+          } else {
+            person = reqPerson.value;
+          }
+        }
+        
         const newReq = {
           id: `SRV-2025-${(DATA.length + 100).toString().padStart(4, '0')}`,
-          type: $("#reqType").value,
-          person: $("#reqPerson").value,
-          item: $("#reqItem").value,
-          date: new Date().toLocaleString('pl-PL').replace(',', ''),
-          status: "Nowe",
-          desc: $("#reqDesc").value
+          type: type,
+          person: person,
+          item: item,
+          date: nowStr,
+          status: "W toku",
+          orderId: orderId,
+          desc: desc,
+          messages: [
+            { sender: "client", text: `Opis zgłoszenia: ${desc}`, time: nowStr }
+          ]
         };
 
         DATA.unshift(newReq);
         saveData();
         render();
         
-        alert("Zgłoszenie zostało wysłane pomyślnie!");
+        alert("Zgłoszenie zostało wysłane pomyślnie! Zapraszamy do rozmowy z managerem na czacie w szczegółach zgłoszenia.");
         e.target.reset();
         close();
       });
@@ -518,16 +1228,56 @@
       // Automatically open and pre-fill "Nowe zgłoszenie" modal if query parameters are present
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("new") === "true") {
-        if (urlParams.get("person")) {
-          $("#reqPerson").value = urlParams.get("person");
-        }
-        if (urlParams.get("item")) {
-          $("#reqItem").value = urlParams.get("item");
-        }
+        populateOrderDropdown();
         const orderId = urlParams.get("order");
+        const person = urlParams.get("person");
+        const item = urlParams.get("item");
+
         if (orderId) {
-          $("#reqDesc").value = `Zgłoszenie dotyczy zamówienia ${orderId}.\n`;
+          bindOrderToggle.checked = true;
+          reqOrder.value = orderId;
+          
+          if (item) {
+            bindProductToggle.checked = true;
+            updateAutoFillValues();
+            
+            for (let i = 0; i < reqProductSelect.options.length; i++) {
+              if (reqProductSelect.options[i].getAttribute("data-name") === item) {
+                reqProductSelect.selectedIndex = i;
+                break;
+              }
+            }
+          } else {
+            bindProductToggle.checked = false;
+          }
+
+          if (person) {
+            bindPersonToggle.checked = true;
+          } else {
+            bindPersonToggle.checked = false;
+          }
+        } else {
+          bindOrderToggle.checked = false;
+          if (item) {
+            bindProductToggle.checked = true;
+            reqItem.value = item;
+          } else {
+            bindProductToggle.checked = false;
+          }
+          if (person) {
+            bindPersonToggle.checked = true;
+            reqPerson.value = person;
+          } else {
+            bindPersonToggle.checked = false;
+          }
         }
+        
+        const desc = urlParams.get("desc");
+        if (desc) {
+          $("#reqDesc").value = desc;
+        }
+        
+        handleTogglesChange();
         open(newModal);
       }
     })();
