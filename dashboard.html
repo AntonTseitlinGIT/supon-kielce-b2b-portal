@@ -153,19 +153,14 @@
     (function(){
       // Wait for app.js to initialize local data
       setTimeout(() => {
-        let orders = [];
-        let tickets = [];
-        let employees = [];
-        try {
-          orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
-          tickets = JSON.parse(localStorage.getItem('portal_requests')) || [];
-          employees = JSON.parse(localStorage.getItem('portal_employees')) || [];
-        } catch(e) {}
+        const orders = window.safeStorage.get('portal_orders', []);
+        const tickets = window.safeStorage.get('portal_requests', []);
+        const employees = window.safeStorage.get('portal_employees', []);
         
         // Count pending orders (status !== 'Zatwierdzone')
         const pendingOrders = orders.filter(o => o.status !== 'Zatwierdzone').length;
         document.getElementById('kpiOrdersCount').textContent = pendingOrders;
-        document.getElementById('kpiOrdersSub').textContent = `${orders.filter(o => o.status === 'Nowe').length} nowe / ${orders.filter(o => o.status === 'W realizacji').length} w toku`;
+        document.getElementById('kpiOrdersSub').textContent = `${orders.filter(o => o.status === 'W realizacji').length} w realizacji / ${orders.filter(o => o.status === 'Wysłane' || o.status === 'Częściowo wysłane').length} w drodze`;
         
         // Count active tickets (status !== 'Zakończone')
         const activeTickets = tickets.filter(t => t.status !== 'Zakończone').length;

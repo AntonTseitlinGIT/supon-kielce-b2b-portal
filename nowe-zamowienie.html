@@ -340,7 +340,6 @@
           <h2>Akcje</h2>
         </header>
         <div class="card-content" style="display:flex; gap:12px; flex-wrap:wrap;">
-          <button class="btn btn-secondary" type="button" id="btnSaveDraft">Zapisz szkic</button>
           <button class="btn" type="button" id="btnSubmitOrder">Wyślij zamówienie</button>
           <a class="btn btn-secondary" href="zamowienia.html" role="button">Anuluj</a>
         </div>
@@ -361,43 +360,46 @@
     <option value="Tomasz Lewandowski">Tomasz Lewandowski (NP-0045) — Spawacz (Produkcja)</option>
   </datalist>
 
+  <script src="mock-data.js"></script>
+  <script src="components.js"></script>
+  <script src="app.js"></script>
   <script>
     // PRODUCT CATALOG
     const PRODUCT_CATALOG = {
       "MOT-TRS-001": {
         name: "Spodnie Motion",
         code: "MOT-TRS-001",
-        photo: "https://images.unsplash.com/photo-1548883354-7622d3dfd5be?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/spodnie.png",
         sizes: ["S (164–172)", "M (172–180)", "L (180–188)", "XL (188–196)", "XXL (196+)"]
       },
       "FR-JKT-220": {
         name: "Kurtka FR (Trudnopalna)",
         code: "FR-JKT-220",
-        photo: "https://images.unsplash.com/photo-1520975922284-5f7f3e8b24f3?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/kurtka.png",
         sizes: ["S", "M", "L", "XL", "XXL"]
       },
       "HIV-BLS-110": {
         name: "Bluza Hi-Vis",
         code: "HIV-BLS-110",
-        photo: "https://images.unsplash.com/photo-1503342452485-86ff0a8d7292?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/bluza.png",
         sizes: ["S", "M", "L", "XL", "XXL"]
       },
       "BUT-002": {
         name: "Buty ochronne S3",
         code: "BUT-002",
-        photo: "https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/buty.png",
         sizes: ["39", "40", "41", "42", "43", "44", "45"]
       },
       "K-10": {
         name: "Kask ochronny BHP",
         code: "K-10",
-        photo: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/kask.png",
         sizes: ["Uniwersalny"]
       },
       "R-20": {
         name: "Rękawice robocze Grip",
         code: "R-20",
-        photo: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=800&auto=format&fit=crop",
+        photo: "foto/rekawice.png",
         sizes: ["8 (S)", "9 (M)", "10 (L)", "11 (XL)"]
       }
     };
@@ -410,7 +412,6 @@
     const btnAddItem = $("#btnAddItem");
     const btnClearItems = $("#btnClearItems");
     const btnSubmitOrder = $("#btnSubmitOrder");
-    const btnSaveDraft = $("#btnSaveDraft");
     const tableSearch = $("#tableSearch");
 
     // Address & parameters input listeners for calculations
@@ -666,11 +667,7 @@
     const editId = urlParams.get('edit');
 
     if (editId) {
-      let orders = [];
-      try {
-        orders = JSON.parse(localStorage.getItem("portal_orders")) || [];
-      } catch (e) {}
-
+      const orders = window.safeStorage.get("portal_orders", []);
       const orderToEdit = orders.find(o => o.id === editId);
       if (orderToEdit) {
         // Change headers to show edit mode
@@ -789,10 +786,7 @@
       const eta = getETAString(priority);
 
       // Save order
-      let orders = [];
-      try {
-        orders = JSON.parse(localStorage.getItem("portal_orders")) || [];
-      } catch (e) {}
+      const orders = window.safeStorage.get("portal_orders", []);
 
       let currentId = editId;
       let originalCreated = today;
@@ -813,7 +807,7 @@
       const newOrder = {
         id: currentId,
         created: originalCreated,
-        eta: status === "Szkic" ? "Do ustalenia" : eta,
+        eta: eta,
         addr: addrValue + (deptValue ? ' • ' + deptValue : ''),
         status: status,
         items: orderItems,
@@ -828,13 +822,13 @@
         orders.unshift(newOrder);
       }
 
-      localStorage.setItem("portal_orders", JSON.stringify(orders));
+      window.safeStorage.set("portal_orders", orders);
 
       // Show beautiful success Toast notification
       if (window.showToast) {
-        window.showToast(status === "Szkic" ? "Szkic został zapisany pomyślnie!" : "Zamówienie zostało pomyślnie wysłane!");
+        window.showToast("Zamówienie zostało pomyślnie wysłane!");
       } else {
-        alert(status === "Szkic" ? "Szkic został zapisany!" : "Zamówienie zostało wysłane!");
+        alert("Zamówienie zostało wysłane!");
       }
 
       // Redirect after animation delay
@@ -843,8 +837,7 @@
       }, 700);
     }
 
-    btnSubmitOrder.addEventListener("click", () => processOrderSave("Nowe"));
-    btnSaveDraft.addEventListener("click", () => processOrderSave("Szkic"));
+    btnSubmitOrder.addEventListener("click", () => processOrderSave("W realizacji"));
 
     // Image Lightbox Viewer
     function showImageLightbox(src, alt = "Zdjęcie produktu") {

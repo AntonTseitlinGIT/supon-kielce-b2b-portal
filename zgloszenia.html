@@ -377,16 +377,16 @@
 
         <div class="advanced-filters-panel" id="advPanel">
           <div class="form-group">
-            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data od</label>
-            <input class="input" type="date" id="f-od" style="display:block; width:100%; margin-top:4px;">
+            <label>Data od</label>
+            <input class="input" type="date" id="f-od">
           </div>
           <div class="form-group">
-            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Data do</label>
-            <input class="input" type="date" id="f-do" style="display:block; width:100%; margin-top:4px;">
+            <label>Data do</label>
+            <input class="input" type="date" id="f-do">
           </div>
           <div class="form-group">
-            <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted);">Kategoria</label>
-            <select class="input" id="f-cat" style="display:block; width:100%; margin-top:4px;">
+            <label>Kategoria</label>
+            <select class="input" id="f-cat">
               <option value="">Wszystkie</option>
               <option value="Reklamacja">Reklamacja</option>
               <option value="Wymiana towaru">Wymiana towaru</option>
@@ -581,106 +581,22 @@
     </div>
   </div>
 
+  <script src="mock-data.js"></script>
+  <script src="app.js"></script>
   <script>
     (function(){
       const $ = (s, r=document)=>r.querySelector(s);
       const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
 
       // NEW CATEGORIES: "Reklamacja", "Wymiana towaru", "Zapytanie ogólne"
-      const DEFAULT_DATA = [
-        {
-          id: "SRV-2025-0145",
-          type: "Reklamacja",
-          person: "Anna Nowak (004218)",
-          item: "Buty ochronne",
-          date: "19.08.2025 10:12",
-          status: "W toku",
-          orderId: "Z-2025-1052",
-          desc: "Po jednym dniu chodzenia pękła podeszwa w lewym bucie.",
-          messages: [
-            { sender: "client", text: "Dzień dobry, zgłaszam reklamację na buty ochronne z zamówienia Z-2025-1052 dla pracownika Anna Nowak. Po jednym dniu chodzenia pękła podeszwa w lewym bucie.", time: "19.08.2025 10:12" },
-            { sender: "manager", text: "Dzień dobry. Bardzo przepraszamy za tę niedogodność. Proszę o odesłanie wadliwej pary na nasz koszt lub podesłanie zdjęcia pęknięcia. Jeżeli wada jest ewidentna, od razu zlecimy wysyłkę nowej pary.", time: "19.08.2025 10:45" },
-            { sender: "client", text: "Wysłałem zdjęcie pęknięcia na Państwa maila biuro@supon.pl. Proszę o weryfikację.", time: "19.08.2025 11:00" },
-            { sender: "manager", text: "Dziękuję, zdjęcie zostało zweryfikowane przez dział reklamacji. Nowa para butów (rozmiar 42) zostanie wysłana do Państwa dzisiaj popołudniu kurierem DPD.", time: "19.08.2025 11:30" }
-          ]
-        },
-        {
-          id: "SRV-2025-0139",
-          type: "Wymiana towaru",
-          person: "Tomasz Lewandowski",
-          item: "Kombinezon BHP",
-          date: "18.08.2025 09:15",
-          status: "W toku",
-          orderId: "",
-          desc: "Rozmiar L okazał się za ciasny w klatce piersiowej, potrzebujemy XL.",
-          messages: [
-            { sender: "client", text: "Zgłaszam potrzebę wymiany kombinezonu BHP dla pracownika Tomasz Lewandowski. Rozmiar L okazał się za ciasny w klatce piersiowej, potrzebujemy XL. Czy jest możliwość wymiany bez wiązania do konkretnego zamówienia (zwrócimy stary przy odbiorze nowego)?", time: "18.08.2025 09:15" },
-            { sender: "manager", text: "Dzień dobry. Oczywiście, możemy dokonać wymiany w ten sposób. Proszę spakować za mały kombinezon i nakleić etykietę zwrotną, którą właśnie generuję. Nowy rozmiar XL wyślemy zaraz po otrzymaniu paczki zwrotnej.", time: "18.08.2025 09:40" },
-            { sender: "client", text: "Paczka zwrotna została nadana w paczkomacie. Dziękuję!", time: "18.08.2025 10:15" },
-            { sender: "manager", text: "Dziękuję za informację. Widzę paczkę w systemie kurierskim. Spakowaliśmy już kombinezon w rozmiarze XL, kurier DPD odbierze go dzisiaj.", time: "18.08.2025 12:00" }
-          ]
-        },
-        {
-          id: "SRV-2025-0132",
-          type: "Zapytanie ogólne",
-          person: "",
-          item: "",
-          date: "17.08.2025 14:00",
-          status: "Zakończone",
-          orderId: "",
-          desc: "Zapytanie o parametry rękawic zimowych EN 511.",
-          messages: [
-            { sender: "client", text: "Dzień dobry, czy posiadają Państwo w ofercie zimowe rękawice termiczne spełniające normę EN 511 o wysokiej odporności na ścieranie? Chcielibyśmy zamówić około 50 par na kolejny sezon.", time: "17.08.2025 14:00" },
-            { sender: "manager", text: "Dzień dobry. Tak, posiadamy w stałej ofercie model 'Supon IceGrip' (norma EN 511, klasy 2.2.X) oraz 'Tegera 295'. Przesłałem szczegółowe karty techniczne obu modeli na Państwa adres e-mail.", time: "17.08.2025 14:30" },
-            { sender: "client", text: "Dziękuję za odpowiedź. Karty techniczne są w porządku. Zdecydowaliśmy się na model IceGrip. Niedługo prześlemy oficjalne zamówienie.", time: "17.08.2025 15:00" },
-            { sender: "manager", text: "Cieszę się. W razie pytań zapraszam do kontaktu. Zamykam zgłoszenie.", time: "17.08.2025 15:30" }
-          ]
-        },
-        {
-          id: "SRV-2025-0121",
-          type: "Zapytanie ogólne",
-          person: "",
-          item: "",
-          date: "16.08.2025 11:20",
-          status: "Zakończone",
-          orderId: "Z-2025-1080",
-          desc: "Zapytanie o termin dostawy zamówienia Z-2025-1080.",
-          messages: [
-            { sender: "client", text: "Chciałbym zapytać, czy zamówienie Z-2025-1080 jest już spakowane i kiedy możemy spodziewać się wysyłki? Zależy nam na pilnej dostawie.", time: "16.08.2025 11:20" },
-            { sender: "manager", text: "Dzień dobry. Państwa zamówienie zostało już skompletowane i przekazane do działu wysyłek. Paczka wyjdzie dzisiaj kurierem DPD, dostawa powinna nastąpić jutro.", time: "16.08.2025 12:00" },
-            { sender: "client", text: "Doskonale, dziękuję bardzo za przyspieszenie sprawy!", time: "16.08.2025 12:30" },
-            { sender: "manager", text: "Nie ma problemu. Polecam się na przyszłość! Zamykam zgłoszenie.", time: "16.08.2025 13:00" }
-          ]
-        }
-      ];
-
-      // Versioned database loader to show the new rich chat histories and toggle structures
-      const STORAGE_KEY = 'portal_requests';
-      const VERSION_KEY = 'portal_requests_v5'; // V5 representing simplified status workflow (W toku, Zakończone, Wszystkie)
-      
-      let DATA;
-      if (!localStorage.getItem(VERSION_KEY)) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-        localStorage.setItem(VERSION_KEY, 'true');
-        DATA = DEFAULT_DATA;
-      } else {
-        DATA = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_DATA;
+      let DATA = window.safeStorage.get('portal_requests', []);
+      if (!Array.isArray(DATA)) {
+        DATA = [];
       }
-
-      // Normalize statuses (merge "Nowe" and "Do oceny" into "W toku")
-      let migrated = false;
-      DATA.forEach(r => {
-        if (r.status === "Nowe" || r.status === "Do oceny") {
-          r.status = "W toku";
-          migrated = true;
-        }
-      });
-      if (migrated) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA));
-      }
+      DATA = DATA.filter(r => r !== null && r !== undefined);
 
       function saveData() {
-        localStorage.setItem('portal_requests', JSON.stringify(DATA));
+        window.safeStorage.set('portal_requests', DATA);
       }
 
       let currentPage = 1;
@@ -910,10 +826,7 @@
             return;
           }
 
-          let orders = [];
-          try {
-            orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
-          } catch(e){}
+          const orders = window.safeStorage.get('portal_orders', []);
           
           const order = orders.find(o => o.id === orderId);
           if (order && order.items && order.items.length > 0) {
@@ -954,10 +867,7 @@
       }
 
       function populateOrderDropdown() {
-        let orders = [];
-        try {
-          orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
-        } catch(e){}
+        const orders = window.safeStorage.get('portal_orders', []);
         
         reqOrder.innerHTML = `
           <option value="">-- Wybierz zamówienie --</option>

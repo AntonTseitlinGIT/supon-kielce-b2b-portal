@@ -216,10 +216,8 @@
       let emp = null;
 
       function loadData() {
-        try {
-          employees = JSON.parse(localStorage.getItem('portal_employees')) || [];
-          orders = JSON.parse(localStorage.getItem('portal_orders')) || [];
-        } catch(e) {}
+        employees = window.safeStorage.get('portal_employees', []);
+        orders = window.safeStorage.get('portal_orders', []);
         
         emp = employees.find(e => e.id === id);
         if (!emp && employees.length > 0) {
@@ -229,7 +227,7 @@
       }
 
       function saveData() {
-        localStorage.setItem('portal_employees', JSON.stringify(employees));
+        window.safeStorage.set('portal_employees', employees);
       }
 
       function updateUI() {
@@ -370,7 +368,7 @@
             const index = employees.findIndex(e => e.id === emp.id);
             if (index !== -1) {
               employees.splice(index, 1);
-              localStorage.setItem('portal_employees', JSON.stringify(employees));
+              window.safeStorage.set('portal_employees', employees);
               if (window.showToast) {
                 window.showToast(`Pracownik ${emp.name} został usunięty.`);
               }

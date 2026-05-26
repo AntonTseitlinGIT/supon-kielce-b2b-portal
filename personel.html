@@ -203,12 +203,12 @@
 
             <div class="advanced-filters-panel" id="advPanel">
               <div class="form-group">
-                <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Numer pracownika</label>
-                <input class="input" type="text" id="filter-id" placeholder="np. NP-0021" style="display:block; width:100%; height: 38px;">
+                <label>Numer pracownika</label>
+                <input class="input" type="text" id="filter-id" placeholder="np. NP-0021">
               </div>
               <div class="form-group">
-                <label style="font-size: 11px; font-weight: 700; text-transform:uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Dział</label>
-                <select id="filter-dept" class="input" style="display:block; width:100%; height: 38px; padding: 0 10px;">
+                <label>Dział</label>
+                <select id="filter-dept" class="input" style="padding: 0 10px;">
                   <option value="Wszystkie">Wszystkie działy</option>
                   <option value="Produkcja">Produkcja</option>
                   <option value="Magazyn">Magazyn</option>
@@ -346,15 +346,11 @@
     let employees = [];
 
     function loadEmployees() {
-      try {
-        employees = JSON.parse(localStorage.getItem("portal_employees")) || [];
-      } catch(e) {
-        employees = [];
-      }
+      employees = window.safeStorage.get("portal_employees", []);
     }
 
     function saveEmployees() {
-      localStorage.setItem("portal_employees", JSON.stringify(employees));
+      window.safeStorage.set("portal_employees", employees);
     }
 
     function renderEmployees(dataToRender) {
@@ -470,13 +466,13 @@
         gridContainer.style.display = "none";
         tableContainer.style.display = "block";
       }
-      localStorage.setItem("portal_employees_view", view);
+      window.safeStorage.set("portal_employees_view", view);
     }
 
     if (cardsBtn && tableBtn) {
       cardsBtn.addEventListener("click", () => setView("cards"));
       tableBtn.addEventListener("click", () => setView("table"));
-      const savedView = localStorage.getItem("portal_employees_view") || "cards";
+      const savedView = window.safeStorage.get("portal_employees_view", "cards");
       setView(savedView);
     }
 

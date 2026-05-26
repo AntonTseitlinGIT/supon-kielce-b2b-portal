@@ -1,8 +1,32 @@
 
+window.safeStorage = {
+  get: (key, defaultVal = null) => {
+    try {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultVal;
+    } catch (e) {
+      console.error(`Błąd odczytu localStorage [${key}]:`, e);
+      return defaultVal;
+    }
+  },
+  set: (key, val) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      return true;
+    } catch (e) {
+      console.error(`Błąd zapisu localStorage [${key}]:`, e);
+      return false;
+    }
+  }
+};
+
 (function(){
   const root = document.documentElement;
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const saved = localStorage.getItem('supon-theme');
+  let saved = null;
+  try {
+    saved = localStorage.getItem('supon-theme');
+  } catch(e) {}
   if(saved){ root.setAttribute('data-theme', saved); }
   else if(prefersDark){ root.setAttribute('data-theme','dark'); }
 
@@ -12,74 +36,154 @@
     const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     const next = current === 'dark' ? 'light' : 'dark';
     root.setAttribute('data-theme', next);
-    localStorage.setItem('supon-theme', next);
+    try {
+      localStorage.setItem('supon-theme', next);
+    } catch(e) {}
   });
 
 
   // Initialize Database in localStorage
   function initDB() {
-    if (!localStorage.getItem('portal_employees') && window.DEFAULT_EMPLOYEES) {
-      localStorage.setItem('portal_employees', JSON.stringify(window.DEFAULT_EMPLOYEES));
-    } else if (localStorage.getItem('portal_employees')) {
-      try {
-        const emps = JSON.parse(localStorage.getItem('portal_employees'));
-        let modified = false;
-        emps.forEach(emp => {
-          if (emp.items) {
-            emp.items.forEach(it => {
-              if (it.lastOp && it.lastOp.includes('—')) {
-                it.lastOp = it.lastOp.split('—')[0].trim();
-                modified = true;
-              }
-            });
-          }
-        });
-        if (modified) {
-          localStorage.setItem('portal_employees', JSON.stringify(emps));
+    // 1. Employees
+    let emps = window.safeStorage.get('portal_employees');
+    if (!Array.isArray(emps)) {
+      window.safeStorage.set('portal_employees', window.DEFAULT_EMPLOYEES || []);
+      emps = window.DEFAULT_EMPLOYEES || [];
+    } else {
+      emps = emps.filter(emp => emp !== null && emp !== undefined);
+      let modified = false;
+      emps.forEach(emp => {
+        if (emp && emp.items) {
+          emp.items = emp.items.filter(it => it !== null && it !== undefined);
+          emp.items.forEach(it => {
+            if (it && it.lastOp && it.lastOp.includes('—')) {
+              it.lastOp = it.lastOp.split('—')[0].trim();
+              modified = true;
+            }
+          });
         }
-      } catch(e) {}
-    }
-    
-    let orders = null;
-    if (localStorage.getItem('portal_orders')) {
-      try {
-        orders = JSON.parse(localStorage.getItem('portal_orders'));
-      } catch(e) {}
-    }
-    
-    if (!orders && window.DEFAULT_ORDERS) {
-      localStorage.setItem('portal_orders', JSON.stringify(window.DEFAULT_ORDERS));
-    } else if (orders && window.DEFAULT_ORDERS) {
-      // Upgrade default orders if they exist in localStorage but are outdated
-      let updated = false;
-      orders = orders.map(o => {
-        const defaultVer = window.DEFAULT_ORDERS.find(d => d.id === o.id);
-        if (defaultVer) {
-          const storedDostawy = o.dostawy ? o.dostawy.length : 0;
-          const defaultDostawy = defaultVer.dostawy ? defaultVer.dostawy.length : 0;
-          
-          // Check if shipments array size, status, or contents changed, upgrade to get package info
-          if (storedDostawy !== defaultDostawy || 
-              (o.status !== defaultVer.status && o.status !== "Zatwierdzone") ||
-              (o.status === defaultVer.status && JSON.stringify(o.dostawy) !== JSON.stringify(defaultVer.dostawy))) {
-            updated = true;
-            return defaultVer;
-          }
-        }
-        return o;
       });
-      if (updated) {
-        localStorage.setItem('portal_orders', JSON.stringify(orders));
+      if (modified) {
+        window.safeStorage.set('portal_employees', emps);
       }
     }
     
+    // 2. Orders
+    let orders = window.safeStorage.get('portal_orders');
+    if (!Array.isArray(orders)) {
+      orders = window.DEFAULT_ORDERS || [];
+      window.safeStorage.set('portal_orders', orders);
+    } else {
+      let migrated = false;
+      const originalLength = orders.length;
+      orders = orders.filter(o => o !== null && o !== undefined && o.status !== "Szkic");
+      if (orders.length !== originalLength) migrated = true;
+      
+      orders.forEach(o => {
+        if (o && o.status === "Nowe") {
+          o.status = "W realizacji";
+          migrated = true;
+        }
+      });
+
+      // Merge in default orders that are not in local storage
+      if (window.DEFAULT_ORDERS) {
+        const storedIds = new Set(orders.map(o => o.id));
+        window.DEFAULT_ORDERS.forEach(d => {
+          if (d && d.id && !storedIds.has(d.id)) {
+            orders.push(d);
+            migrated = true;
+          }
+        });
+      }
+
+      // Upgrade default orders if they exist in localStorage but are outdated
+      if (window.DEFAULT_ORDERS) {
+        orders = orders.map(o => {
+          if (!o) return o;
+          const defaultVer = window.DEFAULT_ORDERS.find(d => d && d.id === o.id);
+          if (defaultVer) {
+            // Force local photo path synchronization if outdated
+            let photoUpdated = false;
+            if (o.items && defaultVer.items) {
+              o.items.forEach((it, idx) => {
+                const defaultItem = defaultVer.items[idx];
+                if (defaultItem && it.foto !== defaultItem.foto) {
+                  it.foto = defaultItem.foto;
+                  photoUpdated = true;
+                }
+              });
+            }
+            if (photoUpdated) migrated = true;
+
+            const storedDostawy = o.dostawy ? o.dostawy.length : 0;
+            const defaultDostawy = defaultVer.dostawy ? defaultVer.dostawy.length : 0;
+            
+            // Check if shipments array size, status, or contents changed, upgrade to get package info
+            if (storedDostawy !== defaultDostawy || 
+                (o.status !== defaultVer.status && o.status !== "Zatwierdzone") ||
+                (o.status === defaultVer.status && JSON.stringify(o.dostawy) !== JSON.stringify(defaultVer.dostawy))) {
+              migrated = true;
+              return defaultVer;
+            }
+          }
+          return o;
+        });
+      }
+
+      if (migrated) {
+        // Sort by ID descending so newly created orders (with higher numbers) are at the top
+        orders.sort((a, b) => b.id.localeCompare(a.id));
+        window.safeStorage.set('portal_orders', orders);
+      }
+    }
     
-    if (!localStorage.getItem('portal_requests') && window.DEFAULT_TICKETS) {
-      localStorage.setItem('portal_requests', JSON.stringify(window.DEFAULT_TICKETS));
+    // 3. Requests (Tickets)
+    const VERSION_KEY = 'portal_requests_v5';
+    let requests = window.safeStorage.get('portal_requests');
+    if (!window.safeStorage.get(VERSION_KEY) || !Array.isArray(requests)) {
+      requests = window.DEFAULT_TICKETS || [];
+      window.safeStorage.set('portal_requests', requests);
+      window.safeStorage.set(VERSION_KEY, 'true');
+    } else {
+      let migrated = false;
+      const originalLength = requests.length;
+      requests = requests.filter(r => r !== null && r !== undefined);
+      if (requests.length !== originalLength) migrated = true;
+
+      requests.forEach(r => {
+        if (r && (r.status === "Nowe" || r.status === "Do oceny")) {
+          r.status = "W toku";
+          migrated = true;
+        }
+      });
+
+      // Merge missing default tickets
+      if (window.DEFAULT_TICKETS) {
+        const storedIds = new Set(requests.map(r => r.id));
+        window.DEFAULT_TICKETS.forEach(d => {
+          if (d && d.id && !storedIds.has(d.id)) {
+            requests.push(d);
+            migrated = true;
+          }
+        });
+      }
+
+      if (migrated) {
+        window.safeStorage.set('portal_requests', requests);
+      }
     }
 
-    if (!localStorage.getItem('portal_wz') && window.DEFAULT_WZ) {
-      localStorage.setItem('portal_wz', JSON.stringify(window.DEFAULT_WZ));
+    // 4. WZ
+    let wz = window.safeStorage.get('portal_wz');
+    if (!Array.isArray(wz)) {
+      window.safeStorage.set('portal_wz', window.DEFAULT_WZ || []);
+    } else {
+      const originalLength = wz.length;
+      wz = wz.filter(w => w !== null && w !== undefined);
+      if (wz.length !== originalLength) {
+        window.safeStorage.set('portal_wz', wz);
+      }
     }
   }
   initDB();
@@ -147,7 +251,7 @@
   });
 
   // Demo: toast on forms with .form (for presentation)
-  document.querySelectorAll('form:not([id="form-add-employee"]):not([id="form-add-ticket"])').forEach(f=>{
+  document.querySelectorAll('form:not([id="form-add-employee"]):not([id="form-add-ticket"]):not([id="newRequestForm"]):not([id="loginForm"])').forEach(f=>{
     f.addEventListener('submit', (e)=>{
       e.preventDefault();
       showToast('Zapisano (demo).');
@@ -161,107 +265,6 @@
   }
 })();
 
-// ===== Zamówienia: modal szczegółów =====
-(function(){
-  const table = document.querySelector('#orders-table');
-  if(!table) return;
-
-  const modal = document.getElementById('order-modal');
-  const backdrop = document.getElementById('modal-backdrop');
-  const itemsBox = document.getElementById('order-items');
-  const metaBox = document.getElementById('order-meta');
-  const title = document.getElementById('order-title');
-
-  function openModal(){
-    modal.classList.add('open');
-    backdrop.classList.add('open');
-  }
-  function closeModal(){
-    modal.classList.remove('open');
-    backdrop.classList.remove('open');
-  }
-
-  modal.addEventListener('click', (e)=>{
-    if(e.target.matches('[data-close]')) closeModal();
-  });
-  backdrop.addEventListener('click', closeModal);
-  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
-
-  table.addEventListener('click', (e)=>{
-    const tr = e.target.closest('tr[data-order]');
-    if(!tr) return;
-
-    // parse payload
-    let payload = {};
-    try{ payload = JSON.parse(tr.getAttribute('data-order')); }catch(_){}
-
-    // tytuł + meta
-    title.textContent = `Zamówienie ${payload.id || ''}`;
-    metaBox.innerHTML = `
-      <span>Status: <b>${payload.status || '—'}</b></span>
-      <span>Utworzono: <b>${payload.created || '—'}</b></span>
-      <span>Adres dostawy: <b>${payload.addr || '—'}</b></span>
-      <span>ETA: <b>${payload.eta || '—'}</b></span>
-    `;
-
-    // pozycje
-    itemsBox.innerHTML = (payload.items || []).map(it => {
-      const total = it.ilosc || 1;
-      let delivered = it.ilosc_dostarczona !== undefined ? it.ilosc_dostarczona : (payload.status === "Dostarczone" || payload.status === "Zatwierdzone" ? total : 0);
-      let shipped = it.ilosc_wyslana !== undefined ? it.ilosc_wyslana : (payload.status === "Wysłane" ? total : 0);
-      let itemStatus = it.status || (delivered >= total ? "Dostarczone" : (shipped >= total ? "W drodze" : payload.status));
-
-      let statusBadge = `<span class="badge" style="padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; `;
-      if (itemStatus === "Dostarczone" || itemStatus === "Zatwierdzone") {
-        statusBadge += `background: color-mix(in oklab, var(--ok) 15%, transparent); color: var(--ok);`;
-      } else if (itemStatus === "W drodze" || itemStatus === "Wysłane") {
-        statusBadge += `background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent);`;
-      } else if (itemStatus === "Częściowo wysłane") {
-        statusBadge += `background: color-mix(in oklab, #b45309 15%, transparent); color: #b45309;`;
-      } else {
-        statusBadge += `background: var(--line); color: var(--muted);`;
-      }
-      statusBadge += `">${itemStatus}</span>`;
-
-      return `
-        <tr>
-          <td><img class="item-photo" src="${it.foto}" alt="" width="50"></td>
-          <td><b>${it.produkt}</b></td>
-          <td>${it.nr}</td>
-          <td>${it.rozmiar}</td>
-          <td>${total} szt.</td>
-          <td>${delivered} szt.</td>
-          <td>${shipped} szt.</td>
-          <td>${statusBadge}</td>
-          <td>${it.osoba}</td>
-        </tr>
-      `;
-    }).join('');
-
-    const shipmentsSec = document.getElementById('shipments-section');
-    const shipmentsBody = document.getElementById('order-shipments');
-    if (shipmentsSec && shipmentsBody) {
-      if (payload.dostawy && payload.dostawy.length > 0) {
-        shipmentsSec.style.display = 'block';
-        shipmentsBody.innerHTML = payload.dostawy.map(d => `
-          <tr>
-            <td><strong>${d.id_wysylki}</strong></td>
-            <td>${d.data_wysylki}</td>
-            <td>${d.kurier}</td>
-            <td><a href="#" style="color: var(--accent); font-weight: 600;" onclick="event.preventDefault(); alert('Śledzenie przesyłki: ${d.nr_listu}')">${d.nr_listu}</a></td>
-            <td><span class="muted">${d.pozycje.map(it => `${it.produkt} (${it.ilosc} szt.)`).join(", ")}</span></td>
-            <td><span style="font-weight: 700; color: ${d.status === 'Dostarczona' ? 'var(--ok)' : 'var(--accent)'}">${d.status}</span></td>
-          </tr>
-        `).join('');
-      } else {
-        shipmentsSec.style.display = 'none';
-        shipmentsBody.innerHTML = '';
-      }
-    }
-
-    openModal();
-  });
-})();
 
 // ===== MODAL (open/close) =====
 document.addEventListener('click', (e) => {
