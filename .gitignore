@@ -5,6 +5,9 @@ node_modules/
 dist/
 build/
 
+# Graphify knowledge graph outputs
+graphify-out/
+
 # Operating system files
 .DS_Store
 Thumbs.db
