@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageCircle } from "lucide-react";
+import Pagination from "@/components/Pagination";
 import { formatTicketStatus, formatTicketType, formatShortDate } from "@/utils/format";
 import AdminTicketFilters from "./AdminTicketFilters";
 import ClickableRow from "./ClickableRow";
@@ -172,41 +173,14 @@ export default async function AdminTicketsPage(props: PageProps) {
               </table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="pagination">
-                <div>
-                  Pokazano <strong>{skip + 1}</strong>–<strong>{Math.min(skip + limit, totalTickets)}</strong> z <strong>{totalTickets}</strong> zgłoszeń
-                </div>
-                <div className="pagination-controls">
-                  <Link
-                    href={getPageUrl(page - 1)}
-                    className="page-btn"
-                    style={{ pointerEvents: page <= 1 ? "none" : "auto", opacity: page <= 1 ? 0.4 : 1 }}
-                  >
-                    <ChevronLeft size={16} />
-                  </Link>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <Link
-                      key={p}
-                      href={getPageUrl(p)}
-                      className={`page-btn ${p === page ? "active" : ""}`}
-                    >
-                      {p}
-                    </Link>
-                  ))}
-
-                  <Link
-                    href={getPageUrl(page + 1)}
-                    className="page-btn"
-                    style={{ pointerEvents: page >= totalPages ? "none" : "auto", opacity: page >= totalPages ? 0.4 : 1 }}
-                  >
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
-              </div>
-            )}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={totalTickets}
+              pageSize={limit}
+              getPageUrl={getPageUrl}
+              itemLabel="zgłoszeń"
+            />
           </>
         )}
       </div>

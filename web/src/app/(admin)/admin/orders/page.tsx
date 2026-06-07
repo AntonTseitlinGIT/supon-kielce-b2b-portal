@@ -2,10 +2,11 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { formatOrderStatus, formatPriority, formatShortDate } from "@/utils/format";
 import AdminOrderFilters from "./AdminOrderFilters";
 import AdminOrdersList from "./AdminOrdersList";
+import Pagination from "@/components/Pagination";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -181,41 +182,14 @@ export default async function AdminOrdersPage(props: PageProps) {
           <>
             <AdminOrdersList orders={orders as any} />
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="pagination">
-                <div>
-                  Pokazano <strong>{skip + 1}</strong>–<strong>{Math.min(skip + limit, totalOrders)}</strong> z <strong>{totalOrders}</strong> zamówień
-                </div>
-                <div className="pagination-controls">
-                  <Link
-                    href={getPageUrl(page - 1)}
-                    className="page-btn"
-                    style={{ pointerEvents: page <= 1 ? "none" : "auto", opacity: page <= 1 ? 0.4 : 1 }}
-                  >
-                    <ChevronLeft size={16} />
-                  </Link>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <Link
-                      key={p}
-                      href={getPageUrl(p)}
-                      className={`page-btn ${p === page ? "active" : ""}`}
-                    >
-                      {p}
-                    </Link>
-                  ))}
-
-                  <Link
-                    href={getPageUrl(page + 1)}
-                    className="page-btn"
-                    style={{ pointerEvents: page >= totalPages ? "none" : "auto", opacity: page >= totalPages ? 0.4 : 1 }}
-                  >
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
-              </div>
-            )}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={totalOrders}
+              pageSize={limit}
+              getPageUrl={getPageUrl}
+              itemLabel="zamówień"
+            />
           </>
         )}
       </div>

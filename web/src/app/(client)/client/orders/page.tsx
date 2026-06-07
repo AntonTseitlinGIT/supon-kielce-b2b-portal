@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import OrderFilters from "./OrderFilters";
 import OrdersListClient from "./OrdersListClient";
+import Pagination from "@/components/Pagination";
 import { OrderStatus } from "@prisma/client";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -193,69 +194,14 @@ export default async function ClientOrdersPage(props: PageProps) {
           <>
             <OrdersListClient orders={orders as any} />
 
-            {/* Pagination */}
-            <div className="pagination" style={{ padding: "20px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
-              <div style={{ fontSize: "14px", color: "var(--muted)" }}>
-                Pokazano <strong>{skip + 1}</strong>–<strong>{Math.min(skip + limit, totalOrders)}</strong> z <strong>{totalOrders}</strong> zamówień
-              </div>
-              <div className="pagination-controls" style={{ display: "flex", gap: "6px" }}>
-                <Link
-                  href={getPageUrl(page - 1)}
-                  className="page-btn"
-                  style={{ 
-                    pointerEvents: page <= 1 ? "none" : "auto", 
-                    opacity: page <= 1 ? 0.4 : 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--line)"
-                  }}
-                >
-                  <ChevronLeft size={16} />
-                </Link>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Link
-                    key={p}
-                    href={getPageUrl(p)}
-                    className={`page-btn ${p === page ? "active" : ""}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "8px",
-                      border: "1px solid var(--line)",
-                      fontWeight: 600
-                    }}
-                  >
-                    {p}
-                  </Link>
-                ))}
-
-                <Link
-                  href={getPageUrl(page + 1)}
-                  className="page-btn"
-                  style={{ 
-                    pointerEvents: page >= totalPages ? "none" : "auto", 
-                    opacity: page >= totalPages ? 0.4 : 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--line)"
-                  }}
-                >
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              totalItems={totalOrders}
+              pageSize={limit}
+              getPageUrl={getPageUrl}
+              itemLabel="zamówień"
+            />
           </>
         )}
       </div>
