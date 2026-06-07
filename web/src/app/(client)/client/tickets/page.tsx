@@ -1,0 +1,245 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
+import Link from "next/link";
+import { MessageCircle, Plus, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { formatTicketStatus, formatTicketType, formatShortDate } from "@/utils/format";
+import TicketsFilterWrapper from "./TicketsFilterWrapper";
+import ClickableRow from "./ClickableRow";
+
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+interface PageProps {
+  searchParams: SearchParams;
+}
+
+export default async function ClientTicketsPage(props: PageProps) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const searchParams = await props.searchParams;
+
+  const search = (searchParams.search as string) || "";
+  const status = (searchParams.status as string) || "";
+  const type = (searchParams.type as string) || "";
+  const branchIdParam = (searchParams.branchId as string) || "";
+  const page = parseInt((searchParams.page as string) || "1", 10);
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const { role, clientId, branchId } = session.user;
+
+  // 1. Where filters
+  const where: any = {
+    clientId: clientId!,
+  };
+
+  if (role === "BRANCH_HEAD") {
+    where.branchId = branchId!;
+  } else if (branchIdParam) {
+    where.branchId = branchIdParam;
+  }
+
+  if (status) {
+    if (status === "OPEN") {
+      where.status = { in: ["NEW", "IN_PROGRESS", "RESOLVED"] };
+    } else {
+      where.status = status;
+    }
+  }
+
+  if (type) {
+    where.type = type;
+  }
+
+  if (search) {
+    where.OR = [
+      { ticketNr: { contains: search, mode: "insensitive" } },
+      { employeeName: { contains: search, mode: "insensitive" } },
+      { itemName: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // 2. Query DB
+  const [tickets, totalTickets, branches] = await Promise.all([
+    prisma.ticket.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      include: {
+        branch: { select: { name: true } },
+        order: { select: { orderNr: true } },
+      },
+    }),
+    prisma.ticket.count({ where }),
+    role === "CLIENT_HEAD"
+      ? prisma.branch.findMany({
+          where: { clientId: clientId!, isActive: true },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const totalPages = Math.ceil(totalTickets / limit) || 1;
+
+  // Pagination URL Generator
+  const getPageUrl = (pageNumber: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (status) params.set("status", status);
+    if (type) params.set("type", type);
+    if (branchIdParam) params.set("branchId", branchIdParam);
+    params.set("page", pageNumber.toString());
+    return `?${params.toString()}`;
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+      {/* Page Header */}
+      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
+        <div>
+          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
+            Zgłoszenia i Reklamacje
+          </h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+            Zgłaszaj uszkodzenia, reklamacje, chęć wymiany odzieży lub kontaktuj się z menedżerem SUPON
+          </p>
+        </div>
+        <div className="page-header-actions">
+          <Link href="/client/tickets/new" className="btn btn-primary">
+            <Plus size={16} /> Nowe zgłoszenie
+          </Link>
+        </div>
+      </div>
+
+      {/* Client tickets filter component with state handlers */}
+      <TicketsFilterWrapper 
+        search={search}
+        status={status}
+        type={type}
+        branchIdParam={branchIdParam}
+        branches={branches}
+        role={role}
+      />
+
+      {/* List Card */}
+      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        {tickets.length === 0 ? (
+          <div className="empty-state">
+            <MessageCircle />
+            <h3>Brak zgłoszeń</h3>
+            <p>Nie odnaleziono zgłoszeń spełniających wybrane kryteria.</p>
+          </div>
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Numer</th>
+                    <th>Typ zgłoszenia</th>
+                    {role === "CLIENT_HEAD" && <th>Oddział</th>}
+                    <th>Zamówienie powiązane</th>
+                    <th>Pracownik / Towar</th>
+                    <th>Data utworzenia</th>
+                    <th>Ostatnia zmiana</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tickets.map((ticket) => {
+                    const statusInfo = formatTicketStatus(ticket.status);
+                    const typeLabel = formatTicketType(ticket.type);
+                    const details = ticket.employeeName 
+                      ? `${ticket.employeeName}${ticket.itemName ? ` (${ticket.itemName})` : ""}`
+                      : ticket.itemName || "—";
+
+                    return (
+                      <ClickableRow key={ticket.id} id={ticket.id}>
+                        <td style={{ fontWeight: 600, color: "var(--accent)" }}>
+                          {ticket.ticketNr}
+                        </td>
+                        <td style={{ fontWeight: 600 }}>
+                          {typeLabel}
+                        </td>
+                        {role === "CLIENT_HEAD" && (
+                          <td style={{ color: "var(--text-secondary)" }}>
+                            {ticket.branch.name}
+                          </td>
+                        )}
+                        <td>
+                          {ticket.order ? (
+                            <Link href={`/client/orders/${ticket.orderId}`} style={{ textDecoration: "underline", color: "var(--text-secondary)" }}>
+                              {ticket.order.orderNr}
+                            </Link>
+                          ) : (
+                            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>brak</span>
+                          )}
+                        </td>
+                        <td style={{ color: "var(--text-secondary)" }} title={details}>
+                          {details}
+                        </td>
+                        <td style={{ color: "var(--text-secondary)" }}>
+                          {formatShortDate(ticket.createdAt)}
+                        </td>
+                        <td style={{ color: "var(--text-secondary)" }}>
+                          {formatShortDate(ticket.updatedAt)}
+                        </td>
+                        <td>
+                          <span className={`badge ${statusInfo.className}`}>
+                            {statusInfo.label}
+                          </span>
+                        </td>
+                      </ClickableRow>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <div>
+                  Pokazano <strong>{skip + 1}</strong>–<strong>{Math.min(skip + limit, totalTickets)}</strong> z <strong>{totalTickets}</strong> zgłoszeń
+                </div>
+                <div className="pagination-controls">
+                  <Link
+                    href={getPageUrl(page - 1)}
+                    className="page-btn"
+                    style={{ pointerEvents: page <= 1 ? "none" : "auto", opacity: page <= 1 ? 0.4 : 1 }}
+                  >
+                    <ChevronLeft size={16} />
+                  </Link>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <Link
+                      key={p}
+                      href={getPageUrl(p)}
+                      className={`page-btn ${p === page ? "active" : ""}`}
+                    >
+                      {p}
+                    </Link>
+                  ))}
+
+                  <Link
+                    href={getPageUrl(page + 1)}
+                    className="page-btn"
+                    style={{ pointerEvents: page >= totalPages ? "none" : "auto", opacity: page >= totalPages ? 0.4 : 1 }}
+                  >
+                    <ChevronRight size={16} />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

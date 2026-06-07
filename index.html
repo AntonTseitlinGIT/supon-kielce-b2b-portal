@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUPON Kielce — Logowanie</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top right, color-mix(in oklab, var(--accent) 12%, transparent), transparent 40%), var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+      overflow: hidden;
+    }
+    
+    .login-container {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: appear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes appear {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login {
+      width: min(920px, 92vw);
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.1);
+    }
+
+    :root[data-theme="dark"] .login {
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .login-left { 
+      padding: clamp(32px, 5vw, 50px); 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .login-left h2 { 
+      margin: 0 0 8px; 
+      font-family: var(--font-heading);
+      font-size: clamp(24px, 3vw, 32px); 
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    
+    .login-left p { margin: 0 0 32px; color: var(--muted); font-size: 15px; }
+    
+    .f { display: grid; gap: 20px; }
+    .f label { font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 4px; display: block; }
+    
+    .input-group {
+      position: relative;
+    }
+
+    .f input {
+      width: 100%;
+      height: 48px; 
+      border: 1px solid var(--line); 
+      border-radius: 12px;
+      padding: 0 16px; 
+      font-size: 16px; 
+      outline: none; 
+      background: var(--page-bg);
+      transition: all 0.2s ease;
+      color: var(--text);
+    }
+    
+    .f input:focus { 
+      border-color: var(--accent); 
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 12%, transparent);
+      transform: translateY(-1px);
+    }
+    
+    .btn-login {
+      height: 52px; 
+      border: 0; 
+      border-radius: 12px; 
+      font-weight: 700;
+      font-size: 16px;
+      background: var(--accent); 
+      color: #fff; 
+      cursor: pointer; 
+      margin-top: 10px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 20px color-mix(in oklab, var(--accent) 30%, transparent);
+    }
+    
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px color-mix(in oklab, var(--accent) 40%, transparent);
+      filter: brightness(1.1);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .alt { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-top: 15px; 
+      font-size: 12px; 
+      color: var(--muted); 
+    }
+    
+    .alt span { display: flex; align-items: center; gap: 6px; }
+    .alt input[type="checkbox"] { width: 14px; height: 14px; margin: 0; cursor: pointer; }
+    .alt a { text-decoration: none; color: var(--accent); font-weight: 600; }
+    .alt a:hover { text-decoration: underline; }
+
+    .login-right {
+      background: radial-gradient(circle at center, color-mix(in oklab, var(--nav-bg) 90%, #fff) 0%, var(--nav-bg) 100%);
+      color: var(--nav-text);
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center;
+      gap: 24px;
+      padding: clamp(32px, 5vw, 50px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-right::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .brand-tile { 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      gap: 20px; 
+      text-align: center;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.07);
+      padding: 40px;
+      border-radius: 32px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .brand-tile img { 
+      width: 130px; 
+      height: 130px; 
+      object-fit: contain; 
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+    }
+
+    .brand-tile .name { font-family: var(--font-heading); font-size: 26px; font-weight: 900; letter-spacing: 1.5px; margin-top: 8px; }
+    .tag { opacity: 0.8; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; }
+    
+    .role-badge {
+      background: rgba(255,255,255,0.1);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border: 1px solid rgba(255,255,255,0.1);
+      z-index: 1;
+      font-family: var(--font);
+    }
+
+    @media (max-width: 760px) {
+      .login { grid-template-columns: 1fr; }
+      .login-right { order: -1; padding: 40px 20px; }
+      .brand-tile img { width: 90px; height: 90px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <main class="login" aria-label="Ekran logowania">
+      <section class="login-left" aria-label="Formularz logowania">
+        <h2>Panel Klienta</h2>
+        <p>Zaloguj się, aby zarządzać swoimi zamówieniami</p>
+        <form class="f" id="loginForm">
+          <div class="input-group">
+            <label for="u">Nazwa użytkownika</label>
+            <input id="u" name="username" type="text" autocomplete="username" placeholder="j.kowalski" required>
+          </div>
+          <div class="input-group">
+            <label for="p">Hasło</label>
+            <input id="p" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <button class="btn-login" type="submit" id="loginBtn">Zaloguj się</button>
+          <div class="alt">
+            <span>
+              <input id="remember" type="checkbox" checked> 
+              <label for="remember" style="display:inline; font-weight: normal;">Zapamiętaj mnie</label>
+            </span>
+            <a href="#">Zapomniałeś hasła?</a>
+          </div>
+        </form>
+      </section>
+      <aside class="login-right" aria-label="Informacje o platformie">
+        <div class="brand-tile">
+          <img src="logo.png" alt="Logo SUPON">
+          <div>
+            <div class="name">SUPON KIELCE</div>
+            <div class="tag">Platforma Obsługi Klienta</div>
+          </div>
+        </div>
+        <div class="role-badge">PORTAL KLIENTA</div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.innerText = 'Logowanie...';
+      btn.style.opacity = '0.7';
+      btn.disabled = true;
+
+      // Simulate a small delay for premium feel
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 800);
+    });
+  </script>
+</body>
+</html>

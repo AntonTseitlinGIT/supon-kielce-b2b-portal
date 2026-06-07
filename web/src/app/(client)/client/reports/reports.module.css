@@ -1,0 +1,137 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.kpisGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.kpiCard {
+  background: var(--page-bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}
+
+.kpiTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.kpiValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  font-family: var(--font-heading);
+}
+
+.kpiFooter {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 960px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartCard {
+  background: var(--page-bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chartTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  color: var(--text);
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.exportButtons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btnExport {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnExportExcel {
+  background: #107c41;
+  color: #ffffff;
+  border: none;
+}
+
+.btnExportExcel:hover {
+  background: #0b592e;
+  transform: translateY(-1px);
+}
+
+.btnExportPdf {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+}
+
+.btnExportPdf:hover {
+  background: #991b1b;
+  transform: translateY(-1px);
+}
+
+.btnExportDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.tableSection {
+  background: var(--page-bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}

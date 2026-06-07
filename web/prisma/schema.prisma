@@ -1,0 +1,459 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===== ENUMS =====
+
+enum Role {
+  BRANCH_HEAD
+  CLIENT_HEAD
+  SUPON_MANAGER
+  SUPON_ADMIN
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum OrderStatus {
+  IN_PROGRESS
+  SENT
+  PARTIALLY_SENT
+  DELIVERED
+  APPROVED
+  CANCELLED
+  DRAFT
+}
+
+enum Priority {
+  STANDARD
+  HIGH
+  CRITICAL
+}
+
+enum TicketType {
+  COMPLAINT
+  EXCHANGE
+  GENERAL
+}
+
+enum TicketStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum WzStatus {
+  IN_TRANSIT
+  RECEIVED
+}
+
+enum DeliveryStatus {
+  IN_TRANSIT
+  DELIVERED
+}
+
+enum OrderType {
+  STANDARD
+  EXCHANGE
+  COMPLAINT
+}
+
+// ===== ORGANISATIONS =====
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  nip       String   @unique
+  address   String?
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches       Branch[]
+  users          User[]
+  orders         Order[]
+  tickets        Ticket[]
+  clientProducts ClientProduct[]
+  ppeLimits      PpeLimit[]
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  clientId  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client            Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  users             User[]
+  employees         Employee[]
+  orders            Order[]
+  tickets           Ticket[]
+  deliveryAddresses DeliveryAddress[]
+}
+
+model DeliveryAddress {
+  id        String   @id @default(cuid())
+  branchId  String
+  address   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+}
+
+
+// ===== USERS =====
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  clientId String?
+  branchId String?
+
+  client          Client?         @relation(fields: [clientId], references: [id])
+  branch          Branch?         @relation(fields: [branchId], references: [id])
+  assignedTickets Ticket[]        @relation("AssignedManager")
+  sentMessages    TicketMessage[]
+  internalNotes   InternalNote[]
+  createdOrders   Order[]         @relation("OrderCreator")
+  createdWzDocs   WzDocument[]    @relation("WzCreator")
+}
+
+// ===== EMPLOYEES =====
+
+model Employee {
+  id           String         @id @default(cuid())
+  employeeNr   String // "NP-0001"
+  name         String
+  jobTitle     String
+  branchId     String
+  address      String?
+  sizes        Json // { height, chest, waist, shoes, clothing }
+  status       EmployeeStatus @default(ACTIVE)
+  rfid         Boolean        @default(false)
+  ppeCompliant Boolean        @default(false)
+  photoUrl     String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  branch        Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  issuedItems   IssuedItem[]
+  history       EmployeeHistory[]
+  ppeLimitUsage PpeLimitUsage[]
+  orderItemsFor OrderItem[]       @relation("ItemEmployee")
+  tickets       Ticket[]
+
+  @@unique([employeeNr, branchId])
+}
+
+model IssuedItem {
+  id         String   @id @default(cuid())
+  employeeId String
+  productId  String
+  articleNr  String
+  name       String
+  size       String
+  issuedAt   DateTime @default(now())
+  rfidChip   String?
+  status     String   @default("Wydane")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+model EmployeeHistory {
+  id          String   @id @default(cuid())
+  employeeId  String
+  description String
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+// ===== PPE LIMITS =====
+
+model PpeCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique // "Obuwie", "Odzież ochronna"
+  description String?
+  createdAt   DateTime @default(now())
+
+  products  Product[]
+  ppeLimits PpeLimit[]
+}
+
+model PpeLimit {
+  id             String   @id @default(cuid())
+  clientId       String
+  categoryId     String
+  limitPerPeriod Int // e.g. 1 pair of shoes
+  periodMonths   Int // per N months
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  client   Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  category PpeCategory     @relation(fields: [categoryId], references: [id])
+  usages   PpeLimitUsage[]
+
+  @@unique([clientId, categoryId])
+}
+
+model PpeLimitUsage {
+  id          String   @id @default(cuid())
+  employeeId  String
+  ppeLimitId  String
+  usedQty     Int      @default(0)
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  ppeLimit PpeLimit @relation(fields: [ppeLimitId], references: [id], onDelete: Cascade)
+}
+
+// ===== PRODUCT CATALOG =====
+
+model Product {
+  id             String   @id @default(cuid())
+  articleNr      String   @unique
+  name           String
+  categoryId     String
+  description    String?
+  photoUrls      String[]
+  availableSizes String[]
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category       PpeCategory     @relation(fields: [categoryId], references: [id])
+  clientProducts ClientProduct[]
+  issuedItems    IssuedItem[]
+  orderItems     OrderItem[]
+  tickets        Ticket[]
+}
+
+// Client-specific assortment (M2M)
+model ClientProduct {
+  clientId    String
+  productId   String
+  customPrice Decimal? @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  addedAt     DateTime @default(now())
+
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, productId])
+}
+
+// ===== ORDERS =====
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNr     String      @unique // "Z-2025-1195"
+  clientId    String
+  branchId    String
+  status      OrderStatus @default(IN_PROGRESS)
+  priority    Priority    @default(STANDARD)
+  eta         DateTime?
+  address     String
+  department  String?
+  clientRef   String?
+  comments    String?
+  isBulk      Boolean     @default(false)
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  client      Client       @relation(fields: [clientId], references: [id])
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  createdBy   User         @relation("OrderCreator", fields: [createdById], references: [id])
+  items       OrderItem[]
+  deliveries  Delivery[]
+  wzDocuments WzDocument[]
+  ticketId    String?
+  ticket      Ticket?      @relation("GeneratedOrders", fields: [ticketId], references: [id])
+  orderType   OrderType    @default(STANDARD)
+  tickets     Ticket[]     @relation("OrderTickets")
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String
+  articleNr    String
+  productName  String
+  size         String
+  quantity     Int
+  qtyDelivered Int     @default(0)
+  qtySent      Int     @default(0)
+  status       String?
+  employeeId   String?
+  employeeName String?
+  remarks      String?
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product   @relation(fields: [productId], references: [id])
+  employee Employee? @relation("ItemEmployee", fields: [employeeId], references: [id])
+}
+
+model Delivery {
+  id         String         @id @default(cuid())
+  deliveryNr String         @unique // "DEL-99401"
+  orderId    String
+  shippedAt  DateTime
+  carrier    String
+  trackingNr String
+  status     DeliveryStatus @default(IN_TRANSIT)
+  createdAt  DateTime       @default(now())
+
+  order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  items      DeliveryItem[]
+  wzDocument WzDocument?
+}
+
+model DeliveryItem {
+  id          String @id @default(cuid())
+  deliveryId  String
+  articleNr   String
+  productName String
+  quantity    Int
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+}
+
+// ===== WZ DOCUMENTS =====
+
+model WzDocument {
+  id          String   @id @default(cuid())
+  wzNr        String   @unique // "WZ-2025-08-044"
+  date        DateTime
+  orderId     String
+  deliveryId  String?  @unique
+  clientId    String
+  branchId    String
+  recipient   String
+  carrier     String
+  trackingNr  String
+  status      WzStatus @default(IN_TRANSIT)
+  pdfUrl      String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  order     Order     @relation(fields: [orderId], references: [id])
+  delivery  Delivery? @relation(fields: [deliveryId], references: [id])
+  createdBy User      @relation("WzCreator", fields: [createdById], references: [id])
+  items     WzItem[]
+}
+
+model WzItem {
+  id        String @id @default(cuid())
+  wzDocId   String
+  articleNr String
+  name      String
+  size      String
+  qty       Int
+
+  wzDoc WzDocument @relation(fields: [wzDocId], references: [id], onDelete: Cascade)
+}
+
+// ===== TICKETS =====
+
+model Ticket {
+  id           String       @id @default(cuid())
+  ticketNr     String       @unique // "SRV-2025-0145"
+  type         TicketType
+  status       TicketStatus @default(NEW)
+  clientId     String
+  branchId     String
+  orderId      String?
+  employeeName String?
+  itemName     String?
+  assignedToId String?
+  createdById  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  client        Client          @relation(fields: [clientId], references: [id])
+  branch        Branch          @relation(fields: [branchId], references: [id])
+  order         Order?          @relation("OrderTickets", fields: [orderId], references: [id])
+  assignedTo    User?           @relation("AssignedManager", fields: [assignedToId], references: [id])
+  messages      TicketMessage[]
+  internalNotes InternalNote[]
+  orders        Order[]         @relation("GeneratedOrders")
+  productId     String?
+  product       Product?        @relation(fields: [productId], references: [id])
+  size          String?
+  newSize       String?
+  employeeId    String?
+  employee      Employee?       @relation(fields: [employeeId], references: [id])
+}
+
+model TicketMessage {
+  id          String   @id @default(cuid())
+  ticketId    String
+  senderId    String
+  text        String?
+  fileUrl     String?
+  fileName    String?
+  isFromSupon Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User   @relation(fields: [senderId], references: [id])
+}
+
+model InternalNote {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  text      String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+}
+
+// ===== SYSTEM =====
+
+model FeatureFlag {
+  key         String  @id
+  isEnabled   Boolean @default(false)
+  description String?
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

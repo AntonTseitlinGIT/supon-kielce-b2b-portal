@@ -19,6 +19,13 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# AI agent / IDE assistant files
+.agent/
+.claude/
+.codebuddy/
+.codex/
+.cursor/
+
 # Editor configurations
 .idea/
 .vscode/
