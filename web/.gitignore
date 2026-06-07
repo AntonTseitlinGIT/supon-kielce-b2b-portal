@@ -45,6 +45,7 @@ next-env.d.ts
 # AI agent / IDE assistant directories
 .agent/
 .claude/
+.github/prompts/
 .codebuddy/
 .codex/
 .continue/
