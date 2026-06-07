@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { FileText, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 import { formatShortDate } from "@/utils/format";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -77,17 +78,7 @@ export default async function ClientDocumentsPage(props: PageProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Page Header */}
-      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
-            Dokumenty WZ
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Pobieraj i przeglądaj dokumenty wydania zewnętrznego (WZ) dla zrealizowanych dostaw
-          </p>
-        </div>
-      </div>
+      <PageHeader compact title="Dokumenty WZ" subtitle="Pobieraj i przeglądaj dokumenty wydania zewnętrznego (WZ) dla zrealizowanych dostaw" />
 
       {/* Filter Bar */}
       <div className="card" style={{ padding: "16px", border: "1px solid var(--line)" }}>

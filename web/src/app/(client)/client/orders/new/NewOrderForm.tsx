@@ -4,7 +4,7 @@ import React, { useState, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createOrder } from "./actions";
 import { Priority } from "@prisma/client";
-import { Plus, Trash2, AlertTriangle, ShieldCheck, MapPin, Package, User, X } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, ShieldCheck, User, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
 
 interface DeliveryAddressOption {
   id: string;
@@ -78,6 +78,9 @@ export default function NewOrderForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  // Wizard step: 1 = Basic info, 2 = Items, 3 = Summary
+  const [step, setStep] = useState(1);
 
   // Form states
   const [branchId, setBranchId] = useState(defaultBranchId || branches[0]?.id || "");
@@ -327,9 +330,33 @@ export default function NewOrderForm({
     });
   };
 
+  // Step validation
+  const validateStep1 = () => {
+    if (!branchId) { setErrorMsg("Wybierz oddział."); return false; }
+    if (!address) { setErrorMsg("Adres dostawy jest wymagany."); return false; }
+    setErrorMsg("");
+    return true;
+  };
+
+  const validateStep2 = () => {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!isBulk && !item.employeeId) {
+        setErrorMsg(`Wiersz ${i + 1}: Wybierz pracownika lub zaznacz zamówienie zbiorcze.`);
+        return false;
+      }
+      if (!item.productId) { setErrorMsg(`Wiersz ${i + 1}: Wybierz produkt.`); return false; }
+      if (!item.size) { setErrorMsg(`Wiersz ${i + 1}: Wybierz rozmiar.`); return false; }
+      if (item.quantity <= 0) { setErrorMsg(`Wiersz ${i + 1}: Ilość musi być większa od zera.`); return false; }
+    }
+    setErrorMsg("");
+    return true;
+  };
+
   // Submit Order
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 3) return;
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -428,7 +455,38 @@ export default function NewOrderForm({
         </div>
       )}
 
-      {/* 1) DANE ZAMÓWIENIA (Full Width Card) */}
+      {/* Stepper */}
+      <div className="card" style={{ padding: "16px 24px", border: "1px solid var(--line)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start" }}>
+          {([
+            { n: 1, label: "Dane podstawowe" },
+            { n: 2, label: "Pozycje zamówienia" },
+            { n: 3, label: "Podsumowanie" },
+          ]).map(({ n, label }, idx) => (
+            <React.Fragment key={n}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px", minWidth: "90px" }}>
+                <div style={{
+                  width: "32px", height: "32px", borderRadius: "50%",
+                  background: step >= n ? "var(--accent)" : "var(--line)",
+                  color: step >= n ? "#fff" : "var(--muted)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontWeight: 700, fontSize: "14px", transition: "all 0.2s ease", flexShrink: 0,
+                }}>
+                  {step > n ? <Check size={16} /> : n}
+                </div>
+                <span style={{ fontSize: "12px", fontWeight: step === n ? 700 : 500, color: step === n ? "var(--text)" : "var(--muted)", textAlign: "center", whiteSpace: "nowrap" }}>
+                  {label}
+                </span>
+              </div>
+              {idx < 2 && (
+                <div style={{ flex: 1, height: "2px", background: step > n ? "var(--accent)" : "var(--line)", margin: "15px 8px 0", transition: "background 0.2s ease" }} />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      {step === 1 && (
       <section className="card" aria-label="Dane zamówienia" style={{ border: "1px solid var(--line)" }}>
         <header className="card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Dane zamówienia</h2>
@@ -577,8 +635,9 @@ export default function NewOrderForm({
 
         </div>
       </section>
+      )}
 
-      {/* 2) POZYCJE ZAMÓWIENIA (Items Table Card) */}
+      {step === 2 && (
       <section className="card items-card" style={{ padding: 0, overflow: "hidden", border: "1px solid var(--line)" }}>
         <header className="card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Pozycje zamówienia</h2>
@@ -849,8 +908,9 @@ export default function NewOrderForm({
           </button>
         </div>
       </section>
+      )}
 
-      {/* 3) PODSUMOWANIE */}
+      {step === 3 && (
       <section className="card" aria-label="Podsumowanie" style={{ border: "1px solid var(--line)" }}>
         <header className="card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Podsumowanie</h2>
@@ -882,40 +942,63 @@ export default function NewOrderForm({
           </div>
         </div>
       </section>
+      )}
 
-      {/* 4) AKCJE */}
-      <section className="card" aria-label="Akcje" style={{ border: "1px solid var(--line)" }}>
-        <header className="card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Akcje</h2>
-        </header>
-        <div className="card-content" style={{ padding: "20px 24px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-          <button 
-            className="btn" 
-            type="submit" 
+      {/* Step navigation */}
+      <div className="card" style={{ padding: "16px 20px", border: "1px solid var(--line)", display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+        {step > 1 && (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => { setErrorMsg(""); setStep(step - 1); }}
+            disabled={isPending}
+            style={{ height: "42px", padding: "0 20px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <ChevronLeft size={16} /> Wróć
+          </button>
+        )}
+        <div style={{ flex: 1 }} />
+        {step < 3 ? (
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              const valid = step === 1 ? validateStep1() : validateStep2();
+              if (valid) setStep(step + 1);
+            }}
+            disabled={isPending}
+            style={{ height: "42px", padding: "0 24px", background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px", display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            Dalej <ChevronRight size={16} />
+          </button>
+        ) : (
+          <button
+            className="btn"
+            type="submit"
             disabled={isPending}
             style={{ height: "42px", padding: "0 24px", background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px" }}
           >
             {isPending ? "Wysyłanie..." : "Wyślij zamówienie"}
           </button>
-          <button 
-            className="btn btn-secondary" 
-            type="button"
-            onClick={() => {
-              if (shouldWarn) {
-                if (window.confirm("Masz niezapisane zmiany. Czy na pewno chcesz opuścić tę stronę?")) {
-                  router.push("/client/orders");
-                }
-              } else {
+        )}
+        <button
+          className="btn btn-secondary"
+          type="button"
+          onClick={() => {
+            if (shouldWarn) {
+              if (window.confirm("Masz niezapisane zmiany. Czy na pewno chcesz opuścić tę stronę?")) {
                 router.push("/client/orders");
               }
-            }}
-            disabled={isPending}
-            style={{ height: "42px", padding: "0 24px", borderRadius: "10px" }}
-          >
-            Anuluj
-          </button>
-        </div>
-      </section>
+            } else {
+              router.push("/client/orders");
+            }
+          }}
+          disabled={isPending}
+          style={{ height: "42px", padding: "0 24px", borderRadius: "10px" }}
+        >
+          Anuluj
+        </button>
+      </div>
 
     </form>
   );

@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -63,7 +63,7 @@ import { join } from "path";
 
 export async function uploadWzPdf(formData: FormData) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -99,7 +99,7 @@ export async function generateWz(
   pdfUrl?: string
 ) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -277,7 +277,7 @@ export async function generateWz(
 
 export async function forceMarkAsDelivered(orderId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -342,7 +342,7 @@ export async function forceMarkAsDelivered(orderId: string) {
 
 export async function forceApproveOrder(orderId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 

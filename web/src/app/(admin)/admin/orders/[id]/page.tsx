@@ -22,7 +22,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_MANAGER" && role !== "SUPON_ADMIN") {
+  if (role !== "SUPON_ADMIN") {
     redirect("/client/dashboard");
   }
 

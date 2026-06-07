@@ -7,6 +7,7 @@ import Pagination from "@/components/Pagination";
 import { formatTicketStatus, formatTicketType, formatShortDate } from "@/utils/format";
 import AdminTicketFilters from "./AdminTicketFilters";
 import ClickableRow from "./ClickableRow";
+import PageHeader from "@/components/PageHeader";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -22,7 +23,7 @@ export default async function AdminTicketsPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_MANAGER" && role !== "SUPON_ADMIN") {
+  if (role !== "SUPON_ADMIN") {
     redirect("/client/dashboard");
   }
 
@@ -95,17 +96,10 @@ export default async function AdminTicketsPage(props: PageProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Page Header */}
-      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
-            Zgłoszenia i Reklamacje Klientów
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Przeglądaj zgłoszenia reklamacyjne, prośby o wymianę odzieży oraz wiadomości kontaktowe od klientów
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Zgłoszenia i Reklamacje Klientów"
+        subtitle="Przeglądaj zgłoszenia reklamacyjne, prośby o wymianę odzieży oraz wiadomości kontaktowe od klientów"
+      />
 
       {/* Filters */}
       <AdminTicketFilters clients={clients} />

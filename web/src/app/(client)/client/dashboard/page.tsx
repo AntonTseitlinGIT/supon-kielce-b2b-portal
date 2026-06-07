@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import PageHeader from "@/components/PageHeader";
 
 export default async function ClientDashboardPage() {
   const session = await auth();
@@ -82,15 +83,7 @@ export default async function ClientDashboardPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", animation: "fadeIn 0.4s ease forwards" }}>
       
-      {/* Page Header (page-header from demo) */}
-      <header className="page-header" style={{ borderBottom: "1px solid var(--line)", background: "transparent", margin: "0 -24px 24px -24px", padding: "24px" }}>
-        <div className="container">
-          <h1 style={{ fontSize: "32px", fontWeight: 800, margin: 0 }}>Witaj w systemie</h1>
-          <p className="subtitle" style={{ fontSize: "15px", color: "var(--muted)", margin: "6px 0 0 0" }}>
-            Wybierz moduł, aby rozpocząć
-          </p>
-        </div>
-      </header>
+      <PageHeader title="Witaj w systemie" subtitle="Wybierz moduł, aby rozpocząć" />
 
       <div className="container" style={{ padding: 0 }}>
         

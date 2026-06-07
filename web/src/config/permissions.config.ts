@@ -82,31 +82,39 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "users:manage:own_client",
   ],
 
-  SUPON_MANAGER: [
+  SUPON_ADMIN: [
     "orders:read:own_branch",
     "orders:read:all_client_branches",
     "orders:read:all_clients",
     "orders:update_status",
+    "orders:cancel",
     "personnel:read:own_branch",
     "personnel:read:all_client_branches",
+    "personnel:manage:all",
     "tickets:read:own_branch",
     "tickets:reply:as_supon",
     "tickets:assign",
     "tickets:update_status",
     "tickets:internal_notes",
     "catalog:read",
+    "catalog:manage_client_assortment",
     "ppe_limits:read",
+    "ppe_limits:manage",
     "wz:read:own_branch",
     "wz:read:all",
     "wz:create",
     "wz:generate_pdf",
     "reports:own_branch",
     "reports:all_client_branches",
+    "reports:all_clients",
     "clients:read",
+    "clients:manage",
     "users:read:own_client",
+    "users:manage:own_client",
+    "settings:read",
   ],
-
-  SUPON_ADMIN: [
+  // SUPON_DEV inherits everything from SUPON_ADMIN plus system-level access
+  SUPON_DEV: [
     "orders:read:own_branch",
     "orders:read:all_client_branches",
     "orders:read:all_clients",
@@ -156,9 +164,11 @@ export function isClientRole(role: Role): boolean {
 }
 
 export function isSuponRole(role: Role): boolean {
-  return role === "SUPON_MANAGER" || role === "SUPON_ADMIN";
+  return role === "SUPON_ADMIN" || role === "SUPON_DEV";
 }
 
 export function getPortalPath(role: Role): string {
-  return isSuponRole(role) ? "/admin/dashboard" : "/client/dashboard";
+  if (role === "SUPON_DEV") return "/developer/dashboard";
+  if (isSuponRole(role)) return "/admin/dashboard";
+  return "/client/dashboard";
 }

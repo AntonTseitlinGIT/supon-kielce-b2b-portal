@@ -7,6 +7,7 @@ import { formatOrderStatus, formatPriority, formatShortDate } from "@/utils/form
 import AdminOrderFilters from "./AdminOrderFilters";
 import AdminOrdersList from "./AdminOrdersList";
 import Pagination from "@/components/Pagination";
+import PageHeader from "@/components/PageHeader";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -22,7 +23,7 @@ export default async function AdminOrdersPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_MANAGER" && role !== "SUPON_ADMIN") {
+  if (role !== "SUPON_ADMIN") {
     redirect("/client/dashboard");
   }
 
@@ -155,17 +156,10 @@ export default async function AdminOrdersPage(props: PageProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Header */}
-      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
-            Zarządzanie Zamówieniami
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Przeglądaj i realizuj zamówienia odzieży roboczej i ŚOI złożone przez klientów
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Zarządzanie Zamówieniami"
+        subtitle="Przeglądaj i realizuj zamówienia odzieży roboczej i ŚOI złożone przez klientów"
+      />
 
       {/* Filters */}
       <AdminOrderFilters clients={clients} />

@@ -6,6 +6,7 @@ import { ShoppingBag } from "lucide-react";
 import OrderFilters from "./OrderFilters";
 import OrdersListClient from "./OrdersListClient";
 import Pagination from "@/components/Pagination";
+import PageHeader from "@/components/PageHeader";
 import { OrderStatus } from "@prisma/client";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -159,22 +160,11 @@ export default async function ClientOrdersPage(props: PageProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* Header */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "8px 0" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "36px", color: "var(--text)", margin: 0 }}>
-            Twoje Zamówienia
-          </h1>
-          <p className="subtitle" style={{ fontSize: "15px", margin: "6px 0 0 0", color: "var(--muted)" }}>
-            Zarządzaj swoimi zamówieniami, śledź dostawy i pobieraj dokumenty
-          </p>
-        </div>
-        <div>
-          <Link href="/client/orders/new" className="btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px", padding: "10px 24px" }}>
-            Złóż zamówienie
-          </Link>
-        </div>
-      </div>
+      <PageHeader compact title="Twoje Zamówienia" subtitle="Zarządzaj swoimi zamówieniami, śledź dostawy i pobieraj dokumenty">
+        <Link href="/client/orders/new" className="btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px", padding: "10px 24px" }}>
+          Złóż zamówienie
+        </Link>
+      </PageHeader>
 
       {/* Filters */}
       <OrderFilters

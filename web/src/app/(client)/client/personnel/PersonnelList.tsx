@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { Search, Grid, List, Download, Plus, Upload, X, Loader2, FileSpreadsheet } from "lucide-react";
 import { bulkCreateEmployees } from "./actions";
+import PageHeader from "@/components/PageHeader";
 import * as XLSX from "xlsx";
 
 interface EmployeeItem {
@@ -258,38 +259,27 @@ export default function PersonnelList({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       
-      {/* Page Header */}
-      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
-            Personel
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Zarządzaj kartami pracowników, ich rozmiarami oraz przydziałami odzieży roboczej
-          </p>
-        </div>
-        <div className="page-header-actions" style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <Link href="/client/personnel/new" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: "6px", height: "42px" }}>
-            <Plus size={16} /> Dodaj pracownika
-          </Link>
-          <button
-            onClick={() => setIsImportModalOpen(true)}
-            className="btn btn-secondary"
-            style={{ display: "flex", alignItems: "center", gap: "6px", height: "42px" }}
-            title="Masowy import pracowników"
-          >
-            <Upload size={16} /> Import
-          </button>
-          <button
-            onClick={() => setIsExportModalOpen(true)}
-            className="btn btn-secondary"
-            style={{ display: "flex", alignItems: "center", gap: "6px", height: "42px" }}
-            title="Eksportuj pracowników"
-          >
-            <Download size={16} /> Eksport
-          </button>
-        </div>
-      </div>
+      <PageHeader compact title="Personel" subtitle="Zarządzaj kartami pracowników, ich rozmiarami oraz przydziałami odzieży roboczej">
+        <Link href="/client/personnel/new" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Plus size={16} /> Dodaj pracownika
+        </Link>
+        <button
+          onClick={() => setIsImportModalOpen(true)}
+          className="btn btn-secondary"
+          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          title="Masowy import pracowników"
+        >
+          <Upload size={16} /> Import
+        </button>
+        <button
+          onClick={() => setIsExportModalOpen(true)}
+          className="btn btn-secondary"
+          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          title="Eksportuj pracowników"
+        >
+          <Download size={16} /> Eksport
+        </button>
+      </PageHeader>
 
       {/* Search & Filters row (aligned with orders style) */}
       <div className="filters-bar-row" style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", marginBottom: "4px" }}>

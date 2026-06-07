@@ -261,7 +261,7 @@ export async function createOrder(input: CreateOrderInput) {
     try {
       const admins = await prisma.user.findMany({
         where: {
-          role: { in: ["SUPON_MANAGER", "SUPON_ADMIN"] },
+          role: { in: ["SUPON_ADMIN", "SUPON_DEV"] },
           isActive: true
         },
         select: { id: true }

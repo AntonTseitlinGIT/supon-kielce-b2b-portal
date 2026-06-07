@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import SettingsClient from "./SettingsClient";
+import PageHeader from "@/components/PageHeader";
 
 export const metadata = {
   title: "Ustawienia Systemowe | SUPON Kielce",
@@ -14,8 +15,7 @@ export default async function AdminSettingsPage() {
     redirect("/login");
   }
 
-  // Admin access control
-  if (session.user.role !== "SUPON_ADMIN") {
+  if (session.user.role !== "SUPON_DEV") {
     redirect("/admin/dashboard");
   }
 
@@ -43,17 +43,7 @@ export default async function AdminSettingsPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", animation: "fadeIn 0.4s ease forwards" }}>
       
-      {/* Page Header */}
-      <header className="page-header" style={{ borderBottom: "1px solid var(--line)", background: "transparent", margin: "0 -24px 24px -24px", padding: "24px" }}>
-        <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ fontSize: "32px", fontWeight: 800, margin: 0 }}>Ustawienia Portalu</h1>
-            <p className="subtitle" style={{ fontSize: "15px", color: "var(--muted)", margin: "6px 0 0 0" }}>
-              Zarządzanie globalnymi parametrami organizacji SUPON Kielce oraz konfiguracja przełączników funkcji (Feature Flags)
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader title="Ustawienia Portalu" subtitle="Zarządzanie globalnymi parametrami organizacji SUPON Kielce oraz konfiguracja przełączników funkcji (Feature Flags)" />
 
       <div className="container" style={{ padding: 0 }}>
         <SettingsClient 

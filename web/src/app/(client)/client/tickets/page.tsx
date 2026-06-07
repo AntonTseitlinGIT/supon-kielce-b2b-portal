@@ -7,6 +7,7 @@ import Pagination from "@/components/Pagination";
 import { formatTicketStatus, formatTicketType, formatShortDate } from "@/utils/format";
 import TicketsFilterWrapper from "./TicketsFilterWrapper";
 import ClickableRow from "./ClickableRow";
+import PageHeader from "@/components/PageHeader";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -101,22 +102,11 @@ export default async function ClientTicketsPage(props: PageProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Page Header */}
-      <div className="page-header" style={{ position: "static", background: "transparent", borderBottom: "none", padding: "0 0 10px 0", minHeight: "auto" }}>
-        <div>
-          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", color: "var(--text-primary)" }}>
-            Zgłoszenia i Reklamacje
-          </h1>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-            Zgłaszaj uszkodzenia, reklamacje, chęć wymiany odzieży lub kontaktuj się z menedżerem SUPON
-          </p>
-        </div>
-        <div className="page-header-actions">
-          <Link href="/client/tickets/new" className="btn btn-primary">
-            <Plus size={16} /> Nowe zgłoszenie
-          </Link>
-        </div>
-      </div>
+      <PageHeader compact title="Zgłoszenia i Reklamacje" subtitle="Zgłaszaj uszkodzenia, reklamacje, chęć wymiany odzieży lub kontaktuj się z menedżerem SUPON">
+        <Link href="/client/tickets/new" className="btn btn-primary">
+          <Plus size={16} /> Nowe zgłoszenie
+        </Link>
+      </PageHeader>
 
       {/* Client tickets filter component with state handlers */}
       <TicketsFilterWrapper 

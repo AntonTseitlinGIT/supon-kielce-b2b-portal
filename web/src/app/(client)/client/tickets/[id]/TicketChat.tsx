@@ -113,7 +113,7 @@ export default function TicketChat({
               isFromSupon: newMsg.isFromSupon,
               createdAt: newMsg.createdAt,
               sender: newMsg.isFromSupon 
-                ? { name: "Menedżer SUPON", role: "SUPON_MANAGER" }
+                ? { name: "Administrator SUPON", role: "SUPON_ADMIN" }
                 : { name: "Ty", role: "BRANCH_HEAD" },
             };
             

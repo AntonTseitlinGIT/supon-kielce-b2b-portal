@@ -7,8 +7,8 @@ import { revalidatePath } from "next/cache";
 export async function createProduct(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
-    return { success: false, error: "Brak uprawnień. Tylko Administrator SUPON może dodawać towary." };
+  if (!session?.user || session.user.role !== "SUPON_DEV") {
+    return { success: false, error: "Brak uprawnień. Tylko Deweloper SUPON może dodawać towary." };
   }
 
   const name = formData.get("name") as string;
@@ -65,8 +65,8 @@ export async function createProduct(prevState: any, formData: FormData) {
 export async function updateProduct(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
-    return { success: false, error: "Brak uprawnień. Tylko Administrator SUPON może edytować towary." };
+  if (!session?.user || session.user.role !== "SUPON_DEV") {
+    return { success: false, error: "Brak uprawnień. Tylko Deweloper SUPON może edytować towary." };
   }
 
   const id = formData.get("id") as string;

@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 export async function updateTicketStatus(ticketId: string, status: TicketStatus) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak autoryzacji." };
   }
 
@@ -65,7 +65,7 @@ interface SendMessageInput {
 
 export async function sendAdminTicketMessage(input: SendMessageInput) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak autoryzacji." };
   }
 
@@ -187,7 +187,7 @@ export async function sendAdminTicketMessage(input: SendMessageInput) {
 
 export async function approveTicketAndGenerateOrder(ticketId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     return { success: false, error: "Brak autoryzacji." };
   }
 

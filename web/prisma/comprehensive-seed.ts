@@ -61,7 +61,6 @@ async function main() {
   // 4. Users
   const hash = (p: string) => bcrypt.hash(p, 12);
   const adminPass = await hash("admin1234");
-  const managerPass = await hash("manager1234");
   const clientPass = await hash("client1234");
   const branchPass = await hash("branch1234");
 
@@ -73,17 +72,6 @@ async function main() {
       name: "Admin SUPON",
       passwordHash: adminPass,
       role: Role.SUPON_ADMIN,
-    }
-  });
-
-  const suponManager = await prisma.user.upsert({
-    where: { email: "manager@suponkielce.pl" },
-    update: {},
-    create: {
-      email: "manager@suponkielce.pl",
-      name: "Marek Kowalski",
-      passwordHash: managerPass,
-      role: Role.SUPON_MANAGER,
     }
   });
 

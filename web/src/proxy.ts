@@ -28,12 +28,25 @@ export default auth((req) => {
 
   // Client portal — only client roles
   if (pathname.startsWith("/client") && !isClientRole(role)) {
-    return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+    return NextResponse.redirect(new URL(getPortalPath(role), req.url));
   }
 
-  // Admin portal — only SUPON roles
-  if (pathname.startsWith("/admin") && !isSuponRole(role)) {
+  // Admin portal — only SUPON roles (not SUPON_DEV — they have their own portal)
+  if (pathname.startsWith("/admin") && (role === "BRANCH_HEAD" || role === "CLIENT_HEAD")) {
     return NextResponse.redirect(new URL("/client/dashboard", req.url));
+  }
+
+  // Developer portal — only SUPON_DEV
+  if (pathname.startsWith("/developer") && role !== "SUPON_DEV") {
+    return NextResponse.redirect(new URL(getPortalPath(role), req.url));
+  }
+
+  // Settings and Users pages in admin — only SUPON_DEV
+  if (
+    (pathname.startsWith("/admin/settings") || pathname.startsWith("/admin/users")) &&
+    role !== "SUPON_DEV"
+  ) {
+    return NextResponse.redirect(new URL("/admin/dashboard", req.url));
   }
 
   return NextResponse.next();

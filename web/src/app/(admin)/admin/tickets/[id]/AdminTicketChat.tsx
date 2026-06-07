@@ -113,7 +113,7 @@ export default function AdminTicketChat({
               isInternal: false,
               createdAt: newMsg.createdAt,
               sender: newMsg.isFromSupon
-                ? { name: "Menedżer SUPON", role: "SUPON_MANAGER" }
+                ? { name: "Administrator SUPON", role: "SUPON_ADMIN" }
                 : { name: "Klient", role: "BRANCH_HEAD" },
             };
             return [...prev, formatted];
@@ -143,7 +143,7 @@ export default function AdminTicketChat({
               isFromSupon: true,
               isInternal: true,
               createdAt: newNote.createdAt,
-              sender: { name: "Menedżer SUPON", role: "SUPON_MANAGER" },
+              sender: { name: "Administrator SUPON", role: "SUPON_ADMIN" },
             };
             return [...prev, formatted];
           });

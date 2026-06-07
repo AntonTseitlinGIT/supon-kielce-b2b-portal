@@ -10,7 +10,7 @@ interface PageProps {
 
 export default async function AdminOrderByNrRedirect(props: PageProps) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_MANAGER" && session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
     redirect("/login");
   }
 

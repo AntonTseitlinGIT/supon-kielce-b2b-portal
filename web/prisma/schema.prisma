@@ -11,8 +11,8 @@ datasource db {
 enum Role {
   BRANCH_HEAD
   CLIENT_HEAD
-  SUPON_MANAGER
   SUPON_ADMIN
+  SUPON_DEV
 }
 
 enum EmployeeStatus {
@@ -83,6 +83,23 @@ model Client {
   tickets        Ticket[]
   clientProducts ClientProduct[]
   ppeLimits      PpeLimit[]
+  config         ClientConfig?
+}
+
+model ClientConfig {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Module toggles — which portal sections are active for this client
+  modules   Json     @default("{\"orders\":true,\"personnel\":true,\"tickets\":true,\"documents\":true,\"branches\":true,\"catalog\":false,\"reports\":false}")
+  // Operational limits
+  limits    Json     @default("{\"maxUsers\":50,\"maxBranches\":10}")
+  // Misc per-client settings
+  settings  Json     @default("{}")
+
+  updatedAt DateTime @updatedAt
+  updatedBy String?  // userId of the SUPON_DEV who last changed this
 }
 
 model Branch {

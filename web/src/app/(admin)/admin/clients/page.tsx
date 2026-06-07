@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ClientListClient from "./ClientListClient";
+import PageHeader from "@/components/PageHeader";
 
 export const metadata = {
   title: "Zarządzanie Klientami | SUPON Kielce",
@@ -37,17 +38,7 @@ export default async function AdminClientsPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", animation: "fadeIn 0.4s ease forwards" }}>
       
-      {/* Page Header */}
-      <header className="page-header" style={{ borderBottom: "1px solid var(--line)", background: "transparent", margin: "0 -24px 24px -24px", padding: "24px" }}>
-        <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ fontSize: "32px", fontWeight: 800, margin: 0 }}>Klienci B2B</h1>
-            <p className="subtitle" style={{ fontSize: "15px", color: "var(--muted)", margin: "6px 0 0 0" }}>
-              Zarządzanie kontrahentami, oddziałami dostaw oraz indywidualnymi cennikami
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader title="Klienci B2B" subtitle="Zarządzanie kontrahentami, oddziałami dostaw oraz indywidualnymi cennikami" />
 
       <div className="container" style={{ padding: 0 }}>
         <ClientListClient clients={clients} />

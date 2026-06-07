@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { formatOrderStatus, formatTicketStatus, formatShortDate, formatTicketType } from "@/utils/format";
 import AdminDashboardCharts from "./AdminDashboardCharts";
+import PageHeader from "@/components/PageHeader";
 
 // Fallback pricing from client/reports/page.tsx
 function getFallbackPrice(categoryName: string) {
@@ -37,7 +38,7 @@ export default async function AdminDashboardPage() {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_MANAGER" && role !== "SUPON_ADMIN") {
+  if (role !== "SUPON_ADMIN") {
     redirect("/client/dashboard");
   }
 
@@ -145,17 +146,7 @@ export default async function AdminDashboardPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", animation: "fadeIn 0.4s ease forwards" }}>
       
-      {/* Page Header */}
-      <header className="page-header" style={{ borderBottom: "1px solid var(--line)", background: "transparent", margin: "0 -24px 24px -24px", padding: "24px" }}>
-        <div className="container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h1 style={{ fontSize: "32px", fontWeight: 800, margin: 0 }}>Pulpit Menedżera</h1>
-            <p className="subtitle" style={{ fontSize: "15px", color: "var(--muted)", margin: "6px 0 0 0" }}>
-              Panel administracyjny SUPON Kielce — Zarządzanie portalem klientów
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader title="Pulpit Menedżera" subtitle="Panel administracyjny SUPON Kielce — Zarządzanie portalem klientów" />
 
       <div className="container" style={{ padding: 0 }}>
         

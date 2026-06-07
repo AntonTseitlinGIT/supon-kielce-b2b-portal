@@ -39,6 +39,17 @@ async function main() {
   // ─── SUPON Users ───
   const hash = (p: string) => bcrypt.hash(p, 12);
 
+  await prisma.user.upsert({
+    where: { email: "dev@suponkielce.pl" },
+    update: {},
+    create: {
+      email: "dev@suponkielce.pl",
+      name: "Developer SUPON",
+      passwordHash: await hash("dev1234"),
+      role: Role.SUPON_DEV,
+    },
+  });
+
   const suponAdmin = await prisma.user.upsert({
     where: { email: "admin@suponkielce.pl" },
     update: {},
@@ -47,17 +58,6 @@ async function main() {
       name: "Admin SUPON",
       passwordHash: await hash("admin1234"),
       role: Role.SUPON_ADMIN,
-    },
-  });
-
-  const suponManager = await prisma.user.upsert({
-    where: { email: "manager@suponkielce.pl" },
-    update: {},
-    create: {
-      email: "manager@suponkielce.pl",
-      name: "Marek Kowalski",
-      passwordHash: await hash("manager1234"),
-      role: Role.SUPON_MANAGER,
     },
   });
 
@@ -278,7 +278,7 @@ async function main() {
       carrier: "DPD",
       trackingNr: "12345678901",
       status: WzStatus.RECEIVED,
-      createdById: suponManager.id,
+      createdById: suponAdmin.id,
       items: {
         create: [
           { articleNr: "MOT-TRS-001", name: "Spodnie Motion", size: "L", qty: 2 },
@@ -322,7 +322,7 @@ async function main() {
       carrier: "DHL",
       trackingNr: "DHL987654321",
       status: WzStatus.IN_TRANSIT,
-      createdById: suponManager.id,
+      createdById: suponAdmin.id,
       items: {
         create: [
           { articleNr: "FR-JKT-220", name: "Kurtka FR (Trudnopalna)", size: "XL", qty: 1 }
@@ -333,8 +333,9 @@ async function main() {
 
   console.log("✅ Seed complete!");
   console.log("\n🔑 Test accounts:");
-  console.log("  SUPON Admin:   admin@suponkielce.pl   / admin1234");
-  console.log("  SUPON Manager: manager@suponkielce.pl / manager1234");
+  console.log("  SUPON Dev:     dev@suponkielce.pl      / dev1234");
+  console.log("  SUPON Admin:   admin@suponkielce.pl    / admin1234");
+  console.log("  SUPON Manager: manager@suponkielce.pl  / manager1234");
   console.log("  Client Head:   centralny@kghm-kielce.pl / client1234");
   console.log("  Branch Head:   zaklad1@kghm-kielce.pl   / branch1234");
 }

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ReportsDashboard from "./ReportsDashboard";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 export const metadata = {
   title: "Raporty i Statystyki | SUPON Kielce",
@@ -201,18 +201,7 @@ export default async function ClientReportsPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Header */}
-      <div>
-        <Link href="/client/dashboard" className="btn btn-ghost btn-sm" style={{ paddingLeft: 0, marginBottom: "8px" }}>
-          <ArrowLeft size={16} style={{ marginRight: "6px" }} /> Powrót do pulpitu
-        </Link>
-        <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", margin: 0 }}>
-          Raporty i analizy wydatków
-        </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
-          Przeglądaj statystyki finansowe, statusy zamówień oraz zużycie asortymentu w skali firmy
-        </p>
-      </div>
+      <PageHeader compact title="Raporty i analizy wydatków" subtitle="Przeglądaj statystyki finansowe, statusy zamówień oraz zużycie asortymentu w skali firmy" />
 
       {/* Main interactive dashboard */}
       <ReportsDashboard
