@@ -1325,3 +1325,21 @@ textarea.input,
   line-height: 1.5;
 }
 
+/* ===== SKELETON LOADING ===== */
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--section-bg) 25%, color-mix(in oklab, var(--section-bg) 60%, var(--page-bg)) 50%, var(--section-bg) 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+.skeleton-text  { height: 14px; border-radius: 4px; }
+.skeleton-title { height: 28px; border-radius: 6px; }
+.skeleton-h1    { height: 40px; border-radius: 8px; }
+.skeleton-badge { height: 22px; width: 72px; border-radius: 20px; display: inline-block; }
+.skeleton-btn   { height: 36px; width: 120px; border-radius: var(--radius-sm); display: inline-block; }
+.skeleton-avatar { border-radius: 50%; flex-shrink: 0; }
+
