@@ -23,10 +23,12 @@ export async function GET() {
       }
     }
 
+    const parsedUrl = new URL(process.env.DATABASE_URL!.replace("postgres?pgbouncer=true", "postgres"));
     return NextResponse.json({
       success: true,
       databaseUrlLength: process.env.DATABASE_URL?.length || 0,
-      databaseUrlHost: process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL.replace("postgres?pgbouncer=true", "postgres")).hostname : "unknown",
+      databaseUrlHost: parsedUrl.hostname,
+      databaseUrlUser: parsedUrl.username,
       envType: process.env.NODE_ENV,
       users,
       demoPasswordMatch: passwordMatch,
