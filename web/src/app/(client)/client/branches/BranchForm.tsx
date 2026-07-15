@@ -119,6 +119,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
     setBranchActive(branch.isActive);
     setErrorMsg("");
     setSuccessMsg("");
+    setPanelState("edit-branch");
   };
 
   const handleBranchReset = () => {
@@ -130,6 +131,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
     setBranchActive(true);
     setErrorMsg("");
     setSuccessMsg("");
+    setPanelState("add-branch");
   };
 
   const handleAddressEditClick = (addr: DeliveryAddress) => {
