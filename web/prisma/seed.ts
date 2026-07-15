@@ -209,6 +209,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Spodnie robocze z tkaniny bawełnianej, wzmocnione kolana",
       availableSizes: ["S", "M", "L", "XL", "XXL", "XXXL", "48", "50", "52", "54", "56"],
+      photoUrls: ["/uploads/spodnie.jpg"],
     },
     {
       articleNr: "FR-JKT-220",
@@ -216,6 +217,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Kurtka trudnopalna klasy FR, certyfikat EN ISO 11612",
       availableSizes: ["S", "M", "L", "XL", "XXL"],
+      photoUrls: ["/uploads/kurtka.jpg"],
     },
     {
       articleNr: "HIV-BLS-110",
@@ -223,6 +225,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Bluza ostrzegawcza klasy 2, EN ISO 20471",
       availableSizes: ["S", "M", "L", "XL", "XXL", "XXXL"],
+      photoUrls: [],
     },
     {
       articleNr: "BUT-002",
@@ -230,6 +233,7 @@ async function main() {
       categoryId: catObuwie.id,
       description: "Trzewiki ochronne S3 SRC, stalowy nosek, podnosek i wkładka",
       availableSizes: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47"],
+      photoUrls: ["/uploads/buty.jpg"],
     },
     {
       articleNr: "K-10",
@@ -237,6 +241,7 @@ async function main() {
       categoryId: catKaski.id,
       description: "Hełm ochronny przemysłowy EN 397, regulowana opaska",
       availableSizes: ["Uniwersalny"],
+      photoUrls: ["/uploads/kask.jpg"],
     },
     {
       articleNr: "R-20",
@@ -244,6 +249,7 @@ async function main() {
       categoryId: catRekawice.id,
       description: "Rękawice powlekane nitrylem, chwyt suchy i mokry",
       availableSizes: ["7 (S)", "8 (M)", "9 (L)", "10 (XL)", "11 (XXL)"],
+      photoUrls: ["/uploads/rekawice.jpg"],
     },
     {
       articleNr: "BHP-COM-050",
@@ -251,6 +257,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Kombinezon jednorazowy Tyvek, klasa 5/6",
       availableSizes: ["S", "M", "L", "XL", "XXL", "XXXL"],
+      photoUrls: [],
     },
     {
       articleNr: "SHO-LEA-333",
@@ -258,6 +265,7 @@ async function main() {
       categoryId: catObuwie.id,
       description: "Trzewiki ze skóry naturalnej, klasa S3 SRC HRO",
       availableSizes: ["39", "40", "41", "42", "43", "44", "45", "46"],
+      photoUrls: [],
     },
   ];
 
@@ -265,8 +273,13 @@ async function main() {
   for (const p of products) {
     const product = await prisma.product.upsert({
       where: { articleNr: p.articleNr },
-      update: {},
-      create: { ...p, photoUrls: [] },
+      update: {
+        photoUrls: p.photoUrls ?? [],
+      },
+      create: { 
+        ...p, 
+        photoUrls: p.photoUrls ?? [],
+      },
     });
     dbProducts[p.articleNr] = product.id;
 

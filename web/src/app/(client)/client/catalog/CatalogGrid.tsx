@@ -88,9 +88,19 @@ export default function CatalogGrid({ products, categories }: CatalogGridProps) 
             <div key={p.id} className={styles.card}>
               
               {/* Product Photo or Icon representation */}
-              <div className={styles.imgPlaceholder}>
-                <PackageOpen size={48} />
-                <span style={{ fontSize: "12px", fontWeight: 600 }}>SUPON Kielce</span>
+              <div className={styles.imgPlaceholder} style={{ position: "relative", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center", padding: 0 }}>
+                {p.photoUrls && p.photoUrls.length > 0 ? (
+                  <img 
+                    src={p.photoUrls[0]} 
+                    alt={p.name} 
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} 
+                  />
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                    <PackageOpen size={48} />
+                    <span style={{ fontSize: "12px", fontWeight: 600 }}>SUPON Kielce</span>
+                  </div>
+                )}
               </div>
 
               {/* Card info contents */}
