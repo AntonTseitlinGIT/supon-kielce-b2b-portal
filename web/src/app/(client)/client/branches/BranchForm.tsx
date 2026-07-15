@@ -39,8 +39,12 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
   const isBranchHead = userRole === "BRANCH_HEAD";
 
   // Active selected branch for editing addresses
-  const [selectedBranch, setSelectedBranch] = useState<Branch>(
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(
     branches[0] || null
+  );
+
+  const [panelState, setPanelState] = useState<"details" | "add-branch" | "edit-branch" | "add-address" | "edit-address">(
+    branches.length === 0 ? "add-branch" : "details"
   );
 
   // Mode for branch: "add" | "edit"
@@ -183,6 +187,8 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       branchCity.trim()
     ].join("\n");
 
+    const branchId = selectedBranch?.id;
+
     const formData = new FormData();
     formData.append("name", branchName.trim());
     formData.append("address", combinedAddress);
@@ -192,7 +198,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       if (branchMode === "add") {
         result = await createBranch(null, formData);
       } else {
-        formData.append("id", selectedBranch.id);
+        formData.append("id", branchId || "");
         formData.append("isActive", branchActive.toString());
         result = await updateBranch(null, formData);
       }
@@ -205,8 +211,20 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
           setBranchPostalCode("");
           setBranchCity("");
         } else {
-          handleBranchReset();
+          setSelectedBranch(prev => prev ? {
+            ...prev,
+            name: branchName.trim(),
+            address: combinedAddress,
+            isActive: branchActive
+          } : null);
+          setBranchMode("add");
+          setBranchName("");
+          setBranchStreet("");
+          setBranchPostalCode("");
+          setBranchCity("");
+          setBranchActive(true);
         }
+        setPanelState("details");
       } else {
         setErrorMsg(result.error || "Wystąpił błąd.");
       }
@@ -236,13 +254,15 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       contactPerson.trim()
     ].join("\n");
 
+    const branchId = selectedBranch.id;
+
     const formData = new FormData();
     formData.append("address", combinedAddress);
 
     startTransition(async () => {
       let result;
       if (addressMode === "add") {
-        formData.append("branchId", selectedBranch.id);
+        formData.append("branchId", branchId);
         result = await createDeliveryAddress(null, formData);
       } else {
         formData.append("id", selectedAddressId);
@@ -253,6 +273,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       if (result.success) {
         setSuccessMsg(result.message || "Adres dostawy zapisany!");
         handleAddressReset();
+        setPanelState("details");
       } else {
         setErrorMsg(result.error || "Wystąpił błąd.");
       }
@@ -281,7 +302,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
   return (
     <div className="list-editor-grid" style={{ gap: "28px" }}>
       
-      {/* LEFT COLUMN: Branches / Address List */}
+      {/* LEFT COLUMN: Branches Master List */}
       <div className="col-24">
         
         {/* Branch selector or Branch Info (if branch head) */}
@@ -296,147 +317,95 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
         ) : (
           <div className="card" style={{ border: "1px solid var(--line)" }}>
             <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="card-title row-8">
+              <h3 className="card-title row-8" style={{ margin: 0 }}>
                 <Shield size={18} style={{ color: "var(--accent)" }} /> Oddziały firmy
               </h3>
-              {branchMode === "edit" && (
-                <button className="btn btn-secondary btn-sm" onClick={handleBranchReset}>
-                  Dodaj nowy oddział
+              {panelState !== "add-branch" && (
+                <button 
+                  className="btn btn-primary btn-sm" 
+                  onClick={handleBranchReset}
+                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                >
+                  + Dodaj oddział
                 </button>
               )}
             </div>
             
-            <div className="table-wrapper" style={{ border: "none", borderRadius: 0, boxShadow: "none" }}>
-              <table className="table">
-                <thead>
-                  <tr style={{ background: "var(--section-bg)" }}>
-                    <th>Nazwa</th>
-                    <th>Adres rejestracyjny</th>
-                    <th style={{ textAlign: "center" }}>Pracownicy</th>
-                    <th style={{ textAlign: "center" }}>Status</th>
-                    <th>Akcje</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branches.map((b) => (
-                    <tr 
-                      key={b.id} 
-                      style={{ 
-                        borderBottom: "1px solid var(--line)",
-                        background: selectedBranch?.id === b.id ? "color-mix(in oklab, var(--accent) 5%, transparent)" : "transparent"
+            <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              {branches.length === 0 ? (
+                <div style={{ padding: "20px", textAlign: "center", color: "var(--muted)" }}>
+                  Brak oddziałów. Dodaj pierwszy oddział.
+                </div>
+              ) : (
+                branches.map((b) => {
+                  const isSelected = selectedBranch?.id === b.id;
+                  const parsed = parseBranchAddress(b.address);
+                  const formattedAddress = `${parsed.street}, ${parsed.postalCode} ${parsed.city}`;
+                  return (
+                    <div 
+                      key={b.id}
+                      onClick={() => {
+                        setSelectedBranch(b);
+                        setPanelState("details");
+                        setErrorMsg("");
+                        setSuccessMsg("");
                       }}
+                      style={{
+                        padding: "16px",
+                        borderRadius: "var(--radius)",
+                        border: isSelected ? "2px solid var(--accent)" : "1px solid var(--line)",
+                        background: isSelected ? "color-mix(in oklab, var(--accent) 4%, var(--page-bg))" : "var(--page-bg)",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                        boxShadow: isSelected ? "var(--shadow-sm)" : "none"
+                      }}
+                      className="branch-list-item"
                     >
-                      <td style={{ fontWeight: 700, color: "var(--text)" }}>
-                        <button 
-                          type="button" 
-                          onClick={() => setSelectedBranch(b)}
-                          style={{ background: "none", border: "none", color: "inherit", font: "inherit", fontWeight: "inherit", textAlign: "left", cursor: "pointer", padding: 0 }}
-                        >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <span style={{ fontWeight: 800, fontSize: "15px", color: "var(--text)" }}>
                           {b.name}
-                        </button>
-                      </td>
-                      <td style={{ color: "var(--muted)", fontSize: "13px", lineHeight: "1.4", whiteSpace: "pre-line" }}>{b.address}</td>
-                      <td style={{ textAlign: "center", fontWeight: 700 }}>{b._count?.employees ?? 0}</td>
-                      <td>
-                        <span className={`badge ${b.isActive ? "badge-success" : "badge-danger"}`}>
-                          {b.isActive ? "Aktywny" : "Nieaktywny"}
                         </span>
-                      </td>
-                      <td>
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          <button className="btn btn-secondary btn-sm" onClick={() => setSelectedBranch(b)}>
-                            Adresy
-                          </button>
-                          <button className="btn btn-secondary btn-sm" onClick={() => handleBranchEditClick(b)}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <span className={`badge ${b.isActive ? "badge-success" : "badge-danger"}`} style={{ fontSize: "11px", padding: "2px 6px" }}>
+                            {b.isActive ? "Aktywny" : "Nieaktywny"}
+                          </span>
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            style={{ padding: "4px 8px", fontSize: "11px", height: "auto" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBranchEditClick(b);
+                            }}
+                          >
                             Edytuj
                           </button>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* DELIVERY ADDRESSES FOR SELECTED BRANCH */}
-        {selectedBranch && (
-          <div className="card" style={{ border: "1px solid var(--line)" }}>
-            <div className="card-header">
-              <h3 className="card-title row-8">
-                <Home size={18} style={{ color: "var(--accent)" }} /> Adresy dostaw dla: {selectedBranch.name}
-              </h3>
-            </div>
-
-            <div className="table-wrapper" style={{ border: "none", borderRadius: 0, boxShadow: "none" }}>
-              {selectedBranch.deliveryAddresses.length === 0 ? (
-                <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--muted)" }}>
-                  Brak dodatkowych adresów dostawy. Wykorzystywany jest główny adres oddziału.
-                </div>
-              ) : (
-                <table className="table">
-                  <thead>
-                    <tr style={{ background: "var(--section-bg)" }}>
-                      <th style={{ width: "60px" }}>Lp.</th>
-                      <th>Szczegóły adresu</th>
-                      <th style={{ textAlign: "center" }}>Status</th>
-                      <th style={{ textAlign: "right" }}>Akcje</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedBranch.deliveryAddresses.map((addr, idx) => (
-                      <tr key={addr.id} style={{ borderBottom: "1px solid var(--line)" }}>
-                        <td style={{ color: "var(--muted)", fontWeight: 600 }}>{idx + 1}.</td>
-                        <td style={{ color: "var(--text)", fontSize: "13.5px", lineHeight: "1.5", whiteSpace: "pre-line" }}>
-                          {addr.address}
-                        </td>
-                        <td style={{ textAlign: "center" }}>
-                          <span className={`badge ${addr.isActive ? "badge-success" : "badge-neutral"}`}>
-                            {addr.isActive ? "Aktywny" : "Nieaktywny"}
-                          </span>
-                        </td>
-                        <td>
-                          <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
-                            <button className="btn btn-secondary btn-sm" onClick={() => handleAddressEditClick(addr)}>
-                              Edytuj
-                            </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleAddressDelete(addr.id)}
-                              style={{
-                                color: "var(--err)",
-                                borderColor: "color-mix(in oklab, var(--err) 30%, var(--line))",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                width: "36px",
-                                padding: 0
-                              }}
-                              title="Usuń adres"
-                              aria-label="Usuń adres dostawy"
-                            >
-                              <Trash2 size={15} aria-hidden="true" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </div>
+                      <div style={{ fontSize: "13px", color: "var(--muted)", whiteSpace: "pre-line" }}>
+                        {formattedAddress}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "var(--muted)", display: "flex", gap: "12px", marginTop: "4px", borderTop: "1px solid var(--line)", paddingTop: "8px" }}>
+                        <span>Pracownicy: <strong>{b._count?.employees ?? 0}</strong></span>
+                        <span>Zamówienia: <strong>{b._count?.orders ?? 0}</strong></span>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
         )}
-
       </div>
 
-      {/* RIGHT COLUMN: Address Form & Branch Form */}
+      {/* RIGHT COLUMN: Details & Forms depending on panelState */}
       <div className="col-24">
         
         {/* FEEDBACK STATUS */}
         {(errorMsg || successMsg) && (
-          <div className="card" style={{ padding: "16px", border: "1px solid var(--line)", background: "var(--page-bg)" }}>
+          <div className="card" style={{ padding: "16px", border: "1px solid var(--line)", background: "var(--page-bg)", marginBottom: "16px" }}>
             {errorMsg && (
               <div role="alert" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--err)", fontSize: "14px" }}>
                 <AlertCircle size={16} aria-hidden="true" />
@@ -452,13 +421,128 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
           </div>
         )}
 
-        {/* 1. Branch Form (only for CLIENT_HEAD, or read-only/hidden for branch head) */}
-        {!isBranchHead && (
+        {/* DETAILS VIEW */}
+        {panelState === "details" && selectedBranch && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            
+            {/* Branch Details Card */}
+            <div className="card" style={{ border: "1px solid var(--line)" }}>
+              <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 className="card-title" style={{ margin: 0 }}> Szczegóły oddziału: {selectedBranch.name}</h3>
+                {!isBranchHead && (
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => handleBranchEditClick(selectedBranch)}
+                  >
+                    Edytuj oddział
+                  </button>
+                )}
+              </div>
+              <div className="card-content" style={{ padding: "20px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div>
+                    <strong style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase" }}>Główny adres dostawy (rejestracyjny)</strong>
+                    <div style={{ 
+                      marginTop: "6px", 
+                      padding: "12px", 
+                      background: "var(--section-bg)", 
+                      borderRadius: "var(--radius)", 
+                      fontSize: "14px",
+                      lineHeight: "1.5",
+                      whiteSpace: "pre-line"
+                    }}>
+                      {selectedBranch.address}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery Addresses List Card */}
+            <div className="card" style={{ border: "1px solid var(--line)" }}>
+              <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 className="card-title row-8" style={{ margin: 0 }}>
+                  <Home size={18} style={{ color: "var(--accent)" }} /> Dodatkowe adresy dostaw
+                </h3>
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    handleAddressReset();
+                    setPanelState("add-address");
+                  }}
+                  style={{ fontSize: "12px", padding: "6px 12px" }}
+                >
+                  + Dodaj adres
+                </button>
+              </div>
+
+              <div className="table-wrapper" style={{ border: "none", borderRadius: 0, boxShadow: "none" }}>
+                {selectedBranch.deliveryAddresses.length === 0 ? (
+                  <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--muted)", fontSize: "14px" }}>
+                    Brak dodatkowych adresów dostawy. Wszystkie zamówienia tego oddziału są dostarczane na jego główny adres powyżej.
+                  </div>
+                ) : (
+                  <table className="table">
+                    <thead>
+                      <tr style={{ background: "var(--section-bg)" }}>
+                        <th style={{ width: "60px" }}>Lp.</th>
+                        <th>Adres dostawy</th>
+                        <th style={{ textAlign: "center" }}>Status</th>
+                        <th style={{ textAlign: "right" }}>Akcje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedBranch.deliveryAddresses.map((addr, idx) => (
+                        <tr key={addr.id} style={{ borderBottom: "1px solid var(--line)" }}>
+                          <td style={{ color: "var(--muted)", fontWeight: 600 }}>{idx + 1}.</td>
+                          <td style={{ color: "var(--text)", fontSize: "13.5px", lineHeight: "1.5", whiteSpace: "pre-line" }}>
+                            {addr.address}
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <span className={`badge ${addr.isActive ? "badge-success" : "badge-neutral"}`}>
+                              {addr.isActive ? "Aktywny" : "Nieaktywny"}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                              <button className="btn btn-secondary btn-sm" onClick={() => handleAddressEditClick(addr)}>
+                                Edytuj
+                              </button>
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleAddressDelete(addr.id)}
+                                style={{
+                                  color: "var(--err)",
+                                  borderColor: "color-mix(in oklab, var(--err) 30%, var(--line))",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "36px",
+                                  padding: 0
+                                }}
+                                title="Usuń adres"
+                                aria-label="Usuń adres dostawy"
+                              >
+                                <Trash2 size={15} aria-hidden="true" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* ADD BRANCH FORM */}
+        {panelState === "add-branch" && (
           <div className="card" style={{ border: "1px solid var(--line)" }}>
             <div className="card-header">
-              <h3 className="card-title">
-                {branchMode === "add" ? "Dodaj oddział" : "Edytuj oddział"}
-              </h3>
+              <h3 className="card-title">Dodaj nowy oddział</h3>
             </div>
             <div className="card-content" style={{ padding: "20px" }}>
               <form onSubmit={handleBranchSubmit} className="col-12">
@@ -470,7 +554,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     className="form-input"
                     value={branchName}
                     onChange={(e) => setBranchName(e.target.value)}
-                    placeholder="np. Zakład 3"
+                    placeholder="np. Zakład Północny Kielce"
                     disabled={isPending}
                     required
                   />
@@ -488,7 +572,6 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     required
                   />
                 </div>
-
                 <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "15px" }}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="bf-branch-postal">Kod pocztowy</label>
@@ -518,40 +601,116 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     />
                   </div>
                 </div>
-                {branchMode === "edit" && (
-                  <div className="switch-container">
-                    <span className="switch-label" id="bf-active-label">Aktywny</span>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={branchActive}
-                        onChange={(e) => setBranchActive(e.target.checked)}
-                        disabled={isPending}
-                        aria-labelledby="bf-active-label"
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                )}
-                <button type="submit" className="btn btn-primary" disabled={isPending} style={{ width: "100%" }}>
-                  {branchMode === "add" ? "Stwórz oddział" : "Zapisz oddział"}
-                </button>
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPanelState(branches.length > 0 ? "details" : "add-branch")}>
+                    Anuluj
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={isPending}>
+                    Stwórz oddział
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         )}
 
-        {/* 2. Address Editor Form */}
-        {selectedBranch && (
+        {/* EDIT BRANCH FORM */}
+        {panelState === "edit-branch" && (
           <div className="card" style={{ border: "1px solid var(--line)" }}>
             <div className="card-header">
-              <h3 className="card-title">
-                {addressMode === "add" ? "Nowy adres dostawy" : "Edytuj adres dostawy"}
-              </h3>
+              <h3 className="card-title">Edytuj oddział: {selectedBranch?.name}</h3>
+            </div>
+            <div className="card-content" style={{ padding: "20px" }}>
+              <form onSubmit={handleBranchSubmit} className="col-12">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="bf-name">Nazwa oddziału</label>
+                  <input
+                    id="bf-name"
+                    type="text"
+                    className="form-input"
+                    value={branchName}
+                    onChange={(e) => setBranchName(e.target.value)}
+                    placeholder="np. Zakład 3"
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="bf-branch-street">Ulica i numer</label>
+                  <input
+                    id="bf-branch-street"
+                    type="text"
+                    className="form-input"
+                    value={branchStreet}
+                    onChange={(e) => setBranchStreet(e.target.value)}
+                    placeholder="np. ul. Fabryczna 10"
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "15px" }}>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-branch-postal">Kod pocztowy</label>
+                    <input
+                      id="bf-branch-postal"
+                      type="text"
+                      inputMode="numeric"
+                      className="form-input"
+                      value={branchPostalCode}
+                      onChange={(e) => setBranchPostalCode(e.target.value)}
+                      placeholder="00-000"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-branch-city">Miasto</label>
+                    <input
+                      id="bf-branch-city"
+                      type="text"
+                      className="form-input"
+                      value={branchCity}
+                      onChange={(e) => setBranchCity(e.target.value)}
+                      placeholder="Kielce"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="switch-container" style={{ marginBottom: "16px" }}>
+                  <span className="switch-label" id="bf-active-label">Aktywny</span>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={branchActive}
+                      onChange={(e) => setBranchActive(e.target.checked)}
+                      disabled={isPending}
+                      aria-labelledby="bf-active-label"
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPanelState("details")}>
+                    Anuluj
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={isPending}>
+                    Zapisz oddział
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ADD DELIVERY ADDRESS FORM */}
+        {panelState === "add-address" && (
+          <div className="card" style={{ border: "1px solid var(--line)" }}>
+            <div className="card-header">
+              <h3 className="card-title">Nowy adres dostawy dla: {selectedBranch?.name}</h3>
             </div>
             <div className="card-content" style={{ padding: "20px" }}>
               <form onSubmit={handleAddressSubmit} className="col-12">
-                
                 <div className="form-group">
                   <label className="form-label" htmlFor="bf-recipient">Odbiorca / Nazwa</label>
                   <input
@@ -565,7 +724,6 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     required
                   />
                 </div>
-
                 <div className="form-group">
                   <label className="form-label" htmlFor="bf-street">Ulica i numer</label>
                   <input
@@ -579,8 +737,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     required
                   />
                 </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "15px" }}>
                   <div className="form-group">
                     <label className="form-label" htmlFor="bf-postal">Kod pocztowy</label>
                     <input
@@ -591,7 +748,6 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
                       placeholder="00-000"
-                      autoComplete="postal-code"
                       disabled={isPending}
                       required
                     />
@@ -605,13 +761,11 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Kielce"
-                      autoComplete="address-level2"
                       disabled={isPending}
                       required
                     />
                   </div>
                 </div>
-
                 <div className="form-group">
                   <label className="form-label" htmlFor="bf-contact">Osoba kontaktowa (opcjonalnie)</label>
                   <input
@@ -624,31 +778,113 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                     disabled={isPending}
                   />
                 </div>
-
-                {addressMode === "edit" && (
-                  <div className="switch-container">
-                    <span className="switch-label" id="bf-addr-active-label">Adres aktywny</span>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={addressActive}
-                        onChange={(e) => setAddressActive(e.target.checked)}
-                        disabled={isPending}
-                        aria-labelledby="bf-addr-active-label"
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                )}
-
-                <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
-                  {addressMode === "edit" && (
-                    <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={handleAddressReset}>
-                      Anuluj
-                    </button>
-                  )}
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPanelState("details")}>
+                    Anuluj
+                  </button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={isPending}>
-                    {addressMode === "add" ? "Dodaj adres" : "Zapisz adres"}
+                    Dodaj adres
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* EDIT DELIVERY ADDRESS FORM */}
+        {panelState === "edit-address" && (
+          <div className="card" style={{ border: "1px solid var(--line)" }}>
+            <div className="card-header">
+              <h3 className="card-title">Edytuj adres dostawy</h3>
+            </div>
+            <div className="card-content" style={{ padding: "20px" }}>
+              <form onSubmit={handleAddressSubmit} className="col-12">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="bf-recipient">Odbiorca / Nazwa</label>
+                  <input
+                    id="bf-recipient"
+                    type="text"
+                    className="form-input"
+                    value={recipientName}
+                    onChange={(e) => setRecipientName(e.target.value)}
+                    placeholder="np. KGHM S.A. Magazyn Główny"
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="bf-street">Ulica i numer</label>
+                  <input
+                    id="bf-street"
+                    type="text"
+                    className="form-input"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    placeholder="np. ul. Fabryczna 10"
+                    disabled={isPending}
+                    required
+                  />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "15px" }}>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-postal">Kod pocztowy</label>
+                    <input
+                      id="bf-postal"
+                      type="text"
+                      inputMode="numeric"
+                      className="form-input"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value)}
+                      placeholder="00-000"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-city">Miasto</label>
+                    <input
+                      id="bf-city"
+                      type="text"
+                      className="form-input"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Kielce"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="bf-contact">Osoba kontaktowa (opcjonalnie)</label>
+                  <input
+                    id="bf-contact"
+                    type="text"
+                    className="form-input"
+                    value={contactPerson}
+                    onChange={(e) => setContactPerson(e.target.value)}
+                    placeholder="np. Adam Kowalski"
+                    disabled={isPending}
+                  />
+                </div>
+                <div className="switch-container" style={{ marginBottom: "16px" }}>
+                  <span className="switch-label" id="bf-addr-active-label">Adres aktivny</span>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={addressActive}
+                      onChange={(e) => setAddressActive(e.target.checked)}
+                      disabled={isPending}
+                      aria-labelledby="bf-addr-active-label"
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+                <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPanelState("details")}>
+                    Anuluj
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={isPending}>
+                    Zapisz adres
                   </button>
                 </div>
               </form>
