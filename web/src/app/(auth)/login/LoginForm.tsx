@@ -29,7 +29,7 @@ export default function LoginForm() {
     });
 
     if (result?.error) {
-      setError("Nieprawidłowy email lub hasło. Spróbuj ponownie.");
+      setError("Nieprawidłowy login lub hasło. Spróbuj ponownie.");
       setIsLoading(false);
     } else {
       router.push(callbackUrl);
@@ -49,20 +49,20 @@ export default function LoginForm() {
       )}
 
       <div className={styles.formGroup}>
-        <label htmlFor="email" className={styles.label}>Adres email</label>
+        <label htmlFor="email" className={styles.label}>Login (Nazwa użytkownika)</label>
         <div className={styles.inputWrapper}>
           <svg className={styles.inputIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
           <input
             id="email"
-            type="email"
+            type="text"
             className={styles.input}
-            placeholder="twoj@email.pl"
+            placeholder="np. demo"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            autoComplete="email"
+            autoComplete="username"
             disabled={isLoading}
           />
         </div>

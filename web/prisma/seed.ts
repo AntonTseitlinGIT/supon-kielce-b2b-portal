@@ -40,10 +40,10 @@ async function main() {
 
   // ─── SUPON Users ───
   const suponAdmin = await prisma.user.upsert({
-    where: { email: "admin@suponkielce.pl" },
+    where: { email: "admin" },
     update: {},
     create: {
-      email: "admin@suponkielce.pl",
+      email: "admin",
       name: "Admin SUPON",
       passwordHash: await hash("admin1234"),
       role: Role.SUPON_ADMIN,
@@ -84,10 +84,10 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "centralny@kghm-kielce.pl" },
+    where: { email: "centralny" },
     update: {},
     create: {
-      email: "centralny@kghm-kielce.pl",
+      email: "centralny",
       name: "Anna Dyrektora",
       passwordHash: await hash("client1234"),
       role: Role.CLIENT_HEAD,
@@ -96,10 +96,10 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "zaklad1@kghm-kielce.pl" },
+    where: { email: "zaklad1" },
     update: {},
     create: {
-      email: "zaklad1@kghm-kielce.pl",
+      email: "zaklad1",
       name: "Piotr Kierownik",
       passwordHash: await hash("branch1234"),
       role: Role.BRANCH_HEAD,
@@ -142,14 +142,27 @@ async function main() {
   });
 
   const demoClientHead = await prisma.user.upsert({
-    where: { email: "demo@suponkielce.pl" },
+    where: { email: "demo" },
     update: {},
     create: {
-      email: "demo@suponkielce.pl",
+      email: "demo",
       name: "Tomasz Dyrektor",
       passwordHash: await hash("demo1234"),
       role: Role.CLIENT_HEAD,
       clientId: demoClient.id,
+    },
+  });
+
+  const demoBranchHead = await prisma.user.upsert({
+    where: { email: "demo-oddzial" },
+    update: {},
+    create: {
+      email: "demo-oddzial",
+      name: "Marek Kierownik",
+      passwordHash: await hash("demo1234"),
+      role: Role.BRANCH_HEAD,
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
     },
   });
 
@@ -535,10 +548,11 @@ async function main() {
 
   console.log("✅ Seed complete!");
   console.log("\n🔑 Test accounts:");
-  console.log("  SUPON Admin:   admin@suponkielce.pl    / admin1234");
-  console.log("  Demo Head:     demo@suponkielce.pl     / demo1234");
-  console.log("  Client Head:   centralny@kghm-kielce.pl / client1234");
-  console.log("  Branch Head:   zaklad1@kghm-kielce.pl   / branch1234");
+  console.log("  SUPON Admin:   admin        / admin1234");
+  console.log("  Demo Head:     demo         / demo1234");
+  console.log("  Demo Branch:   demo-oddzial / demo1234");
+  console.log("  Client Head:   centralny    / client1234");
+  console.log("  Branch Head:   zaklad1      / branch1234");
 }
 
 main()

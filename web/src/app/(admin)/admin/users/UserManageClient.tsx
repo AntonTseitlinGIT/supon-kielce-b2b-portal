@@ -339,14 +339,14 @@ export default function UserManageClient({ users, clients, branches }: Props) {
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required" htmlFor="um-email">Adres e-mail</label>
+              <label className="form-label form-required" htmlFor="um-email">Login</label>
               <input
                 id="um-email"
-                type="email"
+                type="text"
                 className="form-input"
-                placeholder="np. jan.kowalski@firma.pl"
+                placeholder="np. demo"
                 required
-                autoComplete="email"
+                autoComplete="username"
                 value={formEmail}
                 onChange={(e) => setFormEmail(e.target.value)}
                 disabled={isPending}

@@ -20,8 +20,8 @@ export async function createUser(prevState: any, formData: FormData) {
   const branchId = (formData.get("branchId") as string) || null;
 
   if (!name?.trim()) return { success: false, error: "Imię i nazwisko jest wymagane." };
-  if (!email?.trim()) return { success: false, error: "Adres e-mail jest wymagany." };
-  if (!z.email().safeParse(email.trim()).success) return { success: false, error: "Nieprawidłowy format adresu e-mail." };
+  if (!email?.trim()) return { success: false, error: "Login jest wymagany." };
+  if (!z.string().min(3).safeParse(email.trim()).success) return { success: false, error: "Login musi mieć co najmniej 3 znaki." };
   if (!password || password.length < 6) return { success: false, error: "Hasło musi mieć co najmniej 6 znaków." };
   if (!role) return { success: false, error: "Rola użytkownika jest wymagana." };
 
@@ -78,8 +78,8 @@ export async function updateUser(prevState: any, formData: FormData) {
 
   if (!id) return { success: false, error: "Brak ID użytkownika." };
   if (!name?.trim()) return { success: false, error: "Imię i nazwisko jest wymagane." };
-  if (!email?.trim()) return { success: false, error: "Adres e-mail jest wymagany." };
-  if (!z.email().safeParse(email.trim()).success) return { success: false, error: "Nieprawidłowy format adresu e-mail." };
+  if (!email?.trim()) return { success: false, error: "Login jest wymagany." };
+  if (!z.string().min(3).safeParse(email.trim()).success) return { success: false, error: "Login musi mieć co najmniej 3 znaki." };
 
   const validRoles = ["BRANCH_HEAD", "CLIENT_HEAD", "SUPON_ADMIN"];
   if (!role || !validRoles.includes(role)) return { success: false, error: "Nieprawidłowa rola." };
