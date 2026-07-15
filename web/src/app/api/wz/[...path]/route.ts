@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { isSuponRole } from "@/config/permissions.config";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 function getStorageClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,13 +20,30 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { path } = await params;
+  const storagePath = path.join("/");
+
+  // Ownership validation for client-portal users to prevent BOLA (Broken Object Level Authorization)
   if (!isSuponRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const pdfUrl = `/api/wz/${storagePath}`;
+    const wzDoc = await prisma.wzDocument.findFirst({
+      where: { pdfUrl },
+      select: { clientId: true, branchId: true }
+    });
+
+    if (!wzDoc) {
+      return NextResponse.json({ error: "Nie znaleziono dokumentu." }, { status: 404 });
+    }
+
+    if (wzDoc.clientId !== session.user.clientId) {
+      return NextResponse.json({ error: "Brak dostępu do tego dokumentu." }, { status: 403 });
+    }
+
+    if (session.user.role === "BRANCH_HEAD" && wzDoc.branchId !== session.user.branchId) {
+      return NextResponse.json({ error: "Brak dostępu do dokumentów tego oddziału." }, { status: 403 });
+    }
   }
 
-  const { path } = await params;
-  // path[0] is "wz", rest is the filename — reconstruct storage path
-  const storagePath = path.join("/");
 
   try {
     const supabase = getStorageClient();

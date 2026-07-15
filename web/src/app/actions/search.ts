@@ -185,6 +185,9 @@ export async function globalSearch(query: string, scope: "client" | "admin") {
       });
 
     } else if (scope === "admin") {
+      if (session.user.role !== "SUPON_ADMIN") {
+        return { success: false, error: "Brak uprawnień. Dostęp tylko dla Administratora SUPON." };
+      }
       const [clients, products, orders, tickets] = await Promise.all([
         // 1. Search clients
         prisma.client.findMany({

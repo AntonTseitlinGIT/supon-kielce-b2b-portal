@@ -97,25 +97,3 @@ export async function markAllNotificationsAsRead() {
   }
 }
 
-// Utility function to trigger a notification (can be called from other server actions)
-export async function createInAppNotification(
-  userId: string,
-  title: string,
-  body?: string,
-  link?: string
-) {
-  try {
-    await prisma.notification.create({
-      data: {
-        userId,
-        title,
-        body,
-        link
-      }
-    });
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error creating notification:", error);
-    return { success: false, error: error.message };
-  }
-}
