@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatShortDate } from "@/utils/format";
@@ -75,6 +75,19 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
 
   // Tracking Number Popup State
   const [trackingPopup, setTrackingPopup] = useState<{ carrier: string; trackingNr: string; deliveryNr: string } | null>(null);
+
+  // Close topmost overlay on Escape (escape-routes / modal-escape)
+  useEffect(() => {
+    if (!lightbox && !trackingPopup && !selectedOrder) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (lightbox) setLightbox(null);
+      else if (trackingPopup) setTrackingPopup(null);
+      else if (selectedOrder) setSelectedOrder(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox, trackingPopup, selectedOrder]);
 
   // Get carrier tracking URL
   const getCarrierUrl = (carrier: string, trackingNr: string): string => {
@@ -250,8 +263,8 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
             />
           );
         })}
-        <span style={{ marginLeft: "4px", color, fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px", whiteSpace: "nowrap" }}>
-          {isZatwierdzone && "✓ "}{label}
+        <span style={{ marginLeft: "4px", color, fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+          {isZatwierdzone && <Check size={12} aria-hidden="true" />}{label}
         </span>
       </div>
     );
@@ -283,7 +296,7 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
     <>
       {/* Toast popup */}
       {toastMsg && (
-        <div style={{
+        <div role="status" aria-live="polite" style={{
           position: "fixed",
           bottom: "24px",
           right: "24px",
@@ -300,7 +313,7 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
           gap: "8px",
           animation: "slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards"
         }}>
-          <Check size={16} style={{ color: "var(--ok)" }} />
+          <Check size={16} style={{ color: "var(--ok)" }} aria-hidden="true" />
           <span>{toastMsg}</span>
         </div>
       )}
@@ -361,8 +374,9 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
             }}>
               {lightbox.title}
             </div>
-            <button 
+            <button
               onClick={() => setLightbox(null)}
+              aria-label="Zamknij podgląd"
               style={{
                 position: "absolute",
                 top: "-48px",
@@ -378,7 +392,7 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
                 cursor: "pointer"
               }}
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -401,6 +415,9 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tracking-popup-title"
             style={{
               background: "var(--page-bg)",
               border: "1px solid var(--line)",
@@ -416,7 +433,7 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
           >
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div className="row-10">
                 <div style={{
                   width: "40px",
                   height: "40px",
@@ -425,18 +442,19 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
                   display: "grid",
                   placeItems: "center"
                 }}>
-                  <Truck size={20} style={{ color: "var(--accent)" }} />
+                  <Truck size={20} style={{ color: "var(--accent)" }} aria-hidden="true" />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: "15px" }}>Śledzenie przesyłki</div>
+                  <div id="tracking-popup-title" style={{ fontWeight: 800, fontSize: "15px" }}>Śledzenie przesyłki</div>
                   <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>Paczka #{trackingPopup.deliveryNr}</div>
                 </div>
               </div>
               <button
                 onClick={() => setTrackingPopup(null)}
+                aria-label="Zamknij"
                 style={{ background: "transparent", border: 0, cursor: "pointer", color: "var(--muted)", padding: "4px" }}
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
@@ -573,14 +591,14 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
 
                     {/* Partial progress: inline bar + counters */}
                     {isPartial && totalQty > 0 && (
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <div className="row-6">
                         <div style={{ position: "relative", width: "80px", height: "5px", borderRadius: "99px", background: "var(--line)", flexShrink: 0, overflow: "hidden" }}>
                           <div style={{ position: "absolute", left: 0, top: 0, height: "100%", width: `${deliveredPct}%`, background: "var(--ok)", borderRadius: "99px 0 0 99px" }} />
                           <div style={{ position: "absolute", left: `${deliveredPct}%`, top: 0, height: "100%", width: `${inTransitPct}%`, background: "#f59e0b" }} />
                         </div>
-                        <span style={{ fontSize: "11px", color: "var(--muted)", whiteSpace: "nowrap", fontWeight: 500 }}>
-                          {deliveredQty > 0 && <span style={{ color: "var(--ok)", fontWeight: 700 }}>✓{deliveredQty} </span>}
-                          {shippedQty > 0 && <span style={{ color: "#d97706", fontWeight: 700 }}>🚚{shippedQty} </span>}
+                        <span style={{ fontSize: "11px", color: "var(--muted)", whiteSpace: "nowrap", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          {deliveredQty > 0 && <span style={{ color: "var(--ok)", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "2px" }}><Check size={11} aria-hidden="true" />{deliveredQty}</span>}
+                          {shippedQty > 0 && <span style={{ color: "#d97706", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "2px" }}><Truck size={11} aria-hidden="true" />{shippedQty}</span>}
                           {(totalQty - deliveredQty - shippedQty) > 0 && <span>{totalQty - deliveredQty - shippedQty} czeka</span>}
                         </span>
                       </div>
@@ -588,10 +606,10 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
 
                     {/* Non-partial delivery count */}
                     {!isPartial && (deliveredQty > 0 || (order.status === "SENT" && activeShipments.length > 0)) && (
-                      <span style={{ fontSize: "11px", color: activeShipments.length > 0 ? "#d97706" : "var(--ok)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: "11px", color: activeShipments.length > 0 ? "#d97706" : "var(--ok)", fontWeight: 600, whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "4px" }}>
                         {activeShipments.length > 0
-                          ? `🚚 ${activeShipments[0].carrier.toUpperCase()} ${activeShipments[0].trackingNr}`
-                          : `✓ ${deliveredQty}/${totalQty} szt.`
+                          ? <><Truck size={11} aria-hidden="true" /> {activeShipments[0].carrier.toUpperCase()} {activeShipments[0].trackingNr}</>
+                          : <><Check size={11} aria-hidden="true" /> {deliveredQty}/{totalQty} szt.</>
                         }
                       </span>
                     )}
@@ -613,11 +631,20 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
                   key={order.id}
                   style={{ borderBottom: "1px solid var(--line)", transition: "background 0.2s ease", cursor: "pointer" }}
                   onClick={() => setSelectedOrder(order)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedOrder(order);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Otwórz szczegóły zamówienia ${order.orderNr}`}
                   className="clickable-row"
                 >
                   {/* Numer zamówienia */}
                   <td style={{ padding: "12px 16px", whiteSpace: "nowrap" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="row-8">
                       <span style={{ fontWeight: 700, color: "var(--text)", fontSize: "13px" }}>{order.orderNr}</span>
                       {order.orderType === "EXCHANGE" && (
                         <span className="badge" style={{ background: "#f3e8ff", color: "#6b21a8", fontSize: "10px", padding: "1px 6px" }}>WYMIANA</span>
@@ -767,16 +794,22 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
       {selectedOrder && (() => {
         const firstItem = selectedOrder.items[0];
         return (
-          <div style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(2, 6, 23, 0.45)",
-            backdropFilter: "blur(4px)",
-            display: "grid",
-            placeItems: "center",
-            zIndex: 1000
-          }}>
-            <div 
+          <div
+            onClick={() => setSelectedOrder(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(2, 6, 23, 0.55)",
+              backdropFilter: "blur(4px)",
+              display: "grid",
+              placeItems: "center",
+              zIndex: 1000
+            }}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="client-order-modal-title"
+              onClick={(e) => e.stopPropagation()}
               style={{
                 width: "min(1080px, 96vw)",
                 background: "var(--page-bg)",
@@ -789,8 +822,8 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
           >
             {/* Header */}
             <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>Szczegóły zamówienia {selectedOrder.orderNr}</h3>
+              <div className="row-10">
+                <h3 id="client-order-modal-title" style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>Szczegóły zamówienia {selectedOrder.orderNr}</h3>
                 {selectedOrder.orderType === "EXCHANGE" && (
                   <span className="badge" style={{ background: "#f3e8ff", color: "#6b21a8", fontSize: "11px", padding: "2px 8px" }}>WYMIANA</span>
                 )}

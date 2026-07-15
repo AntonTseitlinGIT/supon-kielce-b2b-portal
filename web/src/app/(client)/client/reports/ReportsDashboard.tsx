@@ -50,6 +50,14 @@ interface ReportsDashboardProps {
   statusChartData: DistributionChartItem[];
   categoryChartData: DistributionChartItem[];
   branchesTable: BranchTableItem[];
+  /** Label for the grouping dimension — "Oddział" (client view) or "Klient" (admin view). */
+  dimensionLabel?: string;
+  /** Header for the second table column. */
+  secondaryColLabel?: string;
+  /** Message shown when the table has no rows. */
+  emptyMessage?: string;
+  /** PDF export endpoint. Pass null to hide the PDF button (no admin endpoint yet). */
+  pdfUrl?: string | null;
 }
 
 export default function ReportsDashboard({
@@ -59,6 +67,10 @@ export default function ReportsDashboard({
   statusChartData,
   categoryChartData,
   branchesTable,
+  dimensionLabel = "Oddział",
+  secondaryColLabel = "Adres dostaw",
+  emptyMessage = "Brak danych oddziałów dla tego klienta.",
+  pdfUrl = "/api/client/reports/pdf",
 }: ReportsDashboardProps) {
   const [mounted, setMounted] = useState(false);
   const [isPdfPending, startPdfTransition] = useTransition();
@@ -67,10 +79,18 @@ export default function ReportsDashboard({
     setMounted(true);
   }, []);
 
+  const plnFmt = new Intl.NumberFormat("pl-PL");
+  const summarize = (rows: { label: string; val: number }[], suffix = "") =>
+    rows.length === 0 ? "Brak danych." : rows.map(r => `${r.label}: ${plnFmt.format(r.val)}${suffix}`).join(", ") + ".";
+  const branchSummary = `Wydatki według: ${dimensionLabel.toLowerCase()}. ` + summarize(branchChartData.map(d => ({ label: d.name, val: d.spend })), " zł");
+  const monthlySummary = "Liczba zamówień miesięcznie. " + summarize(monthlyChartData.map(d => ({ label: d.month, val: d.count })));
+  const statusSummary = "Struktura statusów zamówień. " + summarize(statusChartData.map(d => ({ label: d.name, val: d.value })));
+  const categorySummary = "Zamówienia według kategorii ŚOI. " + summarize(categoryChartData.map(d => ({ label: d.name, val: d.value })));
+
   const handleExportExcel = () => {
     const wsData = branchesTable.map(b => ({
-      "Nazwa oddziału": b.name,
-      "Adres": b.address,
+      [`Nazwa: ${dimensionLabel}`]: b.name,
+      [secondaryColLabel]: b.address,
       "Liczba pracowników": b.employeeCount,
       "Liczba zamówień": b.orderCount,
       "Łączne wydatki (PLN)": b.totalSpend,
@@ -78,7 +98,7 @@ export default function ReportsDashboard({
 
     const ws = XLSX.utils.json_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Statystyki Oddziałów");
+    XLSX.utils.book_append_sheet(wb, ws, "Statystyki");
 
     // Format column widths
     ws["!cols"] = [
@@ -93,9 +113,10 @@ export default function ReportsDashboard({
   };
 
   const handleExportPdf = () => {
+    if (!pdfUrl) return;
     startPdfTransition(async () => {
       // Trigger browser to open endpoint directly
-      window.open("/api/client/reports/pdf", "_blank");
+      window.open(pdfUrl, "_blank");
     });
   };
 
@@ -121,21 +142,23 @@ export default function ReportsDashboard({
             <FileSpreadsheet size={16} /> Eksportuj do Excel (XLSX)
           </button>
           
-          <button 
-            onClick={handleExportPdf} 
-            className={`${styles.btnExport} ${styles.btnExportPdf} ${isPdfPending ? styles.btnExportDisabled : ""}`}
-            disabled={isPdfPending}
-          >
-            {isPdfPending ? (
-              <>
-                <Loader2 size={16} className="spinner" /> Generowanie PDF...
-              </>
-            ) : (
-              <>
-                <FileText size={16} /> Pobierz raport PDF
-              </>
-            )}
-          </button>
+          {pdfUrl && (
+            <button
+              onClick={handleExportPdf}
+              className={`${styles.btnExport} ${styles.btnExportPdf} ${isPdfPending ? styles.btnExportDisabled : ""}`}
+              disabled={isPdfPending}
+            >
+              {isPdfPending ? (
+                <>
+                  <Loader2 size={16} className="spinner" /> Generowanie PDF...
+                </>
+              ) : (
+                <>
+                  <FileText size={16} /> Pobierz raport PDF
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -171,8 +194,8 @@ export default function ReportsDashboard({
         
         {/* Chart 1: Expenses per Branch */}
         <div className={styles.chartCard}>
-          <h4 className={styles.chartTitle}>Wydatki według oddziałów (PLN)</h4>
-          <div className={styles.chartWrapper}>
+          <h4 className={styles.chartTitle}>Wydatki według: {dimensionLabel.toLowerCase()} (PLN)</h4>
+          <div className={styles.chartWrapper} role="img" aria-label={branchSummary}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={branchChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" />
@@ -191,7 +214,7 @@ export default function ReportsDashboard({
         {/* Chart 2: Monthly orders frequency */}
         <div className={styles.chartCard}>
           <h4 className={styles.chartTitle}>Częstotliwość zamówień (miesięcznie)</h4>
-          <div className={styles.chartWrapper}>
+          <div className={styles.chartWrapper} role="img" aria-label={monthlySummary}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyChartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" />
@@ -209,7 +232,7 @@ export default function ReportsDashboard({
         {/* Chart 3: Order status distribution */}
         <div className={styles.chartCard}>
           <h4 className={styles.chartTitle}>Struktura statusów zamówień</h4>
-          <div className={styles.chartWrapper}>
+          <div className={styles.chartWrapper} role="img" aria-label={statusSummary}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -235,7 +258,7 @@ export default function ReportsDashboard({
         {/* Chart 4: Categories distribution */}
         <div className={styles.chartCard}>
           <h4 className={styles.chartTitle}>Zamówienia według kategorii ŚOI</h4>
-          <div className={styles.chartWrapper}>
+          <div className={styles.chartWrapper} role="img" aria-label={categorySummary}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -260,13 +283,13 @@ export default function ReportsDashboard({
 
       {/* Summary Table Section */}
       <div className={styles.tableSection}>
-        <h4 className={styles.chartTitle} style={{ marginBottom: "16px" }}>Zestawienie wydatków oddziałów</h4>
+        <h4 className={styles.chartTitle} style={{ marginBottom: "16px" }}>Zestawienie wydatków ({dimensionLabel.toLowerCase()})</h4>
         <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
-                <th>Oddział</th>
-                <th>Adres dostaw</th>
+                <th>{dimensionLabel}</th>
+                <th>{secondaryColLabel}</th>
                 <th style={{ textAlign: "center" }}>Liczba pracowników</th>
                 <th style={{ textAlign: "center" }}>Złożone zamówienia</th>
                 <th style={{ textAlign: "right" }}>Łączny koszt (PLN)</th>
@@ -287,7 +310,7 @@ export default function ReportsDashboard({
               {branchesTable.length === 0 && (
                 <tr>
                   <td colSpan={5} style={{ textAlign: "center", padding: "24px", color: "var(--muted)" }}>
-                    Brak danych oddziałów dla tego klienta.
+                    {emptyMessage}
                   </td>
                 </tr>
               )}

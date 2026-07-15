@@ -1,13 +1,16 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { isSuponRole } from "@/config/permissions.config";
 import { prisma } from "@/lib/db";
-import { TicketStatus } from "@prisma/client";
+import { TicketStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { notifyClientUsers } from "@/lib/notifications";
+import { nextSequence } from "@/lib/sequences";
 
 export async function updateTicketStatus(ticketId: string, status: TicketStatus) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak autoryzacji." };
   }
 
@@ -19,29 +22,18 @@ export async function updateTicketStatus(ticketId: string, status: TicketStatus)
 
     // Notify client users
     try {
-      const clientUsers = await prisma.user.findMany({
-        where: { clientId: ticket.clientId, isActive: true },
-        select: { id: true }
-      });
-
-      if (clientUsers.length > 0) {
-        const STATUS_LABELS: Record<string, string> = {
-          NEW: "nowe",
-          IN_PROGRESS: "w realizacji",
-          RESOLVED: "rozwiązane",
-          CLOSED: "zamknięte"
-        };
-        const statusLabel = STATUS_LABELS[status] || status;
-
-        await prisma.notification.createMany({
-          data: clientUsers.map(u => ({
-            userId: u.id,
-            title: `Zmiana statusu zgłoszenia ${ticket.ticketNr}`,
-            body: `Nowy status zgłoszenia: ${statusLabel}`,
-            link: `/client/tickets/${ticket.id}`
-          }))
-        });
-      }
+      const STATUS_LABELS: Record<string, string> = {
+        NEW: "nowe",
+        IN_PROGRESS: "w realizacji",
+        RESOLVED: "rozwiązane",
+        CLOSED: "zamknięte"
+      };
+      await notifyClientUsers(
+        ticket.clientId,
+        `Zmiana statusu zgłoszenia ${ticket.ticketNr}`,
+        `Nowy status zgłoszenia: ${STATUS_LABELS[status] ?? status}`,
+        `/client/tickets/${ticket.id}`
+      );
     } catch (nErr) {
       console.error("Failed to trigger ticket status notification:", nErr);
     }
@@ -65,7 +57,7 @@ interface SendMessageInput {
 
 export async function sendAdminTicketMessage(input: SendMessageInput) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak autoryzacji." };
   }
 
@@ -143,21 +135,13 @@ export async function sendAdminTicketMessage(input: SendMessageInput) {
 
       // Notify client users about support message reply
       try {
-        const clientUsers = await prisma.user.findMany({
-          where: { clientId: ticket.clientId, isActive: true },
-          select: { id: true }
-        });
-
-        if (clientUsers.length > 0) {
-          await prisma.notification.createMany({
-            data: clientUsers.map(u => ({
-              userId: u.id,
-              title: `Nowa odpowiedź w zgłoszeniu ${ticket.ticketNr}`,
-              body: input.text.length > 60 ? input.text.substring(0, 57) + "..." : input.text,
-              link: `/client/tickets/${ticket.id}`
-            }))
-          });
-        }
+        const preview = input.text.length > 60 ? input.text.substring(0, 57) + "..." : input.text;
+        await notifyClientUsers(
+          ticket.clientId,
+          `Nowa odpowiedź w zgłoszeniu ${ticket.ticketNr}`,
+          preview,
+          `/client/tickets/${ticket.id}`
+        );
       } catch (nErr) {
         console.error("Failed to trigger ticket message notification:", nErr);
       }
@@ -187,7 +171,7 @@ export async function sendAdminTicketMessage(input: SendMessageInput) {
 
 export async function approveTicketAndGenerateOrder(ticketId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak autoryzacji." };
   }
 
@@ -218,15 +202,24 @@ export async function approveTicketAndGenerateOrder(ticketId: string) {
       return { success: false, error: "Zgłoszenie nie ma powiązanego produktu." };
     }
 
-    // 2. Generate unique order number: WYM-YYYY-XXXX or REK-YYYY-XXXX
-    const currentYear = new Date().getFullYear();
-    const orderCount = await prisma.order.count();
-    const sequenceNum = 1000 + orderCount + 1;
-    const prefix = ticket.type === "EXCHANGE" ? "WYM" : "REK";
-    const orderNr = `${prefix}-${currentYear}-${sequenceNum}`;
+    // Required size must be present: newSize for EXCHANGE, original size for COMPLAINT
+    const targetSize = ticket.type === "EXCHANGE" ? ticket.newSize : ticket.size;
+    if (!targetSize) {
+      return {
+        success: false,
+        error: ticket.type === "EXCHANGE"
+          ? "Zgłoszenie wymiany nie ma określonego nowego rozmiaru."
+          : "Zgłoszenie reklamacyjne nie ma określonego rozmiaru.",
+      };
+    }
 
-    // 3. Perform Order Creation and Ticket Resolution in transaction
+    // 2. Generate order number + perform all writes in one serializable transaction
+    const prefix = ticket.type === "EXCHANGE" ? "WYM" : "REK";
     const result = await prisma.$transaction(async (tx) => {
+      const currentYear = new Date().getFullYear();
+      const seq = await nextSequence(tx, "order");
+      const orderNr = `${prefix}-${currentYear}-${1000 + seq}`;
+
       // Create new Order
       const order = await tx.order.create({
         data: {
@@ -241,9 +234,6 @@ export async function approveTicketAndGenerateOrder(ticketId: string) {
           createdById: session.user.id,
         }
       });
-      // Determine size (newSize for exchange, original size for complaint replacement)
-      const targetSize = ticket.type === "EXCHANGE" ? ticket.newSize! : ticket.size!;
-
       // Create order item
       await tx.orderItem.create({
         data: {
@@ -281,25 +271,18 @@ export async function approveTicketAndGenerateOrder(ticketId: string) {
       });
 
       return order;
-    });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+
+    const orderNr = result.orderNr;
 
     // Notify client users about ticket resolution
     try {
-      const clientUsers = await prisma.user.findMany({
-        where: { clientId: ticket.clientId, isActive: true },
-        select: { id: true }
-      });
-
-      if (clientUsers.length > 0) {
-        await prisma.notification.createMany({
-          data: clientUsers.map(u => ({
-            userId: u.id,
-            title: `Zatwierdzono zgłoszenie ${ticket.ticketNr}`,
-            body: `Wygenerowano nowe zamówienie ${orderNr}`,
-            link: `/client/tickets/${ticket.id}`
-          }))
-        });
-      }
+      await notifyClientUsers(
+        ticket.clientId,
+        `Zatwierdzono zgłoszenie ${ticket.ticketNr}`,
+        `Wygenerowano nowe zamówienie ${orderNr}`,
+        `/client/tickets/${ticket.id}`
+      );
     } catch (nErr) {
       console.error("Failed to send resolution notifications:", nErr);
     }

@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { isSuponRole } from "@/config/permissions.config";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
@@ -9,7 +10,7 @@ import { revalidatePath } from "next/cache";
 export async function createClient(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Tylko Administrator SUPON może dodawać klientów." };
   }
 
@@ -56,7 +57,7 @@ export async function createClient(prevState: any, formData: FormData) {
 export async function updateClient(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Tylko Administrator SUPON może edytować klientów." };
   }
 
@@ -115,7 +116,7 @@ export async function updateClient(prevState: any, formData: FormData) {
 export async function createClientBranch(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień." };
   }
 
@@ -154,7 +155,7 @@ export async function createClientBranch(prevState: any, formData: FormData) {
 export async function updateClientBranch(prevState: any, formData: FormData) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień." };
   }
 
@@ -205,7 +206,7 @@ export async function saveClientProductPrice(
 ) {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "SUPON_ADMIN") {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień." };
   }
 
@@ -244,5 +245,69 @@ export async function saveClientProductPrice(
   } catch (error: any) {
     console.error("Error updating client product price:", error);
     return { success: false, error: "Błąd zapisu ceny indywidualnej." };
+  }
+}
+
+interface SaveConfigInput {
+  modules: Record<string, boolean>;
+  limits: { maxUsers: number; maxBranches: number };
+}
+
+export async function saveClientConfig(clientId: string, input: SaveConfigInput) {
+  const session = await auth();
+  if (!session?.user || !isSuponRole(session.user.role)) {
+    return { error: "Brak uprawnień." };
+  }
+
+  // Validate modules — only known keys accepted
+  const sanitizedModules: Record<string, boolean> = {};
+  const knownKeys = new Set(["orders", "personnel", "tickets", "documents", "branches", "catalog", "reports"]);
+  for (const [key, val] of Object.entries(input.modules)) {
+    if (knownKeys.has(key) && typeof val === "boolean") {
+      sanitizedModules[key] = val;
+    }
+  }
+
+  // Validate limits
+  const maxUsers = Math.max(1, Math.min(9999, Number(input.limits.maxUsers) || 50));
+  const maxBranches = Math.max(1, Math.min(999, Number(input.limits.maxBranches) || 10));
+
+  try {
+    await prisma.clientConfig.upsert({
+      where: { clientId },
+      update: {
+        modules: sanitizedModules,
+        limits: { maxUsers, maxBranches },
+        updatedBy: session.user.id,
+      },
+      create: {
+        clientId,
+        modules: sanitizedModules,
+        limits: { maxUsers, maxBranches },
+        updatedBy: session.user.id,
+      },
+    });
+
+    revalidatePath(`/admin/clients/${clientId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving client config:", error);
+    return { error: "Błąd zapisu konfiguracji. Spróbuj ponownie." };
+  }
+}
+
+export async function resetClientConfig(clientId: string) {
+  const session = await auth();
+  if (!session?.user || !isSuponRole(session.user.role)) {
+    return { error: "Brak uprawnień." };
+  }
+
+  try {
+    await prisma.clientConfig.delete({ where: { clientId } }).catch(() => null);
+    revalidatePath(`/admin/clients/${clientId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error resetting client config:", error);
+    return { error: "Błąd resetowania. Spróbuj ponownie." };
   }
 }

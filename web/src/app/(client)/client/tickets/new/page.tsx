@@ -60,6 +60,7 @@ export default async function ClientNewTicketPage() {
     where: {
       branch: { clientId: clientId! },
       status: "ACTIVE",
+      deletedAt: null,
       ...(role === "BRANCH_HEAD" ? { branchId: branchId! } : {}),
     },
     select: {
@@ -71,7 +72,7 @@ export default async function ClientNewTicketPage() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       {/* Breadcrumbs */}
       <div>
         <Link href="/client/tickets" className="btn btn-ghost btn-sm" style={{ paddingLeft: 0, marginBottom: "8px" }}>
@@ -80,7 +81,7 @@ export default async function ClientNewTicketPage() {
         <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", margin: 0 }}>
           Nowe zgłoszenie
         </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+        <p style={{ color: "var(--muted)", fontSize: "14px" }}>
           Zgłoś reklamację towaru, chęć wymiany rozmiaru lub zapytanie ogólne
         </p>
       </div>

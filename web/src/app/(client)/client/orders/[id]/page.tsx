@@ -144,7 +144,7 @@ export default async function ClientOrderDetailPage(props: PageProps) {
                   {order.items.map((item) => (
                     <tr key={item.id} style={{ borderBottom: "1px solid var(--line)" }}>
                       <td style={{ padding: "14px 20px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div className="row-12">
                           <div style={{
                             width: "44px",
                             height: "44px",
@@ -213,7 +213,7 @@ export default async function ClientOrderDetailPage(props: PageProps) {
           {/* Deliveries Card */}
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <h3 className="card-title row-10">
                 <Truck size={18} style={{ color: "var(--accent)" }} /> Historia dostaw
               </h3>
             </div>
@@ -223,10 +223,10 @@ export default async function ClientOrderDetailPage(props: PageProps) {
                 <div style={{ textAlign: "center", padding: "32px 16px", border: "1px dashed var(--line)", borderRadius: "12px", background: "var(--section-bg)" }}>
                   <Truck size={36} style={{ color: "var(--muted)", marginBottom: "12px", opacity: 0.6 }} />
                   <h4 style={{ fontWeight: 700, margin: "0 0 6px 0", color: "var(--text)" }}>Brak dostaw</h4>
-                  <p style={{ color: "var(--muted)", margin: 0, fontSize: "14px" }}>To zamówienie не обладает ещё зарегистрированными отправками.</p>
+                  <p style={{ color: "var(--muted)", margin: 0, fontSize: "14px" }}>To zamówienie nie posiada jeszcze zarejestrowanych wysyłek.</p>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div className="col-20">
                   {order.deliveries.map((delivery) => (
                     <div 
                       key={delivery.id} 
@@ -239,7 +239,7 @@ export default async function ClientOrderDetailPage(props: PageProps) {
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div className="row-10">
                           <span style={{ fontWeight: 800, fontSize: "16px", color: "var(--text)" }}>Dostawa {delivery.deliveryNr}</span>
                           <span className={`badge ${delivery.status === "DELIVERED" ? "badge-success" : "badge-warning"}`} style={{ fontWeight: 700, padding: "2px 8px", borderRadius: "6px" }}>
                             {delivery.status === "DELIVERED" ? "Dostarczono" : "W transporcie"}
@@ -282,7 +282,7 @@ export default async function ClientOrderDetailPage(props: PageProps) {
               <h3 className="card-title">Szczegóły zamówienia</h3>
             </div>
             
-            <div className="card-content" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div className="card-content col-24">
               <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
                 <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "var(--accent-light)", color: "var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
                   <MapPin size={18} />
@@ -341,7 +341,7 @@ export default async function ClientOrderDetailPage(props: PageProps) {
           {order.comments && (
             <div className="card">
               <div className="card-header">
-                <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 className="card-title row-8">
                   <MessageSquare size={16} style={{ color: "var(--accent)" }} /> Uwagi
                 </h3>
               </div>

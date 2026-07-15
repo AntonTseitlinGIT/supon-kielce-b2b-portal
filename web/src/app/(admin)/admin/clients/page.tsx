@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -16,7 +17,7 @@ export default async function AdminClientsPage() {
   }
 
   // Admin check
-  if (session.user.role !== "SUPON_ADMIN") {
+  if (!isSuponRole(session.user.role)) {
     redirect("/admin/dashboard");
   }
 

@@ -42,7 +42,7 @@ export async function closeTicket(ticketId: string) {
           data: clientUsers.map((u) => ({
             userId: u.id,
             title: `Zgłoszenie ${ticket.ticketNr} zostało zamknięte`,
-            body: `Zgłoszenie zostało pomyślnie закрыто.`,
+            body: `Zgłoszenie zostało pomyślnie zamknięte.`,
             link: `/client/tickets/${ticket.id}`,
           })),
         });

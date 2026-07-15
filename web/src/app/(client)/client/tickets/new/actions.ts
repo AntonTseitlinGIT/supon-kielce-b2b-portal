@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { TicketType, TicketStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { nextSequence } from "@/lib/sequences";
+import { createTicketSchema, firstError } from "@/lib/schemas";
 
 interface CreateTicketInput {
   type: TicketType;
@@ -33,6 +35,13 @@ export async function createTicket(input: CreateTicketInput) {
     return { success: false, error: "Brak uprawnień." };
   }
 
+  // Validate payload shape/constraints at the boundary
+  const parsed = createTicketSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: firstError(parsed.error) };
+  }
+  input = parsed.data;
+
   let finalBranchId = input.branchId;
   if (role === "BRANCH_HEAD") {
     finalBranchId = userBranchId!;
@@ -40,10 +49,6 @@ export async function createTicket(input: CreateTicketInput) {
 
   if (!finalBranchId) {
     return { success: false, error: "Oddział jest wymagany." };
-  }
-
-  if (!input.messageText.trim()) {
-    return { success: false, error: "Treść zgłoszenia (wiadomość) nie może być pusta." };
   }
 
   try {
@@ -73,14 +78,14 @@ export async function createTicket(input: CreateTicketInput) {
       }
     }
 
-    // Generate ticket number: SRV-YYYY-XXXX
     const currentYear = new Date().getFullYear();
-    const ticketCount = await prisma.ticket.count();
-    const sequenceNum = 1000 + ticketCount + 1;
-    const ticketNr = `SRV-${currentYear}-${sequenceNum}`;
 
     // Create ticket & initial message inside transaction
     const newTicket = await prisma.$transaction(async (tx) => {
+      // Generate ticket number SRV-YYYY-XXXX from an atomic counter
+      const seq = await nextSequence(tx, "ticket");
+      const ticketNr = `SRV-${currentYear}-${1000 + seq}`;
+
       // Create ticket
       const ticket = await tx.ticket.create({
         data: {
@@ -119,7 +124,7 @@ export async function createTicket(input: CreateTicketInput) {
     try {
       const admins = await prisma.user.findMany({
         where: {
-          role: { in: ["SUPON_ADMIN", "SUPON_DEV"] },
+          role: "SUPON_ADMIN",
           isActive: true
         },
         select: { id: true }
@@ -128,25 +133,28 @@ export async function createTicket(input: CreateTicketInput) {
       if (admins.length > 0) {
         const clientInfo = await prisma.client.findUnique({
           where: { id: clientId! },
-          select: { name: true }
+          select: { name: true, nip: true }
         });
-        const clientName = clientInfo?.name.split("—")[0].trim() || "Klient";
 
-        const typeLabels: Record<string, string> = {
-          COMPLAINT: "reklamacja",
-          EXCHANGE: "wymiana",
-          GENERAL: "ogólne"
-        };
-        const typeLabel = typeLabels[input.type] || input.type;
+        if (clientInfo?.nip !== "1112223344") {
+          const clientName = clientInfo?.name.split("—")[0].trim() || "Klient";
 
-        await prisma.notification.createMany({
-          data: admins.map((admin) => ({
-            userId: admin.id,
-            title: `Nowe zgłoszenie ${newTicket.ticketNr} (${typeLabel})`,
-            body: `Zgłoszone przez ${clientName}`,
-            link: `/admin/tickets/${newTicket.id}`
-          }))
-        });
+          const typeLabels: Record<string, string> = {
+            COMPLAINT: "reklamacja",
+            EXCHANGE: "wymiana",
+            GENERAL: "ogólne"
+          };
+          const typeLabel = typeLabels[input.type] || input.type;
+
+          await prisma.notification.createMany({
+            data: admins.map((admin) => ({
+              userId: admin.id,
+              title: `Nowe zgłoszenie ${newTicket.ticketNr} (${typeLabel})`,
+              body: `Zgłoszone przez ${clientName}`,
+              link: `/admin/tickets/${newTicket.id}`
+            }))
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to generate ticket notification:", err);

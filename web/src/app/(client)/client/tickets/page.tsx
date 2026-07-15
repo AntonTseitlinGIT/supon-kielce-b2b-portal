@@ -101,7 +101,7 @@ export default async function ClientTicketsPage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader compact title="Zgłoszenia i Reklamacje" subtitle="Zgłaszaj uszkodzenia, reklamacje, chęć wymiany odzieży lub kontaktuj się z menedżerem SUPON">
         <Link href="/client/tickets/new" className="btn btn-primary">
           <Plus size={16} /> Nowe zgłoszenie
@@ -119,7 +119,7 @@ export default async function ClientTicketsPage(props: PageProps) {
       />
 
       {/* List Card */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card card-flush">
         {tickets.length === 0 ? (
           <div className="empty-state">
             <MessageCircle />
@@ -159,26 +159,26 @@ export default async function ClientTicketsPage(props: PageProps) {
                           {typeLabel}
                         </td>
                         {role === "CLIENT_HEAD" && (
-                          <td style={{ color: "var(--text-secondary)" }}>
+                          <td style={{ color: "var(--muted)" }}>
                             {ticket.branch.name}
                           </td>
                         )}
                         <td>
                           {ticket.order ? (
-                            <Link href={`/client/orders/${ticket.orderId}`} style={{ textDecoration: "underline", color: "var(--text-secondary)" }}>
+                            <Link href={`/client/orders/${ticket.orderId}`} style={{ textDecoration: "underline", color: "var(--muted)" }}>
                               {ticket.order.orderNr}
                             </Link>
                           ) : (
-                            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>brak</span>
+                            <span style={{ color: "var(--muted)", fontSize: "13px" }}>brak</span>
                           )}
                         </td>
-                        <td style={{ color: "var(--text-secondary)" }} title={details}>
+                        <td style={{ color: "var(--muted)" }} title={details}>
                           {details}
                         </td>
-                        <td style={{ color: "var(--text-secondary)" }}>
+                        <td style={{ color: "var(--muted)" }}>
                           {formatShortDate(ticket.createdAt)}
                         </td>
-                        <td style={{ color: "var(--text-secondary)" }}>
+                        <td style={{ color: "var(--muted)" }}>
                           {formatShortDate(ticket.updatedAt)}
                         </td>
                         <td>

@@ -37,6 +37,7 @@ export default async function ClientLayout({
     <PortalLayout
       navItems={filteredNav}
       user={{
+        id: session.user.id,
         name: session.user.name ?? "",
         email: session.user.email ?? "",
         role: session.user.role,

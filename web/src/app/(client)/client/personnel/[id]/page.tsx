@@ -81,7 +81,7 @@ export default async function ClientEmployeeDetailPage(props: PageProps) {
   });
 
   // Verify access control
-  if (!employee || employee.branch.clientId !== session.user.clientId) {
+  if (!employee || employee.branch.clientId !== session.user.clientId || employee.deletedAt) {
     notFound();
   }
 
@@ -106,7 +106,7 @@ export default async function ClientEmployeeDetailPage(props: PageProps) {
     .substring(0, 2);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       {/* Header */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>

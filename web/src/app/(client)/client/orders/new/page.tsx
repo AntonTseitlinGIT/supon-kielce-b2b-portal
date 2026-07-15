@@ -64,6 +64,7 @@ export default async function ClientNewOrderPage() {
     where: {
       branch: { clientId: clientId! },
       status: "ACTIVE",
+      deletedAt: null,
       ...(role === "BRANCH_HEAD" ? { branchId: branchId! } : {}),
     },
     include: {
@@ -91,7 +92,7 @@ export default async function ClientNewOrderPage() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       {/* Header */}
       <div style={{ padding: "8px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
         <div>

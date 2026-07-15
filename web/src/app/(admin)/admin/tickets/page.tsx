@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -23,7 +24,7 @@ export default async function AdminTicketsPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_ADMIN") {
+  if (!isSuponRole(role)) {
     redirect("/client/dashboard");
   }
 
@@ -95,7 +96,7 @@ export default async function AdminTicketsPage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader
         title="Zgłoszenia i Reklamacje Klientów"
         subtitle="Przeglądaj zgłoszenia reklamacyjne, prośby o wymianę odzieży oraz wiadomości kontaktowe od klientów"
@@ -105,7 +106,7 @@ export default async function AdminTicketsPage(props: PageProps) {
       <AdminTicketFilters clients={clients} />
 
       {/* List Card */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card card-flush">
         {tickets.length === 0 ? (
           <div className="empty-state">
             <MessageCircle />
@@ -142,19 +143,19 @@ export default async function AdminTicketsPage(props: PageProps) {
                           {ticket.ticketNr}
                         </td>
                         <td>{ticket.client.name.split("—")[0].trim()}</td>
-                        <td style={{ color: "var(--text-secondary)" }}>{ticket.branch.name}</td>
+                        <td style={{ color: "var(--muted)" }}>{ticket.branch.name}</td>
                         <td style={{ fontWeight: 600 }}>{typeLabel}</td>
                         <td>
                           {ticket.order ? (
-                            <Link href={`/admin/orders/${ticket.orderId}`} style={{ textDecoration: "underline", color: "var(--text-secondary)" }}>
+                            <Link href={`/admin/orders/${ticket.orderId}`} style={{ textDecoration: "underline", color: "var(--muted)" }}>
                               {ticket.order.orderNr}
                             </Link>
                           ) : (
-                            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>brak</span>
+                            <span style={{ color: "var(--muted)", fontSize: "13px" }}>brak</span>
                           )}
                         </td>
-                        <td style={{ color: "var(--text-secondary)" }} title={details}>{details}</td>
-                        <td style={{ color: "var(--text-secondary)" }}>{formatShortDate(ticket.createdAt)}</td>
+                        <td style={{ color: "var(--muted)" }} title={details}>{details}</td>
+                        <td style={{ color: "var(--muted)" }}>{formatShortDate(ticket.createdAt)}</td>
                         <td>
                           <span className={`badge ${statusInfo.className}`}>
                             {statusInfo.label}

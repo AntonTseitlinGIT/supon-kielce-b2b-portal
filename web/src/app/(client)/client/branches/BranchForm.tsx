@@ -237,10 +237,10 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: isBranchHead ? "1fr 420px" : "1fr 420px", gap: "28px", alignItems: "start" }}>
+    <div className="list-editor-grid" style={{ gap: "28px" }}>
       
       {/* LEFT COLUMN: Branches / Address List */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="col-24">
         
         {/* Branch selector or Branch Info (if branch head) */}
         {isBranchHead ? (
@@ -254,7 +254,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
         ) : (
           <div className="card" style={{ border: "1px solid var(--line)" }}>
             <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="card-title row-8">
                 <Shield size={18} style={{ color: "var(--accent)" }} /> Oddziały firmy
               </h3>
               {branchMode === "edit" && (
@@ -322,7 +322,7 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
         {selectedBranch && (
           <div className="card" style={{ border: "1px solid var(--line)" }}>
             <div className="card-header">
-              <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="card-title row-8">
                 <Home size={18} style={{ color: "var(--accent)" }} /> Adresy dostaw dla: {selectedBranch.name}
               </h3>
             </div>
@@ -372,8 +372,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                                 padding: 0
                               }}
                               title="Usuń adres"
+                              aria-label="Usuń adres dostawy"
                             >
-                              <Trash2 size={15} />
+                              <Trash2 size={15} aria-hidden="true" />
                             </button>
                           </div>
                         </td>
@@ -389,20 +390,20 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       </div>
 
       {/* RIGHT COLUMN: Address Form & Branch Form */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="col-24">
         
         {/* FEEDBACK STATUS */}
         {(errorMsg || successMsg) && (
-          <div className="card" style={{ padding: "16px", border: "1px solid var(--line)", background: "var(--surface)" }}>
+          <div className="card" style={{ padding: "16px", border: "1px solid var(--line)", background: "var(--page-bg)" }}>
             {errorMsg && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--err)", fontSize: "14px" }}>
-                <AlertCircle size={16} />
+              <div role="alert" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--err)", fontSize: "14px" }}>
+                <AlertCircle size={16} aria-hidden="true" />
                 <span>{errorMsg}</span>
               </div>
             )}
             {successMsg && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--ok)", fontSize: "14px" }}>
-                <CheckCircle size={16} />
+              <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--ok)", fontSize: "14px" }}>
+                <CheckCircle size={16} aria-hidden="true" />
                 <span>{successMsg}</span>
               </div>
             )}
@@ -418,10 +419,11 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
               </h3>
             </div>
             <div className="card-content" style={{ padding: "20px" }}>
-              <form onSubmit={handleBranchSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <form onSubmit={handleBranchSubmit} className="col-12">
                 <div className="form-group">
-                  <label className="form-label">Nazwa oddziału</label>
+                  <label className="form-label" htmlFor="bf-name">Nazwa oddziału</label>
                   <input
+                    id="bf-name"
                     type="text"
                     className="form-input"
                     value={branchName}
@@ -432,8 +434,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Główny adres</label>
+                  <label className="form-label" htmlFor="bf-address">Główny adres</label>
                   <textarea
+                    id="bf-address"
                     className="form-input"
                     value={branchAddress}
                     onChange={(e) => setBranchAddress(e.target.value)}
@@ -445,13 +448,14 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                 </div>
                 {branchMode === "edit" && (
                   <div className="switch-container">
-                    <span className="switch-label">Aktywny</span>
+                    <span className="switch-label" id="bf-active-label">Aktywny</span>
                     <label className="switch">
                       <input
                         type="checkbox"
                         checked={branchActive}
                         onChange={(e) => setBranchActive(e.target.checked)}
                         disabled={isPending}
+                        aria-labelledby="bf-active-label"
                       />
                       <span className="slider"></span>
                     </label>
@@ -474,11 +478,12 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
               </h3>
             </div>
             <div className="card-content" style={{ padding: "20px" }}>
-              <form onSubmit={handleAddressSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <form onSubmit={handleAddressSubmit} className="col-12">
                 
                 <div className="form-group">
-                  <label className="form-label">Odbiorca / Nazwa</label>
+                  <label className="form-label" htmlFor="bf-recipient">Odbiorca / Nazwa</label>
                   <input
+                    id="bf-recipient"
                     type="text"
                     className="form-input"
                     value={recipientName}
@@ -490,8 +495,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Ulica i numer</label>
+                  <label className="form-label" htmlFor="bf-street">Ulica i numer</label>
                   <input
+                    id="bf-street"
                     type="text"
                     className="form-input"
                     value={street}
@@ -504,25 +510,30 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
 
                 <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px" }}>
                   <div className="form-group">
-                    <label className="form-label">Kod pocztowy</label>
+                    <label className="form-label" htmlFor="bf-postal">Kod pocztowy</label>
                     <input
+                      id="bf-postal"
                       type="text"
+                      inputMode="numeric"
                       className="form-input"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
                       placeholder="00-000"
+                      autoComplete="postal-code"
                       disabled={isPending}
                       required
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Miasto</label>
+                    <label className="form-label" htmlFor="bf-city">Miasto</label>
                     <input
+                      id="bf-city"
                       type="text"
                       className="form-input"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Kielce"
+                      autoComplete="address-level2"
                       disabled={isPending}
                       required
                     />
@@ -530,8 +541,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Osoba kontaktowa (opcjonalnie)</label>
+                  <label className="form-label" htmlFor="bf-contact">Osoba kontaktowa (opcjonalnie)</label>
                   <input
+                    id="bf-contact"
                     type="text"
                     className="form-input"
                     value={contactPerson}
@@ -543,13 +555,14 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
 
                 {addressMode === "edit" && (
                   <div className="switch-container">
-                    <span className="switch-label">Adres aktywny</span>
+                    <span className="switch-label" id="bf-addr-active-label">Adres aktywny</span>
                     <label className="switch">
                       <input
                         type="checkbox"
                         checked={addressActive}
                         onChange={(e) => setAddressActive(e.target.checked)}
                         disabled={isPending}
+                        aria-labelledby="bf-addr-active-label"
                       />
                       <span className="slider"></span>
                     </label>

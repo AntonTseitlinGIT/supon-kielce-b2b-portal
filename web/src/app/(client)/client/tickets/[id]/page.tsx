@@ -69,9 +69,9 @@ export default async function ClientTicketDetailPage(props: PageProps) {
   const isClosed = ticket.status === "CLOSED";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       {/* Breadcrumbs / Header Action */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div className="col-12">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link 
             href="/client/tickets" 
@@ -105,7 +105,7 @@ export default async function ClientTicketDetailPage(props: PageProps) {
                 {statusInfo.label}
               </span>
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "6px" }}>
+            <p style={{ color: "var(--muted)", fontSize: "14px", marginTop: "6px" }}>
               Typ: <strong>{typeLabel}</strong> | Oddział: {ticket.branch.name}
             </p>
           </div>
@@ -116,7 +116,7 @@ export default async function ClientTicketDetailPage(props: PageProps) {
       <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "24px", alignItems: "start" }}>
         
         {/* Left Side: Ticket Parameters */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div className="col-20">
           
           {/* Details Card */}
           <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "24px" }}>

@@ -30,7 +30,7 @@ export default async function ClientEditEmployeePage(props: PageProps) {
   });
 
   // Verify access control
-  if (!employee || employee.branch.clientId !== clientId) {
+  if (!employee || employee.branch.clientId !== clientId || employee.deletedAt) {
     notFound();
   }
 
@@ -67,7 +67,7 @@ export default async function ClientEditEmployeePage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       {/* Breadcrumbs */}
       <div>
         <Link href={`/client/personnel/${employee.id}`} className="btn btn-ghost btn-sm" style={{ paddingLeft: 0, marginBottom: "8px" }}>
@@ -76,7 +76,7 @@ export default async function ClientEditEmployeePage(props: PageProps) {
         <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "28px", margin: 0 }}>
           Edytuj pracownika
         </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+        <p style={{ color: "var(--muted)", fontSize: "14px" }}>
           Zaktualizuj profil rozmiarów i dane kontaktowe dla {employee.name}
         </p>
       </div>

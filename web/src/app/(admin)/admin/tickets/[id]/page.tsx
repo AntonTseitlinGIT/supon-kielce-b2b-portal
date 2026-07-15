@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -22,7 +23,7 @@ export default async function AdminTicketDetailPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_ADMIN") {
+  if (!isSuponRole(role)) {
     redirect("/client/dashboard");
   }
 
@@ -85,7 +86,7 @@ export default async function AdminTicketDetailPage(props: PageProps) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px", height: "100%" }}>
       {/* Back button and title */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div className="col-12">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link 
             href="/admin/tickets" 
@@ -115,7 +116,7 @@ export default async function AdminTicketDetailPage(props: PageProps) {
                 {statusInfo.label}
               </span>
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "6px" }}>
+            <p style={{ color: "var(--muted)", fontSize: "14px", marginTop: "6px" }}>
               Typ: <strong>{typeLabel}</strong>
             </p>
           </div>
@@ -126,7 +127,7 @@ export default async function AdminTicketDetailPage(props: PageProps) {
       <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: "24px", alignItems: "start" }}>
         
         {/* Left Side: Actions and Details Cards */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div className="col-20">
           
           {/* Status Card */}
           <div className="card" style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "24px" }}>

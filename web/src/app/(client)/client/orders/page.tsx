@@ -40,6 +40,7 @@ export default async function ClientOrdersPage(props: PageProps) {
   // 1. Build DB Query Filter
   const where: any = {
     clientId,
+    deletedAt: null,
   };
 
   if (role === "BRANCH_HEAD") {
@@ -159,7 +160,7 @@ export default async function ClientOrdersPage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       <PageHeader compact title="Twoje Zamówienia" subtitle="Zarządzaj swoimi zamówieniami, śledź dostawy i pobieraj dokumenty">
         <Link href="/client/orders/new" className="btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px", padding: "10px 24px" }}>
           Złóż zamówienie

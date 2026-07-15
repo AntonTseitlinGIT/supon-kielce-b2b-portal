@@ -48,7 +48,7 @@ export default async function ClientWzDetailPage(props: PageProps) {
   const branch = doc.order.branch;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       {/* Back button & Breadcrumbs */}
       <div id="back-btn-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Link 
@@ -114,19 +114,19 @@ export default async function ClientWzDetailPage(props: PageProps) {
       <div className="card" style={{ padding: "40px", display: "flex", flexDirection: "column", gap: "32px", background: "#fff" }}>
         
         {/* Document Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid var(--text-primary)", paddingBottom: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid var(--text)", paddingBottom: "20px" }}>
           <div>
             <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 900, fontSize: "28px", margin: 0, textTransform: "uppercase" }}>
               Dokument WZ
             </h2>
-            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-secondary)", marginTop: "4px" }}>
+            <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--muted)", marginTop: "4px" }}>
               Numer: {doc.wzNr}
             </div>
           </div>
           <div style={{ textAlign: "right", fontSize: "14px" }}>
             <div>Miejscowość: <strong>Kielce</strong></div>
             <div>Data wystawienia: <strong>{formatShortDate(doc.date)}</strong></div>
-            <div style={{ marginTop: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
+            <div style={{ marginTop: "4px", fontSize: "12px", color: "var(--muted)" }}>
               Dotyczy zamówienia: {doc.order.orderNr}
             </div>
           </div>
@@ -135,12 +135,12 @@ export default async function ClientWzDetailPage(props: PageProps) {
         {/* Contractor Details Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px" }}>
           {/* Issuer / Seller */}
-          <div style={{ border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "20px", background: "var(--surface-2)" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.05em" }}>
+          <div style={{ border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "20px", background: "var(--section-bg)" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.05em" }}>
               Wystawca / Dostawca
             </div>
             <div style={{ fontSize: "16px", fontWeight: 700 }}>SUPON Kielce S.A.</div>
-            <div style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "6px", lineHeight: "1.5" }}>
+            <div style={{ fontSize: "14px", color: "var(--muted)", marginTop: "6px", lineHeight: "1.5" }}>
               ul. Sandomierska 105<br />
               25-324 Kielce<br />
               Polska
@@ -152,11 +152,11 @@ export default async function ClientWzDetailPage(props: PageProps) {
 
           {/* Recipient / Client */}
           <div style={{ border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "20px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.05em" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.05em" }}>
               Odbiorca
             </div>
             <div style={{ fontSize: "16px", fontWeight: 700 }}>{client.name}</div>
-            <div style={{ fontSize: "14px", color: "var(--text-secondary)", marginTop: "6px", lineHeight: "1.5" }}>
+            <div style={{ fontSize: "14px", color: "var(--muted)", marginTop: "6px", lineHeight: "1.5" }}>
               <strong>Oddział: {branch.name}</strong><br />
               {branch.address}
             </div>
@@ -171,15 +171,15 @@ export default async function ClientWzDetailPage(props: PageProps) {
         {/* Logistics parameters */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px", border: "1px solid var(--line)", borderRadius: "var(--radius)", padding: "16px", background: "var(--page-bg)", fontSize: "13px" }}>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <Truck size={16} style={{ color: "var(--text-muted)" }} />
+            <Truck size={16} style={{ color: "var(--muted)" }} />
             <div>Przewoźnik: <strong>{doc.carrier}</strong></div>
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <Hash size={16} style={{ color: "var(--text-muted)" }} />
+            <Hash size={16} style={{ color: "var(--muted)" }} />
             <div>List przewozowy: <strong style={{ fontFamily: "monospace" }}>{doc.trackingNr}</strong></div>
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <Calendar size={16} style={{ color: "var(--text-muted)" }} />
+            <Calendar size={16} style={{ color: "var(--muted)" }} />
             <div>Odbiorca paczki: <strong>{doc.recipient}</strong></div>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default async function ClientWzDetailPage(props: PageProps) {
           </h3>
           <div className="table-wrapper">
             <table className="table">
-              <thead style={{ background: "var(--surface-2)" }}>
+              <thead style={{ background: "var(--section-bg)" }}>
                 <tr>
                   <th style={{ width: "40px", textAlign: "center" }}>Lp.</th>
                   <th>Numer artykułu</th>
@@ -204,12 +204,12 @@ export default async function ClientWzDetailPage(props: PageProps) {
               <tbody>
                 {doc.items.map((item, index) => (
                   <tr key={item.id}>
-                    <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>{index + 1}</td>
+                    <td style={{ textAlign: "center", color: "var(--muted)" }}>{index + 1}</td>
                     <td style={{ fontFamily: "monospace", fontWeight: 500 }}>{item.articleNr}</td>
                     <td style={{ fontWeight: 600 }}>{item.name}</td>
                     <td><span className="badge badge-neutral" style={{ fontWeight: 600 }}>{item.size}</span></td>
                     <td style={{ textAlign: "center", fontWeight: 700 }}>{item.qty}</td>
-                    <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>szt.</td>
+                    <td style={{ textAlign: "center", color: "var(--muted)" }}>szt.</td>
                   </tr>
                 ))}
               </tbody>

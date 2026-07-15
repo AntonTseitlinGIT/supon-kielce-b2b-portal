@@ -12,7 +12,6 @@ enum Role {
   BRANCH_HEAD
   CLIENT_HEAD
   SUPON_ADMIN
-  SUPON_DEV
 }
 
 enum EmployeeStatus {
@@ -117,6 +116,8 @@ model Branch {
   orders            Order[]
   tickets           Ticket[]
   deliveryAddresses DeliveryAddress[]
+
+  @@index([clientId])
 }
 
 model DeliveryAddress {
@@ -128,6 +129,8 @@ model DeliveryAddress {
   updatedAt DateTime @updatedAt
 
   branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([branchId])
 }
 
 
@@ -153,6 +156,9 @@ model User {
   internalNotes   InternalNote[]
   createdOrders   Order[]         @relation("OrderCreator")
   createdWzDocs   WzDocument[]    @relation("WzCreator")
+
+  @@index([clientId])
+  @@index([branchId])
 }
 
 // ===== EMPLOYEES =====
@@ -171,6 +177,7 @@ model Employee {
   photoUrl     String?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
 
   branch        Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
   issuedItems   IssuedItem[]
@@ -180,6 +187,7 @@ model Employee {
   tickets       Ticket[]
 
   @@unique([employeeNr, branchId])
+  @@index([branchId, deletedAt])
 }
 
 model IssuedItem {
@@ -195,6 +203,9 @@ model IssuedItem {
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   product  Product  @relation(fields: [productId], references: [id])
+
+  @@index([employeeId])
+  @@index([productId])
 }
 
 model EmployeeHistory {
@@ -205,6 +216,8 @@ model EmployeeHistory {
   createdAt   DateTime @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
 }
 
 // ===== PPE LIMITS =====
@@ -233,6 +246,7 @@ model PpeLimit {
   usages   PpeLimitUsage[]
 
   @@unique([clientId, categoryId])
+  @@index([categoryId])
 }
 
 model PpeLimitUsage {
@@ -247,6 +261,9 @@ model PpeLimitUsage {
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   ppeLimit PpeLimit @relation(fields: [ppeLimitId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([ppeLimitId])
 }
 
 // ===== PRODUCT CATALOG =====
@@ -268,6 +285,8 @@ model Product {
   issuedItems    IssuedItem[]
   orderItems     OrderItem[]
   tickets        Ticket[]
+
+  @@index([categoryId])
 }
 
 // Client-specific assortment (M2M)
@@ -282,6 +301,7 @@ model ClientProduct {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@id([clientId, productId])
+  @@index([productId])
 }
 
 // ===== ORDERS =====
@@ -302,6 +322,7 @@ model Order {
   createdById String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
 
   client      Client       @relation(fields: [clientId], references: [id])
   branch      Branch       @relation(fields: [branchId], references: [id])
@@ -313,6 +334,11 @@ model Order {
   ticket      Ticket?      @relation("GeneratedOrders", fields: [ticketId], references: [id])
   orderType   OrderType    @default(STANDARD)
   tickets     Ticket[]     @relation("OrderTickets")
+
+  @@index([clientId, status, deletedAt])
+  @@index([branchId])
+  @@index([createdById])
+  @@index([ticketId])
 }
 
 model OrderItem {
@@ -333,6 +359,10 @@ model OrderItem {
   order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product  Product   @relation(fields: [productId], references: [id])
   employee Employee? @relation("ItemEmployee", fields: [employeeId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([employeeId])
 }
 
 model Delivery {
@@ -348,16 +378,22 @@ model Delivery {
   order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   items      DeliveryItem[]
   wzDocument WzDocument?
+
+  @@index([orderId])
 }
 
 model DeliveryItem {
-  id          String @id @default(cuid())
+  id          String  @id @default(cuid())
   deliveryId  String
+  orderItemId String? // exact source OrderItem line (null for legacy rows shipped before this field existed)
   articleNr   String
   productName String
   quantity    Int
 
   delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId])
+  @@index([orderItemId])
 }
 
 // ===== WZ DOCUMENTS =====
@@ -382,6 +418,11 @@ model WzDocument {
   delivery  Delivery? @relation(fields: [deliveryId], references: [id])
   createdBy User      @relation("WzCreator", fields: [createdById], references: [id])
   items     WzItem[]
+
+  @@index([clientId])
+  @@index([orderId])
+  @@index([branchId])
+  @@index([createdById])
 }
 
 model WzItem {
@@ -393,6 +434,8 @@ model WzItem {
   qty       Int
 
   wzDoc WzDocument @relation(fields: [wzDocId], references: [id], onDelete: Cascade)
+
+  @@index([wzDocId])
 }
 
 // ===== TICKETS =====
@@ -425,6 +468,13 @@ model Ticket {
   newSize       String?
   employeeId    String?
   employee      Employee?       @relation(fields: [employeeId], references: [id])
+
+  @@index([clientId, status])
+  @@index([branchId])
+  @@index([orderId])
+  @@index([assignedToId])
+  @@index([employeeId])
+  @@index([productId])
 }
 
 model TicketMessage {
@@ -439,6 +489,9 @@ model TicketMessage {
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   sender User   @relation(fields: [senderId], references: [id])
+
+  @@index([ticketId])
+  @@index([senderId])
 }
 
 model InternalNote {
@@ -450,6 +503,9 @@ model InternalNote {
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   author User   @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId])
+  @@index([authorId])
 }
 
 // ===== SYSTEM =====
@@ -473,4 +529,13 @@ model Notification {
   link      String?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// Monotonic counters for human-readable document numbers (orders, WZ, deliveries, tickets).
+// Incremented atomically via INSERT ... ON CONFLICT to avoid count()-based gaps and races.
+model Sequence {
+  key   String @id
+  value Int    @default(0)
 }

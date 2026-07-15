@@ -59,9 +59,10 @@ export async function POST(req: Request) {
 
         // For each item in the delivery, update corresponding OrderItem's qtyDelivered & qtySent
         for (const pkgItem of delivery.items) {
-          const orderItem = order.items.find(
-            item => item.articleNr === pkgItem.articleNr
-          );
+          // Match the exact source line by id; fall back to articleNr only for legacy rows
+          const orderItem = pkgItem.orderItemId
+            ? order.items.find(item => item.id === pkgItem.orderItemId)
+            : order.items.find(item => item.articleNr === pkgItem.articleNr);
 
           if (orderItem) {
             const newDelivered = orderItem.qtyDelivered + pkgItem.quantity;

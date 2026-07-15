@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -22,7 +23,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_ADMIN") {
+  if (!isSuponRole(role)) {
     redirect("/client/dashboard");
   }
 
@@ -66,13 +67,14 @@ export default async function AdminOrderDetailPage(props: PageProps) {
     productName: item.productName,
     size: item.size,
     quantity: item.quantity,
-    qtyDelivered: item.qtyDelivered
+    qtySent: item.qtySent,
+    qtyDelivered: item.qtyDelivered,
   }));
 
   const recipientDefault = order.client.name.split("—")[0].trim() + " (" + order.branch.name + ")";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div className="col-24">
       {/* Back link */}
       <div>
         <Link href="/admin/orders" className="btn btn-ghost btn-sm" style={{ paddingLeft: 0, marginBottom: "8px" }}>
@@ -92,7 +94,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                 {priorityInfo.label}
               </span>
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "4px" }}>
+            <p style={{ color: "var(--muted)", fontSize: "14px", marginTop: "4px" }}>
               Klient: <strong>{order.client.name}</strong> (NIP: {order.client.nip})
             </p>
           </div>
@@ -103,7 +105,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "24px" }}>
         
         {/* Main Column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div className="col-24">
           
           {/* Order Items Table */}
           <div className="card">
@@ -130,7 +132,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                     {order.items.map((item) => (
                       <tr key={item.id}>
                         <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div className="row-10">
                             <div style={{
                               width: "36px",
                               height: "36px",
@@ -155,7 +157,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                             <div style={{ fontWeight: 600 }}>{item.productName}</div>
                           </div>
                         </td>
-                        <td style={{ color: "var(--text-secondary)", fontFamily: "monospace" }}>
+                        <td style={{ color: "var(--muted)", fontFamily: "monospace" }}>
                           {item.articleNr}
                         </td>
                         <td>
@@ -168,21 +170,21 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                             <div style={{ display: "flex", flexDirection: "column" }}>
                               <span style={{ fontWeight: 500 }}>{item.employeeName}</span>
                               {item.employeeId && (
-                                <span style={{ fontSize: "11px", color: "var(--text-muted)", fontFamily: "monospace" }}>
+                                <span style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "monospace" }}>
                                   ID: {item.employeeId.substring(0, 8)}
                                 </span>
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>brak przypisania</span>
+                            <span style={{ color: "var(--muted)", fontSize: "13px" }}>brak przypisania</span>
                           )}
                         </td>
                         <td style={{ textAlign: "center", fontWeight: 600 }}>{item.quantity}</td>
-                        <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>{item.qtySent}</td>
+                        <td style={{ textAlign: "center", color: "var(--muted)" }}>{item.qtySent}</td>
                         <td style={{ textAlign: "center", color: "var(--ok)", fontWeight: 500 }}>
                           {item.qtyDelivered}
                         </td>
-                        <td style={{ color: "var(--text-secondary)", fontSize: "13px" }}>
+                        <td style={{ color: "var(--muted)", fontSize: "13px" }}>
                           {item.remarks || "—"}
                         </td>
                       </tr>
@@ -207,7 +209,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                   <p>To zamówienie nie posiada jeszcze wygenerowanych wysyłek WZ.</p>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className="col-16">
                   {order.deliveries.map((delivery) => (
                     <div 
                       key={delivery.id} 
@@ -225,7 +227,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                             {delivery.status === "DELIVERED" ? "Dostarczono" : "W transporcie"}
                           </span>
                         </div>
-                        <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                        <div style={{ fontSize: "13px", color: "var(--muted)" }}>
                           Wysłano: <strong>{formatShortDate(delivery.shippedAt)}</strong>
                         </div>
                       </div>
@@ -237,7 +239,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
 
                       <div style={{ fontSize: "13px" }}>
                         <div style={{ fontWeight: 600, marginBottom: "4px" }}>Zawartość paczki:</div>
-                        <ul style={{ paddingLeft: "20px", color: "var(--text-secondary)" }}>
+                        <ul style={{ paddingLeft: "20px", color: "var(--muted)" }}>
                           {delivery.items.map((di) => (
                             <li key={di.id}>
                               {di.productName} ({di.articleNr}) — <strong>{di.quantity} szt.</strong>
@@ -254,7 +256,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
         </div>
 
         {/* Sidebar Column */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div className="col-24">
           {/* OrderActions (Change status / Create WZ) */}
           <OrderActions
             orderId={order.id}
@@ -342,7 +344,7 @@ export default async function AdminOrderDetailPage(props: PageProps) {
           {order.comments && (
             <div className="card">
               <div className="card-header">
-                <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <h3 className="card-title row-8">
                   <MessageSquare size={16} style={{ color: "var(--accent)" }} /> Uwagi
                 </h3>
               </div>

@@ -45,11 +45,12 @@ export default function CatalogGrid({ products, categories }: CatalogGridProps) 
         
         {/* Search Input */}
         <div className={styles.searchWrapper}>
-          <Search size={18} className={styles.searchIcon} />
+          <Search size={18} className={styles.searchIcon} aria-hidden="true" />
           <input
-            type="text"
+            type="search"
             className={styles.searchInput}
             placeholder="Szukaj po nazwie, opisie lub kodzie artykułu..."
+            aria-label="Szukaj produktów"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -58,16 +59,20 @@ export default function CatalogGrid({ products, categories }: CatalogGridProps) 
         {/* Categories Pills */}
         <div className={styles.categoriesList}>
           <button
+            type="button"
             className={`${styles.categoryBtn} ${!selectedCategory ? styles.categoryBtnActive : ""}`}
             onClick={() => setSelectedCategory(null)}
+            aria-pressed={!selectedCategory}
           >
             Wszystkie
           </button>
           {categories.map((cat) => (
             <button
               key={cat.id}
+              type="button"
               className={`${styles.categoryBtn} ${selectedCategory === cat.id ? styles.categoryBtnActive : ""}`}
               onClick={() => setSelectedCategory(cat.id)}
+              aria-pressed={selectedCategory === cat.id}
             >
               {cat.name}
             </button>

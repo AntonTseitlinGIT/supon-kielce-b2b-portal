@@ -32,8 +32,8 @@ export default async function ClientBranchesPage() {
     include: {
       _count: {
         select: {
-          employees: true,
-          orders: true,
+          employees: { where: { deletedAt: null } },
+          orders: { where: { deletedAt: null } },
         },
       },
       deliveryAddresses: {
@@ -46,7 +46,7 @@ export default async function ClientBranchesPage() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader
         compact
         title={role === "BRANCH_HEAD" ? "Adresy dostaw oddziału" : "Oddziały firmy"}

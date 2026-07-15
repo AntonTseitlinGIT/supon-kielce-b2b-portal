@@ -120,21 +120,23 @@ export default function OrderFilters({
       {/* 2. Main Search Bar Row */}
       <div className="search-bar-row" style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
         <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: "260px" }}>
-          <Search 
-            size={20} 
-            className="search-icon" 
-            style={{ 
-              position: "absolute", 
-              left: "16px", 
-              top: "50%", 
-              transform: "translateY(-50%)", 
-              color: "var(--muted)", 
-              pointerEvents: "none" 
-            }} 
+          <Search
+            size={20}
+            className="search-icon"
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--muted)",
+              pointerEvents: "none"
+            }}
           />
           <input
-            type="text"
+            type="search"
             placeholder="Szukaj po numerze zamówienia, produkcie lub pracowniku..."
+            aria-label="Szukaj zamówień"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleFilterClick(); }}
@@ -153,19 +155,19 @@ export default function OrderFilters({
 
         <button
           onClick={() => setShowAdv(!showAdv)}
-          className="btn btn-secondary btn-lg"
+          className="btn btn-secondary btn-lg row-8"
           type="button"
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          aria-expanded={showAdv}
+          aria-controls="order-adv-filters"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
           Filtry
         </button>
 
         {hasActiveFilters && (
           <button
             onClick={handleClear}
-            className="btn btn-secondary btn-sm"
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+            className="btn btn-secondary btn-sm row-6"
             title="Wyczyść filtry"
           >
             <X size={16} /> Wyczyść
@@ -175,43 +177,47 @@ export default function OrderFilters({
 
       {/* 3. Advanced filters dropdown panel */}
       {showAdv && (
-        <div 
-          className="advanced-filters-panel" 
-          style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
-            gap: "16px", 
-            padding: "20px", 
-            borderRadius: "16px", 
-            background: "var(--section-bg)", 
+        <div
+          id="order-adv-filters"
+          className="advanced-filters-panel"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            padding: "20px",
+            borderRadius: "16px",
+            background: "var(--section-bg)",
             border: "1px solid var(--line)",
             animation: "slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards"
           }}
         >
-          <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data od</label>
-            <input 
-              className="input" 
-              type="date" 
+          <div className="form-group col-6">
+            <label htmlFor="cof-from" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data od</label>
+            <input
+              id="cof-from"
+              className="input"
+              type="date"
               value={localDateFrom}
               onChange={(e) => setLocalDateFrom(e.target.value)}
               style={{ width: "100%", height: "40px", margin: 0 }}
             />
           </div>
-          <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data do</label>
-            <input 
-              className="input" 
-              type="date" 
+          <div className="form-group col-6">
+            <label htmlFor="cof-to" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data do</label>
+            <input
+              id="cof-to"
+              className="input"
+              type="date"
               value={localDateTo}
               onChange={(e) => setLocalDateTo(e.target.value)}
               style={{ width: "100%", height: "40px", margin: 0 }}
             />
           </div>
 
-          <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Priorytet</label>
+          <div className="form-group col-6">
+            <label htmlFor="cof-priority" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Priorytet</label>
             <select
+              id="cof-priority"
               className="input"
               value={localPriority}
               onChange={(e) => setLocalPriority(e.target.value)}
@@ -225,9 +231,10 @@ export default function OrderFilters({
           </div>
 
           {showBranchFilter && branches.length > 0 && (
-            <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Zakład / Dział</label>
+            <div className="form-group col-6">
+              <label htmlFor="cof-branch" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Zakład / Dział</label>
               <select
+                id="cof-branch"
                 className="input"
                 value={localBranchId}
                 onChange={(e) => setLocalBranchId(e.target.value)}

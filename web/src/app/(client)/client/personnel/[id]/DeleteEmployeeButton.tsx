@@ -19,7 +19,7 @@ export default function DeleteEmployeeButton({
 
   const handleDelete = () => {
     const confirmed = window.confirm(
-      `Czy na pewno chcesz usunąć pracownika ${employeeName}? Tej operacji nie można cofnąć.`
+      `Czy na pewno chcesz usunąć pracownika ${employeeName}?`
     );
 
     if (!confirmed) return;

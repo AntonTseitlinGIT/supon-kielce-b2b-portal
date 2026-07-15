@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { OrderStatus, OrderType } from "@prisma/client";
 import { generateWz, uploadWzPdf, forceMarkAsDelivered, forceApproveOrder } from "./actions";
 import { FileText, Settings, Loader2, Upload, CheckCircle } from "lucide-react";
@@ -11,6 +11,7 @@ interface OrderItemInput {
   productName: string;
   size: string;
   quantity: number;
+  qtySent: number;
   qtyDelivered: number;
 }
 
@@ -48,6 +49,16 @@ export default function OrderActions({
   const [shipQtys, setShipQtys] = useState<Record<string, number>>(initialShipQtys);
 
   const [wzError, setWzError] = useState("");
+
+  // Close WZ modal on Escape
+  useEffect(() => {
+    if (!isWzModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsWzModalOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isWzModalOpen]);
 
   const handleMarkAsDelivered = async () => {
     if (!confirm("Czy na pewno chcesz oznaczyć to zamówienie jako dostarczone? Spowoduje to również zatwierdzenie wszystkich powiązanych dostaw.")) {
@@ -122,26 +133,26 @@ export default function OrderActions({
         // Reset quantities
         setShipQtys({});
         setSelectedFile(null);
-        alert(`Dokument ${res.wzNr} został wygenerowany pomyślnie!`);
+        alert(`Dokument WZ został wygenerowany pomyślnie!`);
       } else {
         setWzError(res.error || "Wystąpił błąd");
       }
     });
   };
 
-  const pendingItemsToShip = items.some(item => item.quantity - item.qtyDelivered > 0);
+  const pendingItemsToShip = items.some(item => item.quantity - item.qtySent - item.qtyDelivered > 0);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className="col-16">
       {/* Status Controller Card */}
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <h3 className="card-title row-8">
             <Settings size={18} style={{ color: "var(--accent)" }} /> Akcje menedżera
           </h3>
         </div>
         
-        <div className="card-content" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="card-content col-16">
           {(status === "SENT" || status === "PARTIALLY_SENT") && (
             <div>
               <button
@@ -206,22 +217,32 @@ export default function OrderActions({
 
       {/* WZ Modal */}
       {isWzModalOpen && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(15, 23, 42, 0.4)",
-          backdropFilter: "blur(4px)",
-          display: "grid",
-          placeItems: "center",
-          zIndex: 9999,
-          padding: "20px"
-        }}>
-          <div className="card animate-scale" style={{ width: "100%", maxWidth: "680px", background: "var(--page-bg)", padding: 0, display: "flex", flexDirection: "column", maxHeight: "90vh", overflow: "hidden" }}>
-            
+        <div
+          onClick={() => setIsWzModalOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(15, 23, 42, 0.55)",
+            backdropFilter: "blur(4px)",
+            display: "grid",
+            placeItems: "center",
+            zIndex: 9999,
+            padding: "20px"
+          }}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="wz-modal-title"
+            onClick={(e) => e.stopPropagation()}
+            className="card animate-scale"
+            style={{ width: "100%", maxWidth: "680px", background: "var(--page-bg)", padding: 0, display: "flex", flexDirection: "column", maxHeight: "90vh", overflow: "hidden" }}
+          >
+
             <div className="card-header" style={{ padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--line)" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Dodanie dokumentu WZ i wysyłka</h3>
-              <button 
+              <h3 id="wz-modal-title" style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Dodanie dokumentu WZ i wysyłka</h3>
+              <button
                 onClick={() => setIsWzModalOpen(false)}
+                aria-label="Zamknij"
                 style={{ background: "transparent", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--muted)" }}
               >
                 &times;
@@ -231,7 +252,7 @@ export default function OrderActions({
             <form onSubmit={handleSubmitWz} style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
               <div style={{ padding: "20px 24px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "16px", maxHeight: "calc(90vh - 140px)" }}>
                 {wzError && (
-                  <div style={{ background: "var(--accent-light)", color: "var(--err)", border: "1px solid var(--err)", padding: "12px", borderRadius: "8px", fontSize: "13.5px" }}>
+                  <div role="alert" style={{ background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", color: "var(--err)", border: "1px solid var(--err)", padding: "12px", borderRadius: "8px", fontSize: "13.5px" }}>
                     {wzError}
                   </div>
                 )}
@@ -239,10 +260,11 @@ export default function OrderActions({
                 {/* Delivery details */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <div>
-                    <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
+                    <label htmlFor="wz-recipient" style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
                       Odbiorca paczki
                     </label>
                     <input
+                      id="wz-recipient"
                       type="text"
                       className="form-input"
                       value={recipient}
@@ -252,10 +274,11 @@ export default function OrderActions({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
+                    <label htmlFor="wz-carrier" style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
                       Kurier / Przewoźnik
                     </label>
                     <select
+                      id="wz-carrier"
                       className="form-select"
                       value={carrier}
                       onChange={(e) => setCarrier(e.target.value)}
@@ -268,10 +291,11 @@ export default function OrderActions({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
+                  <label htmlFor="wz-tracking" style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)" }}>
                     Numer śledzenia przesyłki
                   </label>
                   <input
+                    id="wz-tracking"
                     type="text"
                     className="form-input"
                     value={trackingNr}
@@ -282,10 +306,11 @@ export default function OrderActions({
                 </div>
 
                 <div>
-                  <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-                    <Upload size={13} /> Załącz plik PDF WZ {orderType === "STANDARD" ? "(Wymagane)" : "(Opcjonalne)"}
+                  <label htmlFor="wz-file" style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Upload size={13} aria-hidden="true" /> Załącz plik PDF WZ {orderType === "STANDARD" ? "(Wymagane)" : "(Opcjonalne)"}
                   </label>
                   <input
+                    id="wz-file"
                     type="file"
                     accept="application/pdf"
                     className="form-input"
@@ -318,7 +343,7 @@ export default function OrderActions({
                       </thead>
                       <tbody>
                         {items.map((item) => {
-                          const maxToShip = item.quantity - item.qtyDelivered;
+                          const maxToShip = item.quantity - item.qtySent - item.qtyDelivered;
                           if (maxToShip <= 0) return null;
                           return (
                             <tr key={item.id}>
@@ -337,6 +362,7 @@ export default function OrderActions({
                                   style={{ height: "32px", width: "80px", margin: "0 auto", textAlign: "center", padding: "0" }}
                                   min={0}
                                   max={maxToShip}
+                                  aria-label={`Ilość w WZ — ${item.productName} ${item.size}`}
                                   value={shipQtys[item.id] ?? 0}
                                   onChange={(e) => handleQtyChange(item.id, parseInt(e.target.value, 10), maxToShip)}
                                 />

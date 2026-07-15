@@ -92,6 +92,7 @@ export default function NewOrderForm({
   const [isBulk, setIsBulk] = useState(false);
   const [tableSearch, setTableSearch] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
+  const [isConfirmed, setIsConfirmed] = useState(false);
   
   const [items, setItems] = useState<OrderItemRow[]>([
     { key: "1", employeeId: "", productId: "", size: "", quantity: 1, remarks: "" }
@@ -299,10 +300,11 @@ export default function NewOrderForm({
     }
   };
 
-  // Calculations for KPIs
-  const totalItems = items.length;
-  const totalQty = items.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
-  const uniqueEmployees = isBulk ? "Zbiorcze" : new Set(items.map(i => i.employeeId).filter(Boolean)).size;
+  // Calculations for KPIs (only counting items with selected product)
+  const filledItems = items.filter(i => i.productId);
+  const totalItems = filledItems.length;
+  const totalQty = filledItems.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+  const uniqueEmployees = isBulk ? "Zbiorcze" : new Set(filledItems.map(i => i.employeeId).filter(Boolean)).size;
   const selectedBranch = branches.find((b) => b.id === branchId);
   const addressDisplay = selectedBranch 
     ? `${selectedBranch.name}${department ? " • " + department : ""}`
@@ -357,6 +359,13 @@ export default function NewOrderForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step < 3) return;
+    if (!isConfirmed) {
+      setErrorMsg("Musisz potwierdzić poprawność danych przed wysłaniem zamówienia.");
+      return;
+    }
+    if (!window.confirm("Czy na pewno chcesz zatwierdzić i wysłać zamówienie do SUPON Kielce?")) {
+      return;
+    }
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -386,7 +395,7 @@ export default function NewOrderForm({
         return;
       }
       if (item.quantity <= 0) {
-        setErrorMsg(`Wiersz ${i + 1}: Ilość musi быть większa od zera.`);
+        setErrorMsg(`Wiersz ${i + 1}: Ilość musi być większa od zera.`);
         return;
       }
     }
@@ -422,6 +431,16 @@ export default function NewOrderForm({
     });
   };
 
+  // Prevent accidental submission via Enter key on Steps 1 and 2
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter" && step < 3) {
+      const target = e.target as HTMLElement;
+      if (target.tagName !== "TEXTAREA") {
+        e.preventDefault();
+      }
+    }
+  };
+
   // Filter items matching the table search input
   const filteredItems = items.filter(item => {
     if (!tableSearch) return true;
@@ -438,19 +457,19 @@ export default function NewOrderForm({
   });
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="col-24">
       
       {/* Alert states */}
       {errorMsg && (
-        <div className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
-          <AlertTriangle size={18} />
+        <div role="alert" className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
+          <AlertTriangle size={18} aria-hidden="true" />
           <strong>Błąd:</strong> {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
-          <ShieldCheck size={18} />
+        <div role="status" aria-live="polite" className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
+          <ShieldCheck size={18} aria-hidden="true" />
           {successMsg}
         </div>
       )}
@@ -495,8 +514,9 @@ export default function NewOrderForm({
           
           {/* Adres dostawy select */}
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Oddział</label>
+            <label className="form-label" htmlFor="no-branch" style={{ fontWeight: 600, fontSize: "13px" }}>Oddział</label>
             <select
+              id="no-branch"
               className="input"
               value={branchId}
               onChange={(e) => setBranchId(e.target.value)}
@@ -514,8 +534,9 @@ export default function NewOrderForm({
 
           {branchId && (
             <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Adres dostawy</label>
+              <label className="form-label" htmlFor="no-address" style={{ fontWeight: 600, fontSize: "13px" }}>Adres dostawy</label>
               <select
+                id="no-address"
                 className="input"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -541,8 +562,9 @@ export default function NewOrderForm({
 
           {/* Zakład / Dział input */}
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Zakład / Dział</label>
+            <label className="form-label" htmlFor="no-department" style={{ fontWeight: 600, fontSize: "13px" }}>Zakład / Dział</label>
             <input
+              id="no-department"
               type="text"
               className="input"
               value={department}
@@ -556,8 +578,9 @@ export default function NewOrderForm({
           {/* Preferowana data & Priorytet row */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Preferowana data dostawy</label>
+              <label className="form-label" htmlFor="no-date" style={{ fontWeight: 600, fontSize: "13px" }}>Preferowana data dostawy</label>
               <input
+                id="no-date"
                 type="date"
                 className="input"
                 value={preferredDate}
@@ -567,8 +590,9 @@ export default function NewOrderForm({
               />
             </div>
             <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Priorytet</label>
+              <label className="form-label" htmlFor="no-priority" style={{ fontWeight: 600, fontSize: "13px" }}>Priorytet</label>
               <select
+                id="no-priority"
                 className="input"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
@@ -584,8 +608,9 @@ export default function NewOrderForm({
 
           {/* Numer referencyjny Klienta */}
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Numer referencyjny Klienta (opcjonalnie)</label>
+            <label className="form-label" htmlFor="no-ref" style={{ fontWeight: 600, fontSize: "13px" }}>Numer referencyjny Klienta (opcjonalnie)</label>
             <input
+              id="no-ref"
               type="text"
               className="input"
               value={clientRef}
@@ -598,8 +623,9 @@ export default function NewOrderForm({
 
           {/* Komentarz do zamówienia */}
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: "13px" }}>Komentarz do zamówienia</label>
+            <label className="form-label" htmlFor="no-comments" style={{ fontWeight: 600, fontSize: "13px" }}>Komentarz do zamówienia</label>
             <textarea
+              id="no-comments"
               className="input"
               rows={3}
               value={comments}
@@ -608,29 +634,6 @@ export default function NewOrderForm({
               placeholder="Instrukcje dla magazynu / kompletacji..."
               style={{ width: "100%", margin: 0, padding: "12px" }}
             />
-          </div>
-
-          {/* Podsumowanie parametrów bottom cards */}
-          <div style={{ marginTop: "8px" }}>
-            <h4 style={{ margin: "0 0 12px 0", fontWeight: 700, fontSize: "14px" }}>Podsumowanie parametrów</h4>
-            <div className="kpis" style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
-              <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
-                <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Pozycje</h3>
-                <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{totalItems}</div>
-              </div>
-              <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
-                <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Sztuki</h3>
-                <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{totalQty}</div>
-              </div>
-              <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
-                <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Pracownicy</h3>
-                <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{uniqueEmployees}</div>
-              </div>
-              <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
-                <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Adres</h3>
-                <div className="value" style={{ fontWeight: 700, fontSize: "12px", color: "var(--text)", lineHeight: "1.3", whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }} title={addressDisplay}>{addressDisplay}</div>
-              </div>
-            </div>
           </div>
 
         </div>
@@ -644,16 +647,17 @@ export default function NewOrderForm({
         </header>
 
         {/* Toolbar */}
-        <div className="items-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", padding: "12px 20px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}>
-          <input 
-            className="input" 
-            style={{ maxWidth: "380px", margin: 0, height: "38px" }} 
-            type="search" 
-            placeholder="Filtruj dodane pozycje..." 
+        <div className="items-toolbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px", padding: "12px 20px", borderBottom: "1px solid var(--line)", background: "var(--page-bg)" }}>
+          <input
+            className="input"
+            style={{ maxWidth: "380px", margin: 0, height: "38px" }}
+            type="search"
+            placeholder="Filtruj dodane pozycje..."
+            aria-label="Filtruj dodane pozycje"
             value={tableSearch}
             onChange={(e) => setTableSearch(e.target.value)}
           />
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div className="row-8">
             <label style={{ display: "inline-flex", alignItems: "center", gap: "10px", fontWeight: 600, fontSize: "13px", cursor: "pointer", userSelect: "none" }}>
               <span style={{ color: "var(--muted)", fontSize: "13px" }}>Zamówienie zbiorcze (brak przypisania do pracowników)</span>
               <span className="switch" style={{ position: "relative", display: "inline-block", width: "44px", height: "24px", flexShrink: 0 }}>
@@ -729,6 +733,7 @@ export default function NewOrderForm({
                         value={row.employeeId}
                         onChange={(e) => updateRow(index, "employeeId", e.target.value)}
                         disabled={isBulk || isPending}
+                        aria-label={`Pracownik — pozycja ${index + 1}`}
                       >
                         <option value="">{isBulk ? "— (Zamówienie zbiorcze)" : "-- Wybierz pracownika --"}</option>
                         {filteredEmployees.map((e) => (
@@ -755,6 +760,7 @@ export default function NewOrderForm({
                         value={row.productId}
                         onChange={(e) => updateRow(index, "productId", e.target.value)}
                         disabled={isPending}
+                        aria-label={`Produkt — pozycja ${index + 1}`}
                       >
                         <option value="">Wybierz produkt...</option>
                         {products.map((p) => (
@@ -812,6 +818,7 @@ export default function NewOrderForm({
                         value={row.size}
                         onChange={(e) => updateRow(index, "size", e.target.value)}
                         disabled={isPending || !row.productId}
+                        aria-label={`Rozmiar — pozycja ${index + 1}`}
                       >
                         <option value="">Wybierz...</option>
                         {selectedProduct?.availableSizes.map((s) => (
@@ -832,6 +839,7 @@ export default function NewOrderForm({
                         value={row.quantity}
                         onChange={(e) => updateRow(index, "quantity", parseInt(e.target.value, 10) || 1)}
                         disabled={isPending}
+                        aria-label={`Ilość — pozycja ${index + 1}`}
                       />
                     </td>
 
@@ -842,6 +850,7 @@ export default function NewOrderForm({
                         className="input"
                         style={{ margin: 0, width: "100%", height: "38px" }}
                         placeholder="np. wymiana"
+                        aria-label={`Uwagi — pozycja ${index + 1}`}
                         value={row.remarks}
                         onChange={(e) => updateRow(index, "remarks", e.target.value)}
                         disabled={isPending}
@@ -882,10 +891,10 @@ export default function NewOrderForm({
         </div>
 
         {/* Footer actions for table card */}
-        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--line)", display: "flex", gap: "12px", justifyContent: "flex-end", background: "var(--surface)" }}>
-          <button 
-            className="btn btn-secondary" 
-            type="button" 
+        <div style={{ padding: "16px 20px", borderTop: "1px solid var(--line)", display: "flex", gap: "12px", justifyContent: "flex-end", background: "var(--page-bg)" }}>
+          <button
+            className="btn btn-secondary row-6"
+            type="button"
             onClick={() => {
               if (items.length === 1 && !items[0].productId && !items[0].employeeId) return;
               if (confirm("Czy na pewno chcesz usunąć wszystkie pozycje z tabeli?")) {
@@ -893,7 +902,6 @@ export default function NewOrderForm({
               }
             }}
             disabled={isPending}
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
           >
             <X size={14} /> Wyczyść wszystko
           </button>
@@ -913,32 +921,66 @@ export default function NewOrderForm({
       {step === 3 && (
       <section className="card" aria-label="Podsumowanie" style={{ border: "1px solid var(--line)" }}>
         <header className="card-header" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)" }}>
-          <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Podsumowanie</h2>
+          <h2 style={{ fontSize: "18px", fontWeight: 700, margin: 0 }}>Podsumowanie zamówienia</h2>
         </header>
-        <div className="card-content" style={{ padding: "24px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "16px" }}>
-            <div>
-              <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: 700 }}>Adres dostawy</h4>
-              <p className="muted" style={{ fontWeight: 600, fontSize: "14px" }}>{addressDisplay}</p>
+        <div className="card-content" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          
+          {/* KPI summary cards */}
+          <div className="kpis" style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
+            <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Pozycje</h3>
+              <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{totalItems}</div>
             </div>
-            <div>
-              <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: 700 }}>Podsumowanie ilościowe</h4>
-              <ul className="list-summary" style={{ paddingLeft: "20px", margin: "8px 0", display: "grid", gap: "6px", listStyle: "disc" }}>
-                <li style={{ fontSize: "14px", color: "var(--text)" }}>Pozycji w tabeli: <strong>{totalItems}</strong></li>
-                <li style={{ fontSize: "14px", color: "var(--text)" }}>Łączna ilość sztuk: <strong>{totalQty}</strong></li>
-                <li style={{ fontSize: "14px", color: "var(--text)" }}>Priorytet zamówienia: <strong style={{ color: "var(--accent)" }}>{priority === "STANDARD" ? "Standard" : priority === "HIGH" ? "Wysoki" : "Krytyczny"}</strong></li>
-                <li style={{ fontSize: "14px", color: "var(--text)" }}>Szacowana dostawa (ETA): <strong>{getETAString(priority)}</strong></li>
-              </ul>
+            <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Sztuki</h3>
+              <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{totalQty}</div>
+            </div>
+            <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Pracownicy</h3>
+              <div className="value" style={{ fontWeight: 800, fontSize: "22px", color: "var(--text)" }}>{uniqueEmployees}</div>
+            </div>
+            <div className="kpi" style={{ border: "1px dashed var(--line)", borderRadius: "14px", padding: "14px", background: "var(--page-bg)" }}>
+              <h3 style={{ margin: "0 0 4px 0", fontSize: "11px", color: "var(--muted)", fontWeight: 800, letterSpacing: ".5px", textTransform: "uppercase" }}>Dostawa (ETA)</h3>
+              <div className="value" style={{ fontWeight: 800, fontSize: "16px", color: "var(--accent)", lineHeight: "1.4" }}>{getETAString(priority)}</div>
             </div>
           </div>
 
-          <h4 style={{ margin: "16px 0 8px 0", fontSize: "14px", fontWeight: 700 }}>Uwagi do zamówienia</h4>
-          <div className="card" style={{ borderStyle: "dashed", background: "var(--section-bg)", border: "1px dashed var(--line)", borderRadius: "12px" }}>
-            <div className="card-content" style={{ padding: "12px 16px" }}>
-              <p className="muted" style={{ margin: 0, fontStyle: "italic", fontSize: "13px" }}>
-                {comments.trim() ? comments : "Brak instrukcji dodatkowych."}
-              </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+            <div>
+              <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>Adres dostawy</h4>
+              <p className="muted" style={{ fontWeight: 600, fontSize: "14px", margin: 0 }}>{addressDisplay}</p>
             </div>
+            <div>
+              <h4 style={{ margin: "0 0 8px 0", fontSize: "13px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>Priorytet</h4>
+              <span className={`badge ${priority === "CRITICAL" ? "err" : priority === "HIGH" ? "badge-warning" : "ok"}`} style={{ fontSize: "13px", fontWeight: 700 }}>
+                {priority === "STANDARD" ? "Standard" : priority === "HIGH" ? "Wysoki" : "Krytyczny"}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <h4 style={{ margin: "16px 0 8px 0", fontSize: "13px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>Uwagi do zamówienia</h4>
+            <div className="card" style={{ borderStyle: "dashed", background: "var(--section-bg)", border: "1px dashed var(--line)", borderRadius: "12px" }}>
+              <div className="card-content" style={{ padding: "12px 16px" }}>
+                <p className="muted" style={{ margin: 0, fontStyle: "italic", fontSize: "13px" }}>
+                  {comments.trim() ? comments : "Brak instrukcji dodatkowych."}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--line)", display: "flex", alignItems: "flex-start", gap: "10px" }}>
+            <input
+              type="checkbox"
+              id="confirm-order-checkbox"
+              checked={isConfirmed}
+              onChange={(e) => setIsConfirmed(e.target.checked)}
+              disabled={isPending}
+              style={{ marginTop: "4px", width: "16px", height: "16px", cursor: "pointer" }}
+            />
+            <label htmlFor="confirm-order-checkbox" style={{ fontSize: "13.5px", fontWeight: 500, color: "var(--text)", cursor: "pointer", userSelect: "none" }}>
+              Potwierdzam poprawność wszystkich danych w zamówieniu i wyrażam zgodę na jego przekazanie do realizacji.
+            </label>
           </div>
         </div>
       </section>
@@ -975,8 +1017,8 @@ export default function NewOrderForm({
           <button
             className="btn"
             type="submit"
-            disabled={isPending}
-            style={{ height: "42px", padding: "0 24px", background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px" }}
+            disabled={isPending || !isConfirmed}
+            style={{ height: "42px", padding: "0 24px", background: isConfirmed ? "var(--accent)" : "var(--line)", color: isConfirmed ? "#fff" : "var(--muted)", fontWeight: 700, borderRadius: "10px", cursor: isConfirmed ? "pointer" : "not-allowed" }}
           >
             {isPending ? "Wysyłanie..." : "Wyślij zamówienie"}
           </button>

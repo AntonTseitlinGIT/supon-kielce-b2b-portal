@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { prisma } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -10,7 +11,7 @@ interface PageProps {
 
 export default async function AdminOrderByNrRedirect(props: PageProps) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || (!isSuponRole(session.user.role))) {
     redirect("/login");
   }
 

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { Search, Grid, List, Download, Plus, Upload, X, Loader2, FileSpreadsheet } from "lucide-react";
-import { bulkCreateEmployees } from "./actions";
+import { Search, Grid, List, Download, Plus, Upload, X, Loader2, FileSpreadsheet, RotateCcw, Trash2 } from "lucide-react";
+import { bulkCreateEmployees, restoreEmployee } from "./actions";
 import PageHeader from "@/components/PageHeader";
 import * as XLSX from "xlsx";
 
@@ -20,12 +20,14 @@ interface EmployeeItem {
 
 interface PersonnelListProps {
   initialEmployees: EmployeeItem[];
+  deletedEmployees?: EmployeeItem[];
   branches: { id: string; name: string }[];
   showBranchFilter: boolean;
 }
 
 export default function PersonnelList({
   initialEmployees,
+  deletedEmployees = [],
   branches,
   showBranchFilter,
  }: PersonnelListProps) {
@@ -33,6 +35,9 @@ export default function PersonnelList({
   const [branchFilter, setBranchFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("ACTIVE");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState("");
 
   const [isPending, startTransition] = useTransition();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -247,6 +252,18 @@ export default function PersonnelList({
   // Toggle for filters drawer
   const [showAdv, setShowAdv] = useState(false);
 
+  // Close open modal on Escape
+  useEffect(() => {
+    if (!isImportModalOpen && !isExportModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (isImportModalOpen) { setIsImportModalOpen(false); setImportError(""); setImportSuccess(""); }
+      else if (isExportModalOpen) setIsExportModalOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isImportModalOpen, isExportModalOpen]);
+
   // Clear filters handler
   const handleClear = () => {
     setSearch("");
@@ -256,29 +273,50 @@ export default function PersonnelList({
 
   const hasActiveFilters = search || branchFilter || statusFilter !== "ACTIVE";
 
+  const handleRestore = (id: string) => {
+    setRestoreError("");
+    setRestoringId(id);
+    startTransition(async () => {
+      const res = await restoreEmployee(id);
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setRestoreError(res.error || "Błąd przywracania.");
+        setRestoringId(null);
+      }
+    });
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      
+    <div className="col-20">
+
       <PageHeader compact title="Personel" subtitle="Zarządzaj kartami pracowników, ich rozmiarami oraz przydziałami odzieży roboczej">
-        <Link href="/client/personnel/new" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <Link href="/client/personnel/new" className="btn btn-primary row-6">
           <Plus size={16} /> Dodaj pracownika
         </Link>
         <button
           onClick={() => setIsImportModalOpen(true)}
-          className="btn btn-secondary"
-          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          className="btn btn-secondary row-6"
           title="Masowy import pracowników"
         >
           <Upload size={16} /> Import
         </button>
         <button
           onClick={() => setIsExportModalOpen(true)}
-          className="btn btn-secondary"
-          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          className="btn btn-secondary row-6"
           title="Eksportuj pracowników"
         >
           <Download size={16} /> Eksport
         </button>
+        {deletedEmployees.length > 0 && (
+          <button
+            onClick={() => { setShowDeleted(!showDeleted); setRestoreError(""); }}
+            className={`btn ${showDeleted ? "btn-danger" : "btn-secondary"} row-6`}
+            title="Pokaż usuniętych pracowników"
+          >
+            <Trash2 size={16} /> Usunięci ({deletedEmployees.length})
+          </button>
+        )}
       </PageHeader>
 
       {/* Search & Filters row (aligned with orders style) */}
@@ -286,20 +324,22 @@ export default function PersonnelList({
         
         {/* Search field */}
         <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: "260px" }}>
-          <Search 
-            size={20} 
-            style={{ 
-              position: "absolute", 
-              left: "16px", 
-              top: "50%", 
-              transform: "translateY(-50%)", 
-              color: "var(--muted)", 
-              pointerEvents: "none" 
-            }} 
+          <Search
+            size={20}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--muted)",
+              pointerEvents: "none"
+            }}
           />
           <input
-            type="text"
+            type="search"
             placeholder="Szukaj po nazwisku, stanowisku lub numerze..."
+            aria-label="Szukaj pracowników"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -324,21 +364,23 @@ export default function PersonnelList({
           Filtruj
         </button>
 
-        <button 
+        <button
           onClick={() => setShowAdv(!showAdv)}
-          className="btn btn-secondary" 
+          className="btn btn-secondary"
           type="button"
-          style={{ 
-            height: "48px", 
-            padding: "0 20px", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "8px", 
-            borderColor: "var(--line)", 
-            color: "var(--text)" 
+          aria-expanded={showAdv}
+          aria-controls="personnel-adv-filters"
+          style={{
+            height: "48px",
+            padding: "0 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            borderColor: "var(--line)",
+            color: "var(--text)"
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
           Filtry
         </button>
 
@@ -360,16 +402,20 @@ export default function PersonnelList({
             className={`btn btn-secondary ${viewMode === "grid" ? "active" : ""}`}
             style={{ padding: "0 12px", height: "48px" }}
             title="Widok siatki"
+            aria-label="Widok siatki"
+            aria-pressed={viewMode === "grid"}
           >
-            <Grid size={16} />
+            <Grid size={16} aria-hidden="true" />
           </button>
           <button
             onClick={() => setViewMode("table")}
             className={`btn btn-secondary ${viewMode === "table" ? "active" : ""}`}
             style={{ padding: "0 12px", height: "48px" }}
             title="Widok tabeli"
+            aria-label="Widok tabeli"
+            aria-pressed={viewMode === "table"}
           >
-            <List size={16} />
+            <List size={16} aria-hidden="true" />
           </button>
         </div>
 
@@ -377,23 +423,25 @@ export default function PersonnelList({
 
       {/* Advanced filters drawer */}
       {showAdv && (
-        <div 
-          className="advanced-filters-panel" 
-          style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
-            gap: "16px", 
-            padding: "20px", 
-            borderRadius: "16px", 
-            background: "var(--section-bg)", 
+        <div
+          id="personnel-adv-filters"
+          className="advanced-filters-panel"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            padding: "20px",
+            borderRadius: "16px",
+            background: "var(--section-bg)",
             border: "1px solid var(--line)",
             animation: "slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards"
           }}
         >
           {/* Status filter */}
-          <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Status</label>
+          <div className="form-group col-6">
+            <label htmlFor="pf-status" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Status</label>
             <select
+              id="pf-status"
               className="input"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -407,9 +455,10 @@ export default function PersonnelList({
 
           {/* Branch filter if head office */}
           {showBranchFilter && (
-            <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Oddział</label>
+            <div className="form-group col-6">
+              <label htmlFor="pf-branch" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Oddział</label>
               <select
+                id="pf-branch"
                 className="input"
                 value={branchFilter}
                 onChange={(e) => setBranchFilter(e.target.value)}
@@ -427,8 +476,82 @@ export default function PersonnelList({
         </div>
       )}
 
+      {/* Deleted employees panel */}
+      {showDeleted && (
+        <div className="col-16">
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "14px 18px",
+            borderRadius: "12px",
+            background: "var(--section-bg)",
+            border: "1px solid var(--line)"
+          }}>
+            <Trash2 size={18} style={{ color: "var(--muted)" }} />
+            <span style={{ fontWeight: 600, fontSize: "14px" }}>Usunięci pracownicy</span>
+            <span style={{ fontSize: "12px", color: "var(--muted)" }}>— przywrócenie aktywuje pracownika i zeruje znacznik usunięcia</span>
+          </div>
+
+          {restoreError && (
+            <div role="alert" className="badge badge-danger" style={{ padding: "10px 14px", borderRadius: "8px", fontSize: "13px" }}>
+              {restoreError}
+            </div>
+          )}
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+            {deletedEmployees.map((emp) => {
+              const initials = emp.name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
+              const isRestoring = restoringId === emp.id;
+              return (
+                <div key={emp.id} className="card" style={{ display: "flex", flexDirection: "column", gap: "14px", padding: "18px", opacity: 0.7 }}>
+                  <div className="row-12">
+                    <div style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      background: "var(--section-bg)",
+                      color: "var(--muted)",
+                      display: "grid",
+                      placeItems: "center",
+                      fontWeight: 700,
+                      fontSize: "15px",
+                      border: "1px solid var(--line)"
+                    }}>
+                      {initials}
+                    </div>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "var(--muted)" }}>{emp.name}</h4>
+                      <span style={{ fontSize: "11px", color: "var(--muted)", fontFamily: "monospace" }}>ID: {emp.employeeNr}</span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>
+                    {emp.jobTitle} — {emp.branchName}
+                  </div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: "6px" }}
+                    onClick={() => handleRestore(emp.id)}
+                    disabled={isRestoring || isPending}
+                  >
+                    {isRestoring ? <Loader2 className="animate-spin" size={14} /> : <RotateCcw size={14} />}
+                    {isRestoring ? "Przywracanie..." : "Przywróć pracownika"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {deletedEmployees.length === 0 && (
+            <div className="card" style={{ padding: "32px", textAlign: "center", border: "1px dashed var(--line)" }}>
+              <p style={{ color: "var(--muted)", margin: 0 }}>Brak usuniętych pracowników.</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Grid Mode */}
-      {viewMode === "grid" && (
+      {!showDeleted && viewMode === "grid" && (
         <>
           {filteredEmployees.length === 0 ? (
             <div className="card" style={{ padding: "40px", textAlign: "center", border: "1px dashed var(--line)" }}>
@@ -448,7 +571,7 @@ export default function PersonnelList({
 
                 return (
                   <div key={emp.id} className="card" style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "20px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                    <div className="row-14">
                       
                       {/* Avatar */}
                       <div style={{
@@ -479,7 +602,7 @@ export default function PersonnelList({
                       </div>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div className="col-6">
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
                         <span style={{ color: "var(--muted)" }}>Stanowisko:</span>
                         <strong style={{ color: "var(--text)" }}>{emp.jobTitle}</strong>
@@ -512,8 +635,8 @@ export default function PersonnelList({
       )}
 
       {/* Table Mode */}
-      {viewMode === "table" && (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      {!showDeleted && viewMode === "table" && (
+        <div className="card card-flush">
           {filteredEmployees.length === 0 ? (
             <div className="empty-state">
               <Search size={48} />
@@ -538,7 +661,7 @@ export default function PersonnelList({
                     <tr key={emp.id}>
                       <td style={{ fontWeight: 600, fontFamily: "monospace" }}>{emp.employeeNr}</td>
                       <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="row-8">
                           <div style={{
                             width: "28px",
                             height: "28px",
@@ -560,8 +683,8 @@ export default function PersonnelList({
                           <span style={{ fontWeight: 600 }}>{emp.name}</span>
                         </div>
                       </td>
-                      <td style={{ color: "var(--text-secondary)" }}>{emp.jobTitle}</td>
-                      <td style={{ color: "var(--text-secondary)" }}>{emp.branchName}</td>
+                      <td style={{ color: "var(--muted)" }}>{emp.jobTitle}</td>
+                      <td style={{ color: "var(--muted)" }}>{emp.branchName}</td>
                       <td>
                         <span className={`badge ${emp.status === "ACTIVE" ? "badge-success" : "badge-neutral"}`} style={{ fontSize: "11px" }}>
                           {emp.status === "ACTIVE" ? "Aktywny" : "Nieaktywny"}
@@ -582,20 +705,28 @@ export default function PersonnelList({
       )}
 
       {isImportModalOpen && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(15, 23, 42, 0.4)",
-          backdropFilter: "blur(8px)",
-          zIndex: 1000,
-          display: "grid",
-          placeItems: "center",
-          padding: "20px"
-        }}>
-          <div className="card" style={{
+        <div
+          onClick={() => { setIsImportModalOpen(false); setImportError(""); setImportSuccess(""); }}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.55)",
+            backdropFilter: "blur(8px)",
+            zIndex: 1000,
+            display: "grid",
+            placeItems: "center",
+            padding: "20px"
+          }}>
+          <div
+            className="card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="import-modal-title"
+            onClick={(e) => e.stopPropagation()}
+            style={{
             width: "100%",
             maxWidth: "600px",
             background: "var(--page-bg)",
@@ -608,32 +739,33 @@ export default function PersonnelList({
             animation: "scaleUp 0.15s ease-out"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--line)", paddingBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <FileSpreadsheet style={{ color: "var(--accent)" }} size={22} />
-                <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Masowy import pracowników</h3>
+              <div className="row-10">
+                <FileSpreadsheet style={{ color: "var(--accent)" }} size={22} aria-hidden="true" />
+                <h3 id="import-modal-title" style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Masowy import pracowników</h3>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setIsImportModalOpen(false);
                   setImportError("");
                   setImportSuccess("");
-                }} 
+                }}
+                aria-label="Zamknij"
                 style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--muted)" }}
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             {importError && (
-              <div className="badge badge-danger" style={{ padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
-                <X size={16} />
+              <div role="alert" className="badge badge-danger" style={{ padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
+                <X size={16} aria-hidden="true" />
                 <span>{importError}</span>
               </div>
             )}
 
             {importSuccess && (
-              <div className="badge badge-success" style={{ padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
-                <Loader2 className="animate-spin" size={16} />
+              <div role="status" aria-live="polite" className="badge badge-success" style={{ padding: "10px 14px", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
+                <Loader2 className="animate-spin" size={16} aria-hidden="true" />
                 <span>{importSuccess}</span>
               </div>
             )}
@@ -649,10 +781,11 @@ export default function PersonnelList({
             {/* Branch selector if CLIENT_HEAD */}
             {showBranchFilter && (
               <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label form-required" style={{ fontSize: "13px" }}>Wybierz oddział docelowy</label>
-                <select 
-                  className="form-select" 
-                  value={importBranchId} 
+                <label className="form-label form-required" htmlFor="import-branch" style={{ fontSize: "13px" }}>Wybierz oddział docelowy</label>
+                <select
+                  id="import-branch"
+                  className="form-select"
+                  value={importBranchId}
                   onChange={(e) => setImportBranchId(e.target.value)}
                   style={{ height: "38px" }}
                 >
@@ -667,13 +800,14 @@ export default function PersonnelList({
             {/* File upload */}
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
               <label className="btn btn-secondary" style={{ cursor: "pointer", display: "inline-flex", gap: "8px", height: "38px", alignItems: "center", padding: "0 14px", fontSize: "13px" }}>
-                <Upload size={14} />
+                <Upload size={14} aria-hidden="true" />
                 Załaduj plik CSV
-                <input 
-                  type="file" 
-                  accept=".csv,.txt" 
-                  onChange={handleFileChange} 
-                  style={{ display: "none" }} 
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileChange}
+                  aria-label="Załaduj plik CSV"
+                  style={{ display: "none" }}
                 />
               </label>
               {csvText && <span style={{ fontSize: "12px", color: "var(--muted)" }}>Wczytano zawartość pliku</span>}
@@ -681,8 +815,9 @@ export default function PersonnelList({
 
             {/* CSV Textarea */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px" }}>Dane CSV</label>
+              <label className="form-label" htmlFor="import-csv" style={{ fontSize: "13px" }}>Dane CSV</label>
               <textarea
+                id="import-csv"
                 className="form-textarea"
                 rows={6}
                 placeholder="NP-010;Kamil Ślimak;Magazynier;180;100;90;L;43"
@@ -709,10 +844,9 @@ export default function PersonnelList({
               </button>
               <button 
                 type="button" 
-                className="btn btn-primary" 
+                className="btn btn-primary row-6" 
                 onClick={handleCSVImport}
                 disabled={isPending}
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
                 {isPending ? <Loader2 className="animate-spin" size={14} /> : <FileSpreadsheet size={14} />}
                 {isPending ? "Importowanie..." : "Importuj pracowników"}
@@ -722,20 +856,28 @@ export default function PersonnelList({
         </div>
       )}
       {isExportModalOpen && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(15, 23, 42, 0.4)",
-          backdropFilter: "blur(8px)",
-          zIndex: 1000,
-          display: "grid",
-          placeItems: "center",
-          padding: "20px"
-        }}>
-          <div className="card" style={{
+        <div
+          onClick={() => setIsExportModalOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.55)",
+            backdropFilter: "blur(8px)",
+            zIndex: 1000,
+            display: "grid",
+            placeItems: "center",
+            padding: "20px"
+          }}>
+          <div
+            className="card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="export-modal-title"
+            onClick={(e) => e.stopPropagation()}
+            style={{
             width: "100%",
             maxWidth: "500px",
             background: "var(--page-bg)",
@@ -748,24 +890,26 @@ export default function PersonnelList({
             animation: "scaleUp 0.15s ease-out"
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--line)", paddingBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <Download style={{ color: "var(--accent)" }} size={22} />
-                <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Eksport pracowników</h3>
+              <div className="row-10">
+                <Download style={{ color: "var(--accent)" }} size={22} aria-hidden="true" />
+                <h3 id="export-modal-title" style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>Eksport pracowników</h3>
               </div>
-              <button 
-                onClick={() => setIsExportModalOpen(false)} 
+              <button
+                onClick={() => setIsExportModalOpen(false)}
+                aria-label="Zamknij"
                 style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--muted)" }}
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             {/* 1. Format selector */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", fontWeight: 600 }}>Format pliku</label>
-              <select 
-                className="form-select" 
-                value={exportFormat} 
+              <label className="form-label" htmlFor="export-format" style={{ fontSize: "13px", fontWeight: 600 }}>Format pliku</label>
+              <select
+                id="export-format"
+                className="form-select"
+                value={exportFormat}
                 onChange={(e) => setExportFormat(e.target.value as any)}
                 style={{ height: "38px" }}
               >
@@ -778,10 +922,11 @@ export default function PersonnelList({
 
             {/* 2. Scope selector */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", fontWeight: 600 }}>Zakres eksportu</label>
-              <select 
-                className="form-select" 
-                value={exportScope} 
+              <label className="form-label" htmlFor="export-scope" style={{ fontSize: "13px", fontWeight: 600 }}>Zakres eksportu</label>
+              <select
+                id="export-scope"
+                className="form-select"
+                value={exportScope}
                 onChange={(e) => setExportScope(e.target.value as any)}
                 style={{ height: "38px" }}
               >
@@ -796,10 +941,11 @@ export default function PersonnelList({
               <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "var(--section-bg)", padding: "14px", borderRadius: "8px", border: "1px solid var(--line)" }}>
                 {showBranchFilter && (
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontSize: "12px" }}>Oddział</label>
-                    <select 
-                      className="form-select" 
-                      value={exportBranchFilter} 
+                    <label className="form-label" htmlFor="export-branch" style={{ fontSize: "12px" }}>Oddział</label>
+                    <select
+                      id="export-branch"
+                      className="form-select"
+                      value={exportBranchFilter}
                       onChange={(e) => setExportBranchFilter(e.target.value)}
                       style={{ height: "36px", background: "var(--page-bg)" }}
                     >
@@ -812,10 +958,11 @@ export default function PersonnelList({
                 )}
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label" style={{ fontSize: "12px" }}>Status</label>
-                  <select 
-                    className="form-select" 
-                    value={exportStatusFilter} 
+                  <label className="form-label" htmlFor="export-status" style={{ fontSize: "12px" }}>Status</label>
+                  <select
+                    id="export-status"
+                    className="form-select"
+                    value={exportStatusFilter}
                     onChange={(e) => setExportStatusFilter(e.target.value)}
                     style={{ height: "36px", background: "var(--page-bg)" }}
                   >
@@ -838,9 +985,8 @@ export default function PersonnelList({
               </button>
               <button 
                 type="button" 
-                className="btn btn-primary" 
+                className="btn btn-primary row-6" 
                 onClick={handleExport}
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
               >
                 <Download size={14} />
                 Eksportuj plik

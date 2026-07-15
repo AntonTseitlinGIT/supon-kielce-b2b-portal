@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -23,7 +24,7 @@ export default async function AdminOrdersPage(props: PageProps) {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_ADMIN") {
+  if (!isSuponRole(role)) {
     redirect("/client/dashboard");
   }
 
@@ -40,7 +41,7 @@ export default async function AdminOrdersPage(props: PageProps) {
   const skip = (page - 1) * limit;
 
   // 1. Build DB Query Filter
-  const where: any = {};
+  const where: any = { deletedAt: null };
 
   if (clientIdParam) {
     where.clientId = clientIdParam;
@@ -155,7 +156,7 @@ export default async function AdminOrdersPage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader
         title="Zarządzanie Zamówieniami"
         subtitle="Przeglądaj i realizuj zamówienia odzieży roboczej i ŚOI złożone przez klientów"
@@ -165,7 +166,7 @@ export default async function AdminOrdersPage(props: PageProps) {
       <AdminOrderFilters clients={clients} />
 
       {/* Data Card */}
-      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+      <div className="card card-flush">
         {orders.length === 0 ? (
           <div className="empty-state">
             <ShoppingBag />

@@ -250,7 +250,7 @@ export async function GET() {
       where: { clientId },
       include: {
         _count: {
-          select: { employees: true, orders: true }
+          select: { employees: { where: { deletedAt: null } }, orders: true }
         }
       }
     });
@@ -276,7 +276,7 @@ export async function GET() {
     });
 
     const totalEmployees = await prisma.employee.count({
-      where: { branch: { clientId }, status: "ACTIVE" }
+      where: { branch: { clientId }, status: "ACTIVE", deletedAt: null }
     });
 
     // Calculations

@@ -16,7 +16,7 @@ export default async function AdminLayout({
 
   // Double check admin/supon role permissions
   const role = session.user.role;
-  if (role !== "SUPON_ADMIN" && role !== "SUPON_DEV") {
+  if (role !== "SUPON_ADMIN") {
     redirect("/client/dashboard");
   }
 
@@ -26,6 +26,7 @@ export default async function AdminLayout({
     <AdminSidebarLayout
       navItems={filteredNav}
       user={{
+        id: session.user.id,
         name: session.user.name ?? "",
         email: session.user.email ?? "",
         role: session.user.role,

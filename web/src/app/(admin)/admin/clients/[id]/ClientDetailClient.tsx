@@ -2,15 +2,27 @@
 
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
-import { 
-  ArrowLeft, Building2, Shield, Plus, Edit2, 
-  DollarSign, Check, AlertCircle, CheckCircle, 
-  MapPin, Search, Package 
+import {
+  ArrowLeft, Shield,
+  DollarSign, Check, AlertCircle, CheckCircle,
+  MapPin, Search, Settings, RotateCcw, Save,
+  ShoppingBag, Users, MessageCircle, FileText, Building, Package, BarChart2
 } from "lucide-react";
 import { 
   updateClient, createClientBranch, updateClientBranch, 
-  saveClientProductPrice 
+  saveClientProductPrice, saveClientConfig, resetClientConfig
 } from "../actions";
+import { MODULES, ClientModules, ClientLimits } from "@/config/modules.config";
+
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
+  "shopping-bag": ShoppingBag,
+  "users": Users,
+  "message-circle": MessageCircle,
+  "file-text": FileText,
+  "building": Building,
+  "package": Package,
+  "bar-chart-2": BarChart2,
+};
 
 interface ClientDetail {
   id: string;
@@ -53,15 +65,23 @@ interface ClientDetailClientProps {
   branches: Branch[];
   products: Product[];
   initialClientProducts: Record<string, ClientProductPrice>;
+  initialModules: ClientModules;
+  initialLimits: ClientLimits;
+  lastUpdatedAt?: string | null;
+  lastUpdatedBy?: string | null;
 }
 
 export default function ClientDetailClient({
   client,
   branches,
   products,
-  initialClientProducts
+  initialClientProducts,
+  initialModules,
+  initialLimits,
+  lastUpdatedAt,
+  lastUpdatedBy,
 }: ClientDetailClientProps) {
-  const [activeTab, setActiveTab] = useState<"details" | "branches" | "prices">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "branches" | "prices" | "config">("details");
   const [isPending, startTransition] = useTransition();
 
   // Alert message states
@@ -74,6 +94,42 @@ export default function ClientDetailClient({
   const [clientAddress, setClientAddress] = useState(client.address || "");
   const [clientLogoUrl, setClientLogoUrl] = useState(client.logoUrl || "");
   const [clientIsActive, setClientIsActive] = useState(client.isActive);
+
+  // ================= TAB 4: CONFIGURATION STATE =================
+  const [modules, setModules] = useState<ClientModules>({ ...initialModules });
+  const [limits, setLimits] = useState<ClientLimits>({ ...initialLimits });
+
+  const toggleModule = (key: string, optional: boolean | undefined) => {
+    if (!optional) return; // core modules cannot be disabled
+    setModules(prev => ({ ...prev, [key]: !prev[key] }));
+    setErrorMsg("");
+    setSuccessMsg("");
+  };
+
+  const handleSaveConfig = () => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    startTransition(async () => {
+      const res = await saveClientConfig(client.id, { modules, limits });
+      if (res.success) {
+        setSuccessMsg("Konfiguracja portalu została zapisana.");
+      } else {
+        setErrorMsg(res.error ?? "Błąd podczas zapisu konfiguracji.");
+      }
+    });
+  };
+
+  const handleResetConfig = () => {
+    if (!confirm(`Zresetować konfigurację portalu dla klienta "${client.name}" do wartości domyślnych?`)) return;
+    startTransition(async () => {
+      const res = await resetClientConfig(client.id);
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setErrorMsg(res.error ?? "Błąd podczas resetowania konfiguracji.");
+      }
+    });
+  };
 
   const handleUpdateClient = (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,7 +275,7 @@ export default function ClientDetailClient({
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       
       {/* Navigation Breadcrumb */}
       <div>
@@ -236,59 +292,76 @@ export default function ClientDetailClient({
 
       {/* Tabs Menu */}
       <div className="card" style={{ padding: "6px", background: "var(--section-bg)", border: "1px solid var(--line)" }}>
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "flex", gap: "6px" }} role="tablist" aria-label="Sekcje klienta">
           <button
             onClick={() => { setActiveTab("details"); setErrorMsg(""); setSuccessMsg(""); }}
             className={`btn ${activeTab === "details" ? "btn-primary" : "btn-secondary"}`}
+            role="tab"
+            aria-selected={activeTab === "details"}
             style={{ flex: 1, boxShadow: activeTab === "details" ? undefined : "none", border: activeTab === "details" ? undefined : "none", background: activeTab === "details" ? undefined : "transparent" }}
           >
-            <Shield size={16} /> Dane Podstawowe
+            <Shield size={16} aria-hidden="true" /> Dane Podstawowe
           </button>
           <button
             onClick={() => { setActiveTab("branches"); setErrorMsg(""); setSuccessMsg(""); }}
             className={`btn ${activeTab === "branches" ? "btn-primary" : "btn-secondary"}`}
+            role="tab"
+            aria-selected={activeTab === "branches"}
             style={{ flex: 1, boxShadow: activeTab === "branches" ? undefined : "none", border: activeTab === "branches" ? undefined : "none", background: activeTab === "branches" ? undefined : "transparent" }}
           >
-            <MapPin size={16} /> Oddziały dostaw ({branches.length})
+            <MapPin size={16} aria-hidden="true" /> Oddziały dostaw ({branches.length})
           </button>
           <button
             onClick={() => { setActiveTab("prices"); setErrorMsg(""); setSuccessMsg(""); }}
             className={`btn ${activeTab === "prices" ? "btn-primary" : "btn-secondary"}`}
+            role="tab"
+            aria-selected={activeTab === "prices"}
             style={{ flex: 1, boxShadow: activeTab === "prices" ? undefined : "none", border: activeTab === "prices" ? undefined : "none", background: activeTab === "prices" ? undefined : "transparent" }}
           >
-            <DollarSign size={16} /> Cennik indywidualny ({products.length})
+            <DollarSign size={16} aria-hidden="true" /> Cennik indywidualny ({products.length})
+          </button>
+          <button
+            onClick={() => { setActiveTab("config"); setErrorMsg(""); setSuccessMsg(""); }}
+            className={`btn ${activeTab === "config" ? "btn-primary" : "btn-secondary"}`}
+            role="tab"
+            aria-selected={activeTab === "config"}
+            style={{ flex: 1, boxShadow: activeTab === "config" ? undefined : "none", border: activeTab === "config" ? undefined : "none", background: activeTab === "config" ? undefined : "transparent" }}
+          >
+            <Settings size={16} aria-hidden="true" /> Konfiguracja portalu
           </button>
         </div>
       </div>
 
       {/* Feedback Alerts */}
       {errorMsg && (
-        <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "12px 16px", borderRadius: "10px", color: "var(--err)", fontSize: "14px" }}>
-          <AlertCircle size={18} style={{ flexShrink: 0, marginTop: "2px" }} />
+        <div role="alert" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "12px 16px", borderRadius: "10px", color: "var(--err)", fontSize: "14px" }}>
+          <AlertCircle size={18} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "12px 16px", borderRadius: "10px", color: "var(--ok)", fontSize: "14px" }}>
-          <CheckCircle size={18} style={{ flexShrink: 0, marginTop: "2px" }} />
+        <div role="status" aria-live="polite" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "12px 16px", borderRadius: "10px", color: "var(--ok)", fontSize: "14px" }}>
+          <CheckCircle size={18} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* Tab Contents */}
       {activeTab === "details" && (
-        <div className="card" style={{ animation: "fadeIn 0.2s ease" }}>
+        <div className="card" role="tabpanel" style={{ animation: "fadeIn 0.2s ease" }}>
           <div className="card-header">
             <h3 className="card-title" style={{ margin: 0 }}>Formularz edycji danych klienta</h3>
           </div>
           <div className="card-content">
             <form onSubmit={handleUpdateClient} style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "600px" }}>
               <div className="form-group">
-                <label className="form-label form-required">Nazwa firmy</label>
+                <label className="form-label form-required" htmlFor="cd-name">Nazwa firmy</label>
                 <input
+                  id="cd-name"
                   type="text"
                   className="form-input"
+                  autoComplete="organization"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   required
@@ -297,9 +370,11 @@ export default function ClientDetailClient({
               </div>
 
               <div className="form-group">
-                <label className="form-label form-required">NIP</label>
+                <label className="form-label form-required" htmlFor="cd-nip">NIP</label>
                 <input
+                  id="cd-nip"
                   type="text"
+                  inputMode="numeric"
                   className="form-input"
                   value={clientNip}
                   onChange={(e) => setClientNip(e.target.value)}
@@ -309,10 +384,12 @@ export default function ClientDetailClient({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Adres siedziby</label>
+                <label className="form-label" htmlFor="cd-address">Adres siedziby</label>
                 <textarea
+                  id="cd-address"
                   className="form-textarea"
                   rows={4}
+                  autoComplete="street-address"
                   value={clientAddress}
                   onChange={(e) => setClientAddress(e.target.value)}
                   disabled={isPending}
@@ -320,9 +397,10 @@ export default function ClientDetailClient({
               </div>
 
               <div className="form-group">
-                <label className="form-label">URL Logo</label>
+                <label className="form-label" htmlFor="cd-logo">URL Logo</label>
                 <input
-                  type="text"
+                  id="cd-logo"
+                  type="url"
                   className="form-input"
                   value={clientLogoUrl}
                   onChange={(e) => setClientLogoUrl(e.target.value)}
@@ -331,13 +409,14 @@ export default function ClientDetailClient({
               </div>
 
               <div className="switch-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderTop: "1px solid var(--line)" }}>
-                <span className="form-label" style={{ margin: 0 }}>Klient aktywny</span>
+                <span className="form-label" style={{ margin: 0 }} id="cd-active-label">Klient aktywny</span>
                 <label className="switch">
                   <input
                     type="checkbox"
                     checked={clientIsActive}
                     onChange={(e) => setClientIsActive(e.target.checked)}
                     disabled={isPending}
+                    aria-labelledby="cd-active-label"
                   />
                   <span className="slider"></span>
                 </label>
@@ -357,7 +436,7 @@ export default function ClientDetailClient({
       )}
 
       {activeTab === "branches" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1.8fr 1fr", gap: "24px", alignItems: "start", animation: "fadeIn 0.2s ease" }}>
+        <div className="list-editor-grid" role="tabpanel" style={{ animation: "fadeIn 0.2s ease" }}>
           {/* Branches list */}
           <div className="card">
             <div className="card-header">
@@ -423,8 +502,9 @@ export default function ClientDetailClient({
             <div className="card-content">
               <form onSubmit={handleBranchSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div className="form-group">
-                  <label className="form-label form-required">Nazwa oddziału</label>
+                  <label className="form-label form-required" htmlFor="br-name">Nazwa oddziału</label>
                   <input
+                    id="br-name"
                     type="text"
                     className="form-input"
                     placeholder="np. Magazyn Główny"
@@ -436,8 +516,9 @@ export default function ClientDetailClient({
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label form-required">Adres dostawy</label>
+                  <label className="form-label form-required" htmlFor="br-address">Adres dostawy</label>
                   <textarea
+                    id="br-address"
                     className="form-textarea"
                     rows={4}
                     placeholder="Pełny adres dostawy dla tego oddziału..."
@@ -450,13 +531,14 @@ export default function ClientDetailClient({
 
                 {branchMode === "edit" && (
                   <div className="switch-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderTop: "1px solid var(--line)" }}>
-                    <span className="form-label" style={{ margin: 0 }}>Oddział aktywny</span>
+                    <span className="form-label" style={{ margin: 0 }} id="br-active-label">Oddział aktywny</span>
                     <label className="switch">
                       <input
                         type="checkbox"
                         checked={branchIsActive}
                         onChange={(e) => setBranchIsActive(e.target.checked)}
                         disabled={isPending}
+                        aria-labelledby="br-active-label"
                       />
                       <span className="slider"></span>
                     </label>
@@ -491,7 +573,7 @@ export default function ClientDetailClient({
       )}
 
       {activeTab === "prices" && (
-        <div className="card" style={{ animation: "fadeIn 0.2s ease" }}>
+        <div className="card" role="tabpanel" style={{ animation: "fadeIn 0.2s ease" }}>
           <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
             <div>
               <h3 className="card-title" style={{ margin: 0 }}>Indywidualny cennik kontraktowy</h3>
@@ -501,14 +583,15 @@ export default function ClientDetailClient({
             </div>
             
             <div style={{ position: "relative", width: "260px" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }}>
+              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }} aria-hidden="true">
                 <Search size={16} />
               </span>
               <input
-                type="text"
+                type="search"
                 className="form-input"
                 style={{ paddingLeft: "32px", height: "36px", fontSize: "13px" }}
                 placeholder="Szukaj artykułu..."
+                aria-label="Szukaj artykułu w cenniku"
                 value={priceSearch}
                 onChange={(e) => setPriceSearch(e.target.value)}
               />
@@ -559,6 +642,7 @@ export default function ClientDetailClient({
                                 checked={cp.isActive}
                                 onChange={(e) => handleActiveToggle(product.id, e.target.checked)}
                                 disabled={isSaving}
+                                aria-label={`Dostępność: ${product.name}`}
                               />
                               <span className="slider"></span>
                             </label>
@@ -569,14 +653,16 @@ export default function ClientDetailClient({
                         </td>
                         <td>
                           <div style={{ position: "relative" }}>
-                            <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: "13px" }}>
+                            <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", fontSize: "13px" }} aria-hidden="true">
                               zł
                             </span>
                             <input
                               type="text"
+                              inputMode="decimal"
                               className="form-input"
                               style={{ paddingLeft: "26px", height: "36px", fontSize: "13.5px" }}
                               placeholder="Domyślna cena..."
+                              aria-label={`Cena kontraktowa: ${product.name}`}
                               value={cp.customPrice}
                               onChange={(e) => handlePriceChange(product.id, e.target.value)}
                               disabled={isSaving}
@@ -600,6 +686,136 @@ export default function ClientDetailClient({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "config" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", animation: "fadeIn 0.2s ease" }}>
+          {/* Modules */}
+          <div className="card">
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700 }}>Moduły portalu klienta</h3>
+                <p style={{ margin: "4px 0 0", fontSize: "12.5px", color: "var(--muted)" }}>
+                  Włącz lub wyłącz sekcje widoczne dla użytkowników tego klienta
+                </p>
+              </div>
+              <span className="badge badge-info" style={{ fontSize: "12px" }}>
+                {MODULES.filter(m => modules[m.key]).length} / {MODULES.length} aktywnych
+              </span>
+            </div>
+
+            <div style={{ padding: "8px 0" }}>
+              {MODULES.map((mod) => {
+                const Icon = ICON_MAP[mod.icon];
+                const isOn = modules[mod.key];
+                const isCore = !mod.optional;
+                return (
+                  <div
+                    key={mod.key}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "16px",
+                      padding: "14px 20px",
+                      borderBottom: "1px solid var(--line)",
+                      opacity: isCore ? 0.75 : 1,
+                    }}
+                  >
+                    {/* Icon */}
+                    <div style={{
+                      width: "36px", height: "36px", borderRadius: "9px", flexShrink: 0,
+                      background: isOn ? "color-mix(in oklab, var(--accent) 12%, transparent)" : "var(--section-bg)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      {Icon && <Icon size={17} style={{ color: isOn ? "var(--accent)" : "var(--muted)" }} />}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                        {mod.label}
+                        {isCore && (
+                          <span className="badge" style={{ fontSize: "10px", background: "var(--section-bg)", color: "var(--muted)" }}>
+                            rdzeń
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: "12.5px", color: "var(--muted)", marginTop: "2px" }}>{mod.description}</div>
+                    </div>
+
+                    {/* Toggle */}
+                    <label className={`toggle-switch${isCore ? " toggle-disabled" : ""}`} title={isCore ? "Ten moduł jest wymagany i nie może być wyłączony" : undefined}>
+                      <input
+                        type="checkbox"
+                        className="toggle-input"
+                        checked={isOn}
+                        onChange={() => toggleModule(mod.key, mod.optional)}
+                        disabled={isCore || isPending}
+                      />
+                      <span className="toggle-track" />
+                      <span className="toggle-label">{isOn ? "Włączony" : "Wyłączony"}</span>
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Limits */}
+          <div className="card" style={{ padding: "20px" }}>
+            <h2 style={{ margin: "0 0 16px", fontSize: "15px", fontWeight: 700 }}>Limity operacyjne</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", maxWidth: "480px" }}>
+              <div className="form-group">
+                <label className="form-label">Maks. użytkowników</label>
+                <input
+                  type="number" min={1} max={9999}
+                  className="form-input"
+                  value={limits.maxUsers}
+                  onChange={e => setLimits(prev => ({ ...prev, maxUsers: Number(e.target.value) }))}
+                  disabled={isPending}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Maks. oddziałów</label>
+                <input
+                  type="number" min={1} max={999}
+                  className="form-input"
+                  value={limits.maxBranches}
+                  onChange={e => setLimits(prev => ({ ...prev, maxBranches: Number(e.target.value) }))}
+                  disabled={isPending}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
+            <button
+              onClick={handleSaveConfig}
+              className="btn btn-primary"
+              disabled={isPending}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              <Save size={15} />
+              {isPending ? "Zapisywanie..." : "Zapisz konfigurację"}
+            </button>
+
+            <button
+              onClick={handleResetConfig}
+              className="btn btn-ghost btn-sm"
+              disabled={isPending}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "var(--err)" }}
+            >
+              <RotateCcw size={13} />
+              Resetuj do domyślnych
+            </button>
+
+            {lastUpdatedAt && (
+              <span style={{ marginLeft: "auto", fontSize: "11.5px", color: "var(--muted)" }}>
+                Ostatnia zmiana: {new Date(lastUpdatedAt).toLocaleString("pl-PL")}
+                {lastUpdatedBy && ` · ${lastUpdatedBy}`}
+              </span>
+            )}
           </div>
         </div>
       )}

@@ -27,6 +27,14 @@ export default function AdminDashboardCharts({
   clientSpendData,
   statusData
 }: AdminDashboardChartsProps) {
+  const plnFmt = new Intl.NumberFormat("pl-PL");
+  const spendSummary = clientSpendData.length === 0
+    ? "Brak danych o wydatkach."
+    : `Wydatki według klientów: ${clientSpendData.map(d => `${d.clientName} ${plnFmt.format(d.spend)} zł`).join(", ")}.`;
+  const statusSummary = statusData.length === 0
+    ? "Brak danych o statusach zamówień."
+    : `Statusy zamówień: ${statusData.map(d => `${d.name} ${d.value}`).join(", ")}.`;
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "20px", marginBottom: "32px" }}>
       {/* Chart 1: Spend per Client */}
@@ -34,7 +42,7 @@ export default function AdminDashboardCharts({
         <h3 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 16px 0", color: "var(--text)" }}>
           Wydatki według klientów (PLN)
         </h3>
-        <div style={{ height: "260px", width: "100%" }}>
+        <div style={{ height: "260px", width: "100%" }} role="img" aria-label={spendSummary}>
           {clientSpendData.length === 0 ? (
             <div style={{ height: "100%", display: "grid", placeItems: "center", color: "var(--muted)", fontSize: "14px" }}>
               Brak danych do wyświetlenia
@@ -61,7 +69,7 @@ export default function AdminDashboardCharts({
         <h3 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 16px 0", color: "var(--text)" }}>
           Statusy zamówień
         </h3>
-        <div style={{ height: "260px", width: "100%" }}>
+        <div style={{ height: "260px", width: "100%" }} role="img" aria-label={statusSummary}>
           {statusData.length === 0 ? (
             <div style={{ height: "100%", display: "grid", placeItems: "center", color: "var(--muted)", fontSize: "14px" }}>
               Brak danych do wyświetlenia

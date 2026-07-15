@@ -11,11 +11,19 @@ export const metadata = {
 export default async function AdminUsersPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  if (session.user.role !== "SUPON_DEV") redirect("/admin/dashboard");
+  if (session.user.role !== "SUPON_ADMIN") redirect("/admin/dashboard");
 
   const [users, clients, branches] = await Promise.all([
     prisma.user.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        clientId: true,
+        branchId: true,
+        isActive: true,
+        createdAt: true,
         client: { select: { id: true, name: true } },
         branch: { select: { id: true, name: true } },
       },

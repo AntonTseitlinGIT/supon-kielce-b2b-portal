@@ -252,24 +252,24 @@ export default function NewTicketForm({
   const filteredOrders = orders.filter((o) => o.items.length > 0);
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <form onSubmit={handleSubmit} className="col-16">
       
       {/* Alert states */}
       {errorMsg && (
-        <div className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <AlertTriangle size={18} />
+        <div role="alert" className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <AlertTriangle size={18} aria-hidden="true" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <ShieldCheck size={18} />
+        <div role="status" aria-live="polite" className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <ShieldCheck size={18} aria-hidden="true" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div className="col-16">
         
         {/* Main Details Card */}
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px", border: "1px solid var(--line)", padding: "24px" }}>
@@ -288,10 +288,11 @@ export default function NewTicketForm({
             {/* Oddział selection */}
             {userRole === "CLIENT_HEAD" ? (
               <div className="form-group">
-                <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Building2 size={14} style={{ color: "var(--muted)" }} /> Oddział
+                <label className="form-label form-required row-6" htmlFor="nt-branch">
+                  <Building2 size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Oddział
                 </label>
                 <select
+                  id="nt-branch"
                   className="form-select"
                   value={branchId}
                   onChange={(e) => setBranchId(e.target.value)}
@@ -307,10 +308,11 @@ export default function NewTicketForm({
               </div>
             ) : (
               <div className="form-group">
-                <label className="form-label" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Building2 size={14} style={{ color: "var(--muted)" }} /> Oddział
+                <label className="form-label row-6" htmlFor="nt-branch-ro">
+                  <Building2 size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Oddział
                 </label>
                 <input
+                  id="nt-branch-ro"
                   type="text"
                   className="form-input"
                   value={branches.find((b) => b.id === branchId)?.name || ""}
@@ -321,10 +323,11 @@ export default function NewTicketForm({
 
             {/* Ticket Type */}
             <div className="form-group">
-              <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase", fontSize: "11px", fontWeight: 800, color: "var(--muted)" }}>
+              <label className="form-label form-required" htmlFor="nt-type" style={{ display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase", fontSize: "11px", fontWeight: 800, color: "var(--muted)" }}>
                 Typ zgłoszenia
               </label>
               <select
+                id="nt-type"
                 className="form-select"
                 value={type}
                 onChange={(e) => setType(e.target.value as TicketType)}
@@ -366,6 +369,7 @@ export default function NewTicketForm({
                     }
                   }}
                   disabled={isPending || type === "COMPLAINT" || type === "EXCHANGE"}
+                  aria-label="Powiąż z konkretnym zamówieniem"
                 />
                 <span className="slider"></span>
               </label>
@@ -391,6 +395,7 @@ export default function NewTicketForm({
                     }
                   }}
                   disabled={isPending || type === "COMPLAINT" || type === "EXCHANGE"}
+                  aria-label="Powiąż z konkretnym produktem"
                 />
                 <span className="slider"></span>
               </label>
@@ -411,6 +416,7 @@ export default function NewTicketForm({
                     }
                   }}
                   disabled={isPending}
+                  aria-label="Powiąż z konkretnym pracownikiem"
                 />
                 <span className="slider"></span>
               </label>
@@ -431,13 +437,14 @@ export default function NewTicketForm({
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="col-16">
               {(linkOrder || linkProduct) && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                   {linkOrder && (
                     <div className="form-group">
-                      <label className="form-label" style={{ fontWeight: 600 }}>Powiązane zamówienie</label>
+                      <label className="form-label" htmlFor="nt-order" style={{ fontWeight: 600 }}>Powiązane zamówienie</label>
                       <select
+                        id="nt-order"
                         className="form-select"
                         value={orderId}
                         onChange={(e) => {
@@ -463,8 +470,9 @@ export default function NewTicketForm({
 
                   {linkProduct && (
                     <div className="form-group">
-                      <label className="form-label" style={{ fontWeight: 600 }}>Wybierz produkt z zamówienia</label>
+                      <label className="form-label" htmlFor="nt-product" style={{ fontWeight: 600 }}>Wybierz produkt z zamówienia</label>
                       <select
+                        id="nt-product"
                         className="form-select"
                         value={selectedOrderItemId}
                         onChange={(e) => {
@@ -507,8 +515,9 @@ export default function NewTicketForm({
 
                   {type === "EXCHANGE" && productId && (
                     <div className="form-group" style={{ gridColumn: "span 2" }}>
-                      <label className="form-label" style={{ fontWeight: 600 }}>Nowy rozmiar na wymianę</label>
+                      <label className="form-label" htmlFor="nt-newsize" style={{ fontWeight: 600 }}>Nowy rozmiar na wymianę</label>
                       <select
+                        id="nt-newsize"
                         className="form-select"
                         value={newSize}
                         onChange={(e) => setNewSize(e.target.value)}
@@ -532,9 +541,10 @@ export default function NewTicketForm({
 
               {linkEmployee && (
                 <div className="form-group" style={{ maxWidth: "50%" }}>
-                  <label className="form-label" style={{ fontWeight: 600 }}>Pracownik</label>
+                  <label className="form-label" htmlFor="nt-employee" style={{ fontWeight: 600 }}>Pracownik</label>
                   {filteredEmployees.length > 0 ? (
                     <select
+                      id="nt-employee"
                       className="form-select"
                       value={employeeId}
                       onChange={(e) => {
@@ -555,6 +565,7 @@ export default function NewTicketForm({
                     </select>
                   ) : (
                     <input
+                      id="nt-employee"
                       type="text"
                       className="form-input"
                       placeholder="Imię i Nazwisko"
@@ -585,7 +596,9 @@ export default function NewTicketForm({
 
           {/* Description message */}
           <div className="form-group">
+            <label className="form-label form-required" htmlFor="nt-message">Treść zgłoszenia</label>
             <textarea
+              id="nt-message"
               className="form-textarea"
               rows={6}
               placeholder="Opisz dokładnie swój problem lub pytanie. Menedżer odpowie na czacie..."
@@ -610,12 +623,13 @@ export default function NewTicketForm({
                   type="file"
                   onChange={handleFileUpload}
                   disabled={uploading || isPending}
+                  aria-label="Załącz plik lub obraz"
                   style={{ display: "none" }}
                 />
               </label>
 
               {fileName && (
-                <div style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                <div style={{ fontSize: "13px", color: "var(--muted)" }}>
                   Załączono: <strong>{fileName}</strong>
                 </div>
               )}

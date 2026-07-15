@@ -139,7 +139,7 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
   });
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px", alignItems: "start" }}>
+    <div className="list-editor-grid">
       
       {/* Product List */}
       <div className="card">
@@ -155,6 +155,7 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
               style={{ width: "160px", height: "36px", fontSize: "13px", padding: "0 10px" }}
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
+              aria-label="Filtruj wg kategorii"
             >
               <option value="all">Wszystkie kategorie</option>
               {categories.map((c) => (
@@ -166,14 +167,15 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
 
             {/* Search Input */}
             <div style={{ position: "relative", width: "220px" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }}>
+              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }} aria-hidden="true">
                 <Search size={16} />
               </span>
               <input
-                type="text"
+                type="search"
                 className="form-input"
                 style={{ paddingLeft: "32px", height: "36px", fontSize: "13px" }}
                 placeholder="Szukaj towaru..."
+                aria-label="Szukaj towaru"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -213,7 +215,7 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
                         {p.category.name}
                       </span>
                     </td>
-                    <td style={{ fontSize: "13px", color: "var(--text-secondary)", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <td style={{ fontSize: "13px", color: "var(--muted)", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {p.availableSizes.join(", ")}
                     </td>
                     <td style={{ textAlign: "center" }}>
@@ -255,24 +257,25 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
         </div>
         <div className="card-content">
           {errorMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
-              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="alert" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
+              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
-              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="status" aria-live="polite" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
+              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{successMsg}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-            
+
             <div className="form-group">
-              <label className="form-label form-required">Nazwa artykułu</label>
+              <label className="form-label form-required" htmlFor="ac-name">Nazwa artykułu</label>
               <input
+                id="ac-name"
                 type="text"
                 className="form-input"
                 placeholder="np. Buty robocze S1"
@@ -284,8 +287,9 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required">Numer artykułu (Kod)</label>
+              <label className="form-label form-required" htmlFor="ac-article">Numer artykułu (Kod)</label>
               <input
+                id="ac-article"
                 type="text"
                 className="form-input"
                 placeholder="np. BHP-BUT-091"
@@ -297,8 +301,9 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required">Kategoria ŚOI</label>
+              <label className="form-label form-required" htmlFor="ac-category">Kategoria ŚOI</label>
               <select
+                id="ac-category"
                 className="form-input"
                 required
                 value={categoryId}
@@ -315,23 +320,26 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
             </div>
 
             <div className="form-group">
-              <label className="form-label">Dostępne rozmiary</label>
+              <label className="form-label" htmlFor="ac-sizes">Dostępne rozmiary</label>
               <input
+                id="ac-sizes"
                 type="text"
                 className="form-input"
                 placeholder="np. S, M, L, XL lub 41, 42, 43"
+                aria-describedby="ac-sizes-help"
                 value={availableSizes}
                 onChange={(e) => setAvailableSizes(e.target.value)}
                 disabled={isPending}
               />
-              <span style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
+              <span id="ac-sizes-help" style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
                 Rozdziel wartości przecinkami. Pozostaw puste dla towarów bezrozmiarowych.
               </span>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Opis towaru</label>
+              <label className="form-label" htmlFor="ac-description">Opis towaru</label>
               <textarea
+                id="ac-description"
                 className="form-textarea"
                 rows={3}
                 placeholder="Szczegółowy opis specyfikacji produktu..."
@@ -343,13 +351,14 @@ export default function CatalogClient({ products, categories }: CatalogClientPro
 
             {mode === "edit" && (
               <div className="switch-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderTop: "1px solid var(--line)" }}>
-                <span className="form-label" style={{ margin: 0 }}>Artykuł aktywny</span>
+                <span className="form-label" style={{ margin: 0 }} id="ac-active-label">Artykuł aktywny</span>
                 <label className="switch">
                   <input
                     type="checkbox"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
                     disabled={isPending}
+                    aria-labelledby="ac-active-label"
                   />
                   <span className="slider"></span>
                 </label>

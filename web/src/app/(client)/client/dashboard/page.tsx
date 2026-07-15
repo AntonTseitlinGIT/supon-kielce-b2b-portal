@@ -14,17 +14,17 @@ export default async function ClientDashboardPage() {
   const { role, clientId, branchId } = session.user;
 
   // Build role-scoped database filters
-  const whereFilterOrder = role === "BRANCH_HEAD" 
-    ? { branchId: branchId! } 
-    : { clientId: clientId! };
+  const whereFilterOrder = role === "BRANCH_HEAD"
+    ? { branchId: branchId!, deletedAt: null }
+    : { clientId: clientId!, deletedAt: null };
 
   const whereFilterTicket = role === "BRANCH_HEAD"
     ? { branchId: branchId! }
     : { clientId: clientId! };
 
   const whereFilterEmployee = role === "BRANCH_HEAD"
-    ? { branchId: branchId!, status: "ACTIVE" as const }
-    : { branch: { clientId: clientId! }, status: "ACTIVE" as const };
+    ? { branchId: branchId!, status: "ACTIVE" as const, deletedAt: null }
+    : { branch: { clientId: clientId! }, status: "ACTIVE" as const, deletedAt: null };
 
   // Fetch counts in parallel for KPIs
   const [

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LogOut, Search, Moon, Sun,
+  LogOut, Search, Menu, X,
   LayoutDashboard, ShoppingBag, MessageCircle, Building2, Package,
   BarChart2, UserCog, Settings, Users, FileText, Building,
 } from "lucide-react";
@@ -32,12 +32,12 @@ const ROLE_LABELS: Record<Role, string> = {
   BRANCH_HEAD: "Kierownik Oddziału",
   CLIENT_HEAD: "Dyrektor Centrali",
   SUPON_ADMIN: "Administrator SUPON",
-  SUPON_DEV: "Deweloper systemu",
 };
 
 interface AdminSidebarLayoutProps {
   navItems: NavItem[];
   user: {
+    id: string;
     name: string;
     email: string;
     role: Role;
@@ -48,22 +48,7 @@ interface AdminSidebarLayoutProps {
 export default function AdminSidebarLayout({ navItems, user, children }: AdminSidebarLayoutProps) {
   const pathname = usePathname() || "";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initial = saved ?? (prefersDark ? "dark" : "light");
-    setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-  };
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,6 +61,11 @@ export default function AdminSidebarLayout({ navItems, user, children }: AdminSi
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [pathname]);
+
   const checkActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
 
@@ -85,8 +75,20 @@ export default function AdminSidebarLayout({ navItems, user, children }: AdminSi
   return (
     <div className="admin-shell">
 
+      {/* ── Mobile backdrop ── */}
+      {isMobileSidebarOpen && (
+        <div
+          className="mobile-sidebar-overlay"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside className="admin-sidebar" aria-label="Nawigacja">
+      <aside
+        className={`admin-sidebar${isMobileSidebarOpen ? " sidebar-open" : ""}`}
+        aria-label="Nawigacja"
+      >
 
         <div className="sidebar-brand">
           <Link href="/admin/dashboard" className="sidebar-logo-link">
@@ -137,6 +139,14 @@ export default function AdminSidebarLayout({ navItems, user, children }: AdminSi
 
         {/* Thin top bar */}
         <header className="admin-topbar">
+          {/* Hamburger — mobile only */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+            aria-label="Menu"
+          >
+            {isMobileSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
           <button
             onClick={() => setIsSearchOpen(true)}
             className="admin-search-btn"
@@ -147,15 +157,7 @@ export default function AdminSidebarLayout({ navItems, user, children }: AdminSi
             <kbd>⌘K</kbd>
           </button>
           <div className="admin-topbar-actions">
-            <NotificationBell />
-            <button
-              onClick={toggleTheme}
-              title={theme === "dark" ? "Tryb jasny" : "Tryb ciemny"}
-              aria-label="Przełącz motyw"
-              className="topbar-icon-btn"
-            >
-              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-            </button>
+            <NotificationBell userId={user.id} />
           </div>
         </header>
 

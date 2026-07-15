@@ -21,10 +21,19 @@ export default function ClickableRow({ id, children }: ClickableRowProps) {
   };
 
   return (
-    <tr 
+    <tr
       className="clickable"
       style={{ cursor: "pointer" }}
       onClick={handleRowClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          router.push(`/client/tickets/${id}`);
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label="Otwórz szczegóły zgłoszenia"
     >
       {children}
     </tr>

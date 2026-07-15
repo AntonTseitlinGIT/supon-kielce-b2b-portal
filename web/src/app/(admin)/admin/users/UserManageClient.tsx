@@ -38,7 +38,7 @@ const ROLE_LABELS: Record<Role, string> = {
 const ROLE_BADGE: Record<Role, string> = {
   SUPON_ADMIN: "err",
   CLIENT_HEAD: "badge-info",
-  BRANCH_HEAD: "badge-muted",
+  BRANCH_HEAD: "badge-neutral",
 };
 
 const CLIENT_ROLES: Role[] = ["CLIENT_HEAD", "BRANCH_HEAD"];
@@ -163,7 +163,7 @@ export default function UserManageClient({ users, clients, branches }: Props) {
   });
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "2.2fr 1fr", gap: "24px", alignItems: "start" }}>
+    <div className="list-editor-grid">
 
       {/* Users Table */}
       <div className="card">
@@ -174,14 +174,15 @@ export default function UserManageClient({ users, clients, branches }: Props) {
           </h3>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <div style={{ position: "relative" }}>
-              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }}>
+              <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--muted)", display: "flex" }} aria-hidden="true">
                 <Search size={15} />
               </span>
               <input
-                type="text"
+                type="search"
                 className="form-input"
                 style={{ paddingLeft: "32px", height: "36px", fontSize: "13px", width: "200px" }}
                 placeholder="Szukaj po nazwie / e-mail..."
+                aria-label="Szukaj użytkowników"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -191,6 +192,7 @@ export default function UserManageClient({ users, clients, branches }: Props) {
               style={{ height: "36px", fontSize: "13px" }}
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as Role | "")}
+              aria-label="Filtruj wg roli"
             >
               <option value="">Wszystkie role</option>
               {(Object.keys(ROLE_LABELS) as Role[]).map(r => (
@@ -202,6 +204,7 @@ export default function UserManageClient({ users, clients, branches }: Props) {
               style={{ height: "36px", fontSize: "13px" }}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
+              aria-label="Filtruj wg statusu"
             >
               <option value="">Wszyscy</option>
               <option value="active">Aktywni</option>
@@ -233,7 +236,7 @@ export default function UserManageClient({ users, clients, branches }: Props) {
                 filtered.map(user => (
                   <tr key={user.id} style={{ background: editUser?.id === user.id ? "color-mix(in oklab, var(--accent) 6%, var(--page-bg))" : undefined }}>
                     <td>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div className="row-10">
                         <div style={{
                           width: "32px", height: "32px", borderRadius: "50%",
                           background: "var(--accent)", color: "#fff",
@@ -293,13 +296,13 @@ export default function UserManageClient({ users, clients, branches }: Props) {
       <div className="card">
         <div className="card-header" style={{ borderBottom: "1px solid var(--line)" }}>
           <h3 className="card-title" style={{ margin: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span className="row-8">
               {isEditMode ? <Pencil size={16} style={{ color: "var(--accent)" }} /> : <Plus size={18} style={{ color: "var(--accent)" }} />}
               {isEditMode ? `Edytuj: ${editUser!.name.split(" ")[0]}` : "Nowy użytkownik"}
             </span>
             {isEditMode && (
-              <button type="button" onClick={cancelEdit} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: "2px" }}>
-                <X size={16} />
+              <button type="button" onClick={cancelEdit} aria-label="Anuluj edycję" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: "2px" }}>
+                <X size={16} aria-hidden="true" />
               </button>
             )}
           </h3>
@@ -307,26 +310,28 @@ export default function UserManageClient({ users, clients, branches }: Props) {
 
         <div className="card-content">
           {errorMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
-              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="alert" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
+              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{errorMsg}</span>
             </div>
           )}
           {successMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
-              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="status" aria-live="polite" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
+              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{successMsg}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
             <div className="form-group">
-              <label className="form-label form-required">Imię i nazwisko</label>
+              <label className="form-label form-required" htmlFor="um-name">Imię i nazwisko</label>
               <input
+                id="um-name"
                 type="text"
                 className="form-input"
                 placeholder="np. Jan Kowalski"
                 required
+                autoComplete="name"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 disabled={isPending}
@@ -334,12 +339,14 @@ export default function UserManageClient({ users, clients, branches }: Props) {
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required">Adres e-mail</label>
+              <label className="form-label form-required" htmlFor="um-email">Adres e-mail</label>
               <input
+                id="um-email"
                 type="email"
                 className="form-input"
                 placeholder="np. jan.kowalski@firma.pl"
                 required
+                autoComplete="email"
                 value={formEmail}
                 onChange={(e) => setFormEmail(e.target.value)}
                 disabled={isPending}
@@ -348,13 +355,15 @@ export default function UserManageClient({ users, clients, branches }: Props) {
 
             {!isEditMode && (
               <div className="form-group">
-                <label className="form-label form-required">Hasło (min. 6 znaków)</label>
+                <label className="form-label form-required" htmlFor="um-password">Hasło (min. 6 znaków)</label>
                 <input
+                  id="um-password"
                   type="password"
                   className="form-input"
                   placeholder="••••••••"
                   required
                   minLength={6}
+                  autoComplete="new-password"
                   value={formPassword}
                   onChange={(e) => setFormPassword(e.target.value)}
                   disabled={isPending}
@@ -363,8 +372,9 @@ export default function UserManageClient({ users, clients, branches }: Props) {
             )}
 
             <div className="form-group">
-              <label className="form-label form-required">Rola</label>
+              <label className="form-label form-required" htmlFor="um-role">Rola</label>
               <select
+                id="um-role"
                 className="form-input"
                 required
                 value={formRole}
@@ -383,8 +393,9 @@ export default function UserManageClient({ users, clients, branches }: Props) {
 
             {CLIENT_ROLES.includes(formRole) && (
               <div className="form-group">
-                <label className="form-label">Klient</label>
+                <label className="form-label" htmlFor="um-client">Klient</label>
                 <select
+                  id="um-client"
                   className="form-input"
                   value={formClientId}
                   onChange={(e) => { setFormClientId(e.target.value); setFormBranchId(""); }}
@@ -400,8 +411,9 @@ export default function UserManageClient({ users, clients, branches }: Props) {
 
             {BRANCH_ROLES.includes(formRole) && formClientId && (
               <div className="form-group">
-                <label className="form-label">Oddział</label>
+                <label className="form-label" htmlFor="um-branch">Oddział</label>
                 <select
+                  id="um-branch"
                   className="form-input"
                   value={formBranchId}
                   onChange={(e) => setFormBranchId(e.target.value)}
@@ -417,13 +429,14 @@ export default function UserManageClient({ users, clients, branches }: Props) {
 
             {isEditMode && (
               <div className="switch-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderTop: "1px solid var(--line)" }}>
-                <span className="form-label" style={{ margin: 0 }}>Konto aktywne</span>
+                <span className="form-label" style={{ margin: 0 }} id="um-active-label">Konto aktywne</span>
                 <label className="switch">
                   <input
                     type="checkbox"
                     checked={formIsActive}
                     onChange={(e) => setFormIsActive(e.target.checked)}
                     disabled={isPending}
+                    aria-labelledby="um-active-label"
                   />
                   <span className="slider" />
                 </label>
@@ -454,14 +467,16 @@ export default function UserManageClient({ users, clients, branches }: Props) {
                 </button>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                  <label className="form-label" style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <KeyRound size={14} style={{ color: "var(--accent)" }} /> Nowe hasło (min. 6 znaków)
+                  <label className="form-label" htmlFor="um-newpass" style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <KeyRound size={14} style={{ color: "var(--accent)" }} aria-hidden="true" /> Nowe hasło (min. 6 znaków)
                   </label>
                   <input
+                    id="um-newpass"
                     type="password"
                     className="form-input"
                     placeholder="••••••••"
                     minLength={6}
+                    autoComplete="new-password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     disabled={isPending}

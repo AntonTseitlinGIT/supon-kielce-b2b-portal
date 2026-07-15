@@ -1,13 +1,16 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import { isSuponRole } from "@/config/permissions.config";
 import { prisma } from "@/lib/db";
-import { OrderStatus, WzStatus, DeliveryStatus } from "@prisma/client";
+import { OrderStatus, WzStatus, DeliveryStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { notifyClientUsers, notifySuponUsers } from "@/lib/notifications";
+import { nextSequence } from "@/lib/sequences";
 
 export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -19,32 +22,21 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 
     // Notify client users
     try {
-      const clientUsers = await prisma.user.findMany({
-        where: { clientId: order.clientId, isActive: true },
-        select: { id: true }
-      });
-
-      if (clientUsers.length > 0) {
-        const STATUS_LABELS: Record<string, string> = {
-          IN_PROGRESS: "w realizacji",
-          SENT: "wysłane",
-          PARTIALLY_SENT: "częściowo wysłane",
-          DELIVERED: "dostarczone",
-          APPROVED: "zatwierdzone",
-          CANCELLED: "anulowane",
-          DRAFT: "szkic"
-        };
-        const statusLabel = STATUS_LABELS[status] || status;
-
-        await prisma.notification.createMany({
-          data: clientUsers.map(u => ({
-            userId: u.id,
-            title: `Zmiana statusu zamówienia ${order.orderNr}`,
-            body: `Nowy status zamówienia: ${statusLabel}`,
-            link: `/client/orders/${order.id}`
-          }))
-        });
-      }
+      const STATUS_LABELS: Record<string, string> = {
+        IN_PROGRESS: "w realizacji",
+        SENT: "wysłane",
+        PARTIALLY_SENT: "częściowo wysłane",
+        DELIVERED: "dostarczone",
+        APPROVED: "zatwierdzone",
+        CANCELLED: "anulowane",
+        DRAFT: "szkic"
+      };
+      await notifyClientUsers(
+        order.clientId,
+        `Zmiana statusu zamówienia ${order.orderNr}`,
+        `Nowy status zamówienia: ${STATUS_LABELS[status] ?? status}`,
+        `/client/orders/${order.id}`
+      );
     } catch (nErr) {
       console.error("Failed to trigger order status notification:", nErr);
     }
@@ -58,12 +50,18 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   }
 }
 
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
+function getStorageClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) throw new Error("Supabase storage not configured");
+  return createSupabaseClient(url, serviceKey);
+}
 
 export async function uploadWzPdf(formData: FormData) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -72,18 +70,35 @@ export async function uploadWzPdf(formData: FormData) {
     return { success: false, error: "Brak pliku." };
   }
 
+  const ALLOWED_TYPES = ["application/pdf"];
+  const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { success: false, error: "Niedozwolony typ pliku. Akceptowany jest tylko PDF." };
+  }
+  if (file.size > MAX_SIZE_BYTES) {
+    return { success: false, error: "Plik jest za duży. Maksymalny rozmiar to 10 MB." };
+  }
+
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext !== "pdf") {
+    return { success: false, error: "Plik musi mieć rozszerzenie .pdf." };
+  }
+
   try {
+    const supabase = getStorageClient();
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const storagePath = `wz/${Date.now()}-${safeName}`;
+
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const { error } = await supabase.storage
+      .from("wz-documents")
+      .upload(storagePath, bytes, { contentType: "application/pdf", upsert: false });
 
-    const uploadDir = join(process.cwd(), "public", "uploads", "wz");
-    await mkdir(uploadDir, { recursive: true });
+    if (error) throw error;
 
-    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_")}`;
-    const filePath = join(uploadDir, filename);
-
-    await writeFile(filePath, buffer);
-    return { success: true, pdfUrl: `/uploads/wz/${filename}` };
+    // Store the storage path (not a public URL) — served via protected API route
+    return { success: true, pdfUrl: `/api/wz/${storagePath}` };
   } catch (error) {
     console.error("Failed to upload WZ PDF:", error);
     return { success: false, error: "Błąd zapisu pliku na serwerze." };
@@ -99,7 +114,7 @@ export async function generateWz(
   pdfUrl?: string
 ) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -117,21 +132,22 @@ export async function generateWz(
       return { success: false, error: "Zamówienie nie istnieje." };
     }
 
-    // Generate unique WZ number WZ-YYYY-MM-XXX
     const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const wzCount = await prisma.wzDocument.count();
-    const wzNr = `WZ-${currentYear}-${currentMonth}-${String(1000 + wzCount + 1).substring(1)}`;
-
-    // Create delivery number DEL-XXXXX
-    const delCount = await prisma.delivery.count();
-    const deliveryNr = `DEL-${20000 + delCount + 1}`;
-
     const itemsMap = new Map(order.items.map(i => [i.id, i]));
 
-    // Start transaction
+    // All number generation + writes in one serializable transaction to prevent race conditions
     await prisma.$transaction(async (tx) => {
+      // Generate unique WZ number WZ-YYYY-MM-XXX from an atomic counter
+      const currentYear = now.getFullYear();
+      const currentMonth = String(now.getMonth() + 1).padStart(2, '0');
+      const wzSeq = await nextSequence(tx, "wz");
+      // Zero-pad to 3 digits; grows to 4+ digits gracefully past 999 (no truncation/collision)
+      const wzNr = `WZ-${currentYear}-${currentMonth}-${String(wzSeq).padStart(3, '0')}`;
+
+      // Generate delivery number DEL-XXXXX from an atomic counter
+      const delSeq = await nextSequence(tx, "delivery");
+      const deliveryNr = `DEL-${20000 + delSeq}`;
+
       // 1. Create Delivery
       const delivery = await tx.delivery.create({
         data: {
@@ -168,8 +184,8 @@ export async function generateWz(
         const dbItem = itemsMap.get(shipItem.orderItemId);
         if (!dbItem) continue;
 
-        // Check overflow
-        const maxShip = dbItem.quantity - dbItem.qtyDelivered;
+        // Check overflow — can't ship more than what's neither already shipped nor delivered
+        const maxShip = dbItem.quantity - dbItem.qtySent - dbItem.qtyDelivered;
         if (shipItem.quantity > maxShip) {
           throw new Error(`Przekroczono limit wysyłki dla produktu ${dbItem.productName}. Maksymalnie do wysłania: ${maxShip}.`);
         }
@@ -185,25 +201,21 @@ export async function generateWz(
           }
         });
 
-        // b. Create DeliveryItem
+        // b. Create DeliveryItem (linked to the exact OrderItem line for unambiguous delivery confirmation)
         await tx.deliveryItem.create({
           data: {
             deliveryId: delivery.id,
+            orderItemId: dbItem.id,
             articleNr: dbItem.articleNr,
             productName: dbItem.productName,
             quantity: shipItem.quantity,
           }
         });
 
-        // c. Update OrderItem quantities
-        const updatedDelivered = dbItem.qtyDelivered + shipItem.quantity;
-        const updatedSent = dbItem.qtySent + shipItem.quantity;
+        // c. Update OrderItem quantities — only qtySent increases on ship; qtyDelivered increases on confirmed delivery
         await tx.orderItem.update({
           where: { id: shipItem.orderItemId },
-          data: {
-            qtyDelivered: updatedDelivered,
-            qtySent: updatedSent
-          }
+          data: { qtySent: { increment: shipItem.quantity } }
         });
 
         // d. Create IssuedItem for employee
@@ -231,44 +243,33 @@ export async function generateWz(
         }
       }
 
-      // 4. Update Order status based on delivery metrics
-      const currentItems = await tx.orderItem.findMany({
-        where: { orderId }
-      });
-      const isFullySent = currentItems.every(i => (i.qtySent + i.qtyDelivered) >= i.quantity);
+      // 4. Update Order status: all shipped if qtySent covers full quantity for every item
+      const currentItems = await tx.orderItem.findMany({ where: { orderId } });
+      const isFullySent = currentItems.every(i => i.qtySent >= i.quantity);
 
       await tx.order.update({
         where: { id: orderId },
-        data: {
-          status: isFullySent ? OrderStatus.SENT : OrderStatus.PARTIALLY_SENT
-        }
+        data: { status: isFullySent ? OrderStatus.SENT : OrderStatus.PARTIALLY_SENT }
       });
-    });
+
+      return wzNr;
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     // Notify client users about WZ document
     try {
-      const clientUsers = await prisma.user.findMany({
-        where: { clientId: order.clientId, isActive: true },
-        select: { id: true }
-      });
-
-      if (clientUsers.length > 0) {
-        await prisma.notification.createMany({
-          data: clientUsers.map(u => ({
-            userId: u.id,
-            title: `Wystawiono dokument WZ ${wzNr}`,
-            body: `Wysłano produkty dla zamówienia ${order.orderNr}`,
-            link: `/client/documents`
-          }))
-        });
-      }
+      await notifyClientUsers(
+        order.clientId,
+        `Wystawiono dokument WZ`,
+        `Wysłano produkty dla zamówienia ${order.orderNr}`,
+        `/client/documents`
+      );
     } catch (nErr) {
       console.error("Failed to trigger WZ notification:", nErr);
     }
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath("/admin/orders");
-    return { success: true, wzNr };
+    return { success: true };
   } catch (error: any) {
     console.error("Failed to generate WZ:", error);
     return { success: false, error: error.message || "Błąd serwera przy generowaniu WZ." };
@@ -277,7 +278,7 @@ export async function generateWz(
 
 export async function forceMarkAsDelivered(orderId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 
@@ -305,9 +306,10 @@ export async function forceMarkAsDelivered(orderId: string) {
         });
 
         for (const pkgItem of delItems) {
-          const orderItem = orderItems.find(
-            item => item.articleNr === pkgItem.articleNr
-          );
+          // Match the exact source line by id; fall back to articleNr only for legacy rows
+          const orderItem = pkgItem.orderItemId
+            ? orderItems.find(item => item.id === pkgItem.orderItemId)
+            : orderItems.find(item => item.articleNr === pkgItem.articleNr);
 
           if (orderItem) {
             const newDelivered = orderItem.qtyDelivered + pkgItem.quantity;
@@ -342,7 +344,7 @@ export async function forceMarkAsDelivered(orderId: string) {
 
 export async function forceApproveOrder(orderId: string) {
   const session = await auth();
-  if (!session?.user || (session.user.role !== "SUPON_ADMIN")) {
+  if (!session?.user || !isSuponRole(session.user.role)) {
     return { success: false, error: "Brak uprawnień. Zaloguj się jako administrator." };
   }
 

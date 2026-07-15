@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatShortDate } from "@/utils/format";
 import { OrderStatus } from "@prisma/client";
@@ -81,6 +81,16 @@ interface AdminOrdersListProps {
 export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Close modal on Escape (escape-routes / modal-escape)
+  useEffect(() => {
+    if (!selectedOrder) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedOrder(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedOrder]);
+
   // Status dot tracker helper matching demo's look
   const getStatusTracker = (orderStatus: OrderStatus) => {
     let activeDots = 1;
@@ -138,8 +148,8 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
             />
           );
         })}
-        <span style={{ marginLeft: "4px", color, fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px", whiteSpace: "nowrap" }}>
-          {isZatwierdzone && "✓ "}{label}
+        <span style={{ marginLeft: "4px", color, fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", gap: "3px" }}>
+          {isZatwierdzone && <Check size={12} aria-hidden="true" />}{label}
         </span>
       </div>
     );
@@ -202,18 +212,18 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
                         {/* Badges breakdown */}
                         <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
                           {deliveredQty > 0 && (
-                            <span title="Odebrane" style={{ display: "inline-flex", alignItems: "center", gap: "2px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(22, 163, 74, 0.08)", color: "var(--ok)", border: "1px solid rgba(22, 163, 74, 0.15)", whiteSpace: "nowrap" }}>
-                              ✓ {deliveredQty}
+                            <span title="Odebrane" style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(22, 163, 74, 0.08)", color: "var(--ok)", border: "1px solid rgba(22, 163, 74, 0.15)", whiteSpace: "nowrap" }}>
+                              <Check size={11} aria-hidden="true" /> {deliveredQty}
                             </span>
                           )}
                           {shippedQty > 0 && (
-                            <span title="W drodze" style={{ display: "inline-flex", alignItems: "center", gap: "2px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(217, 119, 6, 0.08)", color: "#d97706", border: "1px solid rgba(217, 119, 6, 0.15)", whiteSpace: "nowrap" }}>
-                              🚚 {shippedQty}
+                            <span title="W drodze" style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(217, 119, 6, 0.08)", color: "#d97706", border: "1px solid rgba(217, 119, 6, 0.15)", whiteSpace: "nowrap" }}>
+                              <Truck size={11} aria-hidden="true" /> {shippedQty}
                             </span>
                           )}
                           {totalQty - deliveredQty - shippedQty > 0 && (
-                            <span title="Oczekujące" style={{ display: "inline-flex", alignItems: "center", gap: "2px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(106, 112, 123, 0.08)", color: "var(--muted)", border: "1px solid rgba(106, 112, 123, 0.15)", whiteSpace: "nowrap" }}>
-                              🕒 {totalQty - deliveredQty - shippedQty}
+                            <span title="Oczekujące" style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", fontWeight: 800, padding: "1px 5px", borderRadius: "5px", background: "rgba(106, 112, 123, 0.08)", color: "var(--muted)", border: "1px solid rgba(106, 112, 123, 0.15)", whiteSpace: "nowrap" }}>
+                              <Clock size={11} aria-hidden="true" /> {totalQty - deliveredQty - shippedQty}
                             </span>
                           )}
                         </div>
@@ -228,10 +238,19 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
                   key={order.id}
                   style={{ borderBottom: "1px solid var(--line)", transition: "background 0.2s ease", cursor: "pointer" }}
                   onClick={() => setSelectedOrder(order)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedOrder(order);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Otwórz szczegóły zamówienia ${order.orderNr}`}
                   className="clickable-row"
                 >
                   <td style={{ padding: "12px 16px", whiteSpace: "nowrap" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="row-8">
                       <span style={{ fontWeight: 700, color: "var(--text)", fontSize: "13px" }}>{order.orderNr}</span>
                       {order.orderType === "EXCHANGE" && (
                         <span className="badge" style={{ background: "#f3e8ff", color: "#6b21a8", fontSize: "10px", padding: "1px 6px" }}>WYMIANA</span>
@@ -244,7 +263,7 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
                   <td style={{ padding: "12px 16px", fontWeight: 600, fontSize: "13px" }}>
                     {order.client.name.split("—")[0].trim()}
                   </td>
-                  <td style={{ padding: "12px 16px", color: "var(--text-secondary)", fontSize: "13px" }}>
+                  <td style={{ padding: "12px 16px", color: "var(--muted)", fontSize: "13px" }}>
                     {order.branch.name}
                   </td>
                   <td style={{ padding: "12px 16px", fontFamily: "monospace", fontSize: "13px" }}>
@@ -268,16 +287,22 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
 
       {/* MODAL DIALOG DISPLAY */}
       {selectedOrder && (
-        <div style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(2, 6, 23, 0.45)",
-          backdropFilter: "blur(4px)",
-          display: "grid",
-          placeItems: "center",
-          zIndex: 1000
-        }}>
-          <div 
+        <div
+          onClick={() => setSelectedOrder(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(2, 6, 23, 0.55)",
+            backdropFilter: "blur(4px)",
+            display: "grid",
+            placeItems: "center",
+            zIndex: 1000
+          }}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="order-modal-title"
+            onClick={(e) => e.stopPropagation()}
             style={{
               width: "min(1080px, 96vw)",
               background: "var(--page-bg)",
@@ -291,8 +316,8 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
             {/* Header */}
             <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <h3 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>Szczegóły zamówienia {selectedOrder.orderNr}</h3>
+                <div className="row-10">
+                  <h3 id="order-modal-title" style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>Szczegóły zamówienia {selectedOrder.orderNr}</h3>
                   {selectedOrder.orderType === "EXCHANGE" && (
                     <span className="badge" style={{ background: "#f3e8ff", color: "#6b21a8", fontSize: "11px", padding: "2px 8px" }}>WYMIANA</span>
                   )}
@@ -411,7 +436,7 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
                 
                 {/* Left Column: Items and Deliveries */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className="col-16">
                   <div>
                     <h4 style={{ fontSize: "15px", fontWeight: 800, color: "var(--text)", borderBottom: "1px solid var(--line)", paddingBottom: "8px", margin: 0 }}>
                       Pozycje zamówienia
@@ -465,7 +490,7 @@ export default function AdminOrdersList({ orders }: AdminOrdersListProps) {
                 </div>
 
                 {/* Right Column: Metagrid */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div className="col-16">
                   
                   {/* Meta Details Group */}
                   <div>

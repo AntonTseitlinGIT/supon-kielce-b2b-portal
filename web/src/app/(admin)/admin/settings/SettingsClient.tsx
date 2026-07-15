@@ -110,7 +110,7 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "24px", alignItems: "start" }}>
+    <div className="list-editor-grid">
       
       {/* Organisation info Form */}
       <div className="card">
@@ -121,26 +121,28 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
         </div>
         <div className="card-content">
           {errorMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
-              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="alert" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--err) 12%, var(--page-bg))", border: "1px solid var(--err)", padding: "10px 14px", borderRadius: "10px", color: "var(--err)", marginBottom: "16px", fontSize: "13px" }}>
+              <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
-              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <div role="status" aria-live="polite" style={{ display: "flex", gap: "8px", background: "color-mix(in oklab, var(--ok) 12%, var(--page-bg))", border: "1px solid var(--ok)", padding: "10px 14px", borderRadius: "10px", color: "var(--ok)", marginBottom: "16px", fontSize: "13px" }}>
+              <CheckCircle size={16} style={{ flexShrink: 0, marginTop: "2px" }} aria-hidden="true" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <form onSubmit={handleSettingsSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <form onSubmit={handleSettingsSubmit} className="col-16">
             <div className="form-group">
-              <label className="form-label form-required">Nazwa dostawcy (firmy)</label>
+              <label className="form-label form-required" htmlFor="set-company">Nazwa dostawcy (firmy)</label>
               <input
+                id="set-company"
                 type="text"
                 className="form-input"
                 required
+                autoComplete="organization"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 disabled={isPending}
@@ -148,9 +150,11 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required">NIP firmy</label>
+              <label className="form-label form-required" htmlFor="set-nip">NIP firmy</label>
               <input
+                id="set-nip"
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 required
                 value={nip}
@@ -160,24 +164,28 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required">Adres rejestrowy / Magazyn centralny</label>
+              <label className="form-label form-required" htmlFor="set-address">Adres rejestrowy / Magazyn centralny</label>
               <textarea
+                id="set-address"
                 className="form-textarea"
                 rows={3}
                 required
+                autoComplete="street-address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 disabled={isPending}
               />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            <div className="grid-2">
               <div className="form-group">
-                <label className="form-label form-required">E-mail do kontaktu</label>
+                <label className="form-label form-required" htmlFor="set-email">E-mail do kontaktu</label>
                 <input
+                  id="set-email"
                   type="email"
                   className="form-input"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isPending}
@@ -185,11 +193,13 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
               </div>
 
               <div className="form-group">
-                <label className="form-label form-required">Telefon infolinii</label>
+                <label className="form-label form-required" htmlFor="set-phone">Telefon infolinii</label>
                 <input
-                  type="text"
+                  id="set-phone"
+                  type="tel"
                   className="form-input"
                   required
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   disabled={isPending}
@@ -216,7 +226,7 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
             <Shield size={20} className="muted" /> Flagi funkcji i moduły (Feature Flags)
           </h3>
         </div>
-        <div className="card-content" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="card-content col-16">
           {flags.map((flag) => {
             const isToggling = togglingFlagKey === flag.key;
             return (
@@ -237,7 +247,7 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
               >
                 <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingRight: "10px" }}>
                   <span style={{ fontWeight: 600, fontSize: "14px", color: "var(--text)", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Power size={14} style={{ color: flag.isEnabled ? "var(--ok)" : "var(--muted)" }} />
+                    <Power size={14} style={{ color: flag.isEnabled ? "var(--ok)" : "var(--muted)" }} aria-hidden="true" />
                     {getFlagLabel(flag.key)}
                   </span>
                   <span style={{ fontSize: "12px", color: "var(--muted)" }}>
@@ -251,6 +261,7 @@ export default function SettingsClient({ settings, featureFlags }: SettingsClien
                     checked={flag.isEnabled}
                     onChange={() => handleFlagToggle(flag.key, flag.isEnabled)}
                     disabled={isToggling}
+                    aria-label={`${getFlagLabel(flag.key)} — ${flag.isEnabled ? "włączone" : "wyłączone"}`}
                   />
                   <span className="slider"></span>
                 </label>

@@ -185,24 +185,24 @@ export default function EmployeeForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <form onSubmit={handleSubmit} className="col-16">
       
       {/* Alert states */}
       {errorMsg && (
-        <div className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <AlertTriangle size={18} />
+        <div role="alert" className="badge badge-danger" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <AlertTriangle size={18} aria-hidden="true" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
-          <ShieldCheck size={18} />
+        <div role="status" aria-live="polite" className="badge badge-success" style={{ padding: "12px 18px", borderRadius: "var(--radius)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+          <ShieldCheck size={18} aria-hidden="true" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <div className="col-16">
         
         {/* Base Info Card */}
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "20px", border: "1px solid var(--line)", padding: "24px" }}>
@@ -219,10 +219,11 @@ export default function EmployeeForm({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div className="form-group">
-              <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <Fingerprint size={14} style={{ color: "var(--muted)" }} /> Numer ewidencyjny
+              <label className="form-label form-required row-6" htmlFor="ef-nr">
+                <Fingerprint size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Numer ewidencyjny
               </label>
               <input
+                id="ef-nr"
                 type="text"
                 className="form-input"
                 placeholder="np. NP-0005"
@@ -233,10 +234,11 @@ export default function EmployeeForm({
             </div>
 
             <div className="form-group">
-              <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <User size={14} style={{ color: "var(--muted)" }} /> Imię i nazwisko
+              <label className="form-label form-required row-6" htmlFor="ef-name">
+                <User size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Imię i nazwisko
               </label>
               <input
+                id="ef-name"
                 type="text"
                 className="form-input"
                 placeholder="np. Jan Kowalski"
@@ -249,10 +251,11 @@ export default function EmployeeForm({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
             <div className="form-group">
-              <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <Briefcase size={14} style={{ color: "var(--muted)" }} /> Stanowisko
+              <label className="form-label form-required row-6" htmlFor="ef-job">
+                <Briefcase size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Stanowisko
               </label>
               <input
+                id="ef-job"
                 type="text"
                 className="form-input"
                 placeholder="np. Spawacz, Magazynier"
@@ -264,10 +267,11 @@ export default function EmployeeForm({
 
             {userRole === "CLIENT_HEAD" ? (
               <div className="form-group">
-                <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Building2 size={14} style={{ color: "var(--muted)" }} /> Oddział
+                <label className="form-label form-required row-6" htmlFor="ef-branch">
+                  <Building2 size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Oddział
                 </label>
                 <select
+                  id="ef-branch"
                   className="form-select"
                   value={branchId}
                   onChange={(e) => setBranchId(e.target.value)}
@@ -283,10 +287,11 @@ export default function EmployeeForm({
               </div>
             ) : (
               <div className="form-group">
-                <label className="form-label" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <Building2 size={14} style={{ color: "var(--muted)" }} /> Oddział
+                <label className="form-label row-6" htmlFor="ef-branch-ro">
+                  <Building2 size={14} style={{ color: "var(--muted)" }} aria-hidden="true" /> Oddział
                 </label>
                 <input
+                  id="ef-branch-ro"
                   type="text"
                   className="form-input"
                   value={branches.find((b) => b.id === branchId)?.name || ""}
@@ -296,10 +301,11 @@ export default function EmployeeForm({
             )}
 
             <div className="form-group">
-              <label className="form-label form-required" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <label className="form-label form-required row-6" htmlFor="ef-status">
                 Status pracownika
               </label>
               <select
+                id="ef-status"
                 className="form-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as EmployeeStatus)}
@@ -327,9 +333,11 @@ export default function EmployeeForm({
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", alignItems: "flex-end" }}>
             <div className="form-group" style={{ width: "110px", margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Wzrost (cm)</label>
+              <label className="form-label" htmlFor="ef-height" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Wzrost (cm)</label>
               <input
+                id="ef-height"
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 placeholder="np. 182"
                 value={height}
@@ -340,9 +348,11 @@ export default function EmployeeForm({
             </div>
 
             <div className="form-group" style={{ width: "110px", margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Klatka (cm)</label>
+              <label className="form-label" htmlFor="ef-chest" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Klatka (cm)</label>
               <input
+                id="ef-chest"
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 placeholder="np. 104"
                 value={chest}
@@ -353,9 +363,11 @@ export default function EmployeeForm({
             </div>
 
             <div className="form-group" style={{ width: "130px", margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Obwód pasa (cm)</label>
+              <label className="form-label" htmlFor="ef-waist" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Obwód pasa (cm)</label>
               <input
+                id="ef-waist"
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 placeholder="np. 92"
                 value={waist}
@@ -366,8 +378,9 @@ export default function EmployeeForm({
             </div>
 
             <div className="form-group" style={{ width: "150px", margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Rozmiar odzieży</label>
+              <label className="form-label" htmlFor="ef-clothing" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Rozmiar odzieży</label>
               <input
+                id="ef-clothing"
                 type="text"
                 className="form-input"
                 placeholder="np. L lub 54"
@@ -379,9 +392,11 @@ export default function EmployeeForm({
             </div>
 
             <div className="form-group" style={{ width: "130px", margin: 0 }}>
-              <label className="form-label" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Rozmiar obuwia</label>
+              <label className="form-label" htmlFor="ef-shoes" style={{ fontSize: "13px", whiteSpace: "nowrap" }}>Rozmiar obuwia</label>
               <input
+                id="ef-shoes"
                 type="text"
+                inputMode="numeric"
                 className="form-input"
                 placeholder="np. 43"
                 value={shoes}

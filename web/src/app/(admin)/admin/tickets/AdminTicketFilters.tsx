@@ -77,20 +77,22 @@ export default function AdminTicketFilters({ clients }: AdminTicketFiltersProps)
       <div className="search-bar-row" style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
         
         <div className="search-wrapper" style={{ position: "relative", flex: 1, minWidth: "260px" }}>
-          <Search 
-            size={20} 
-            style={{ 
-              position: "absolute", 
-              left: "16px", 
-              top: "50%", 
-              transform: "translateY(-50%)", 
-              color: "var(--muted)", 
-              pointerEvents: "none" 
-            }} 
+          <Search
+            size={20}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--muted)",
+              pointerEvents: "none"
+            }}
           />
           <input
-            type="text"
+            type="search"
             placeholder="Szukaj po numerze zgłoszenia, pracowniku lub towarze..."
+            aria-label="Szukaj zgłoszeń"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") handleFilterClick(); }}
@@ -109,20 +111,20 @@ export default function AdminTicketFilters({ clients }: AdminTicketFiltersProps)
 
         <button
           onClick={() => setShowAdv(!showAdv)}
-          className="btn btn-secondary btn-lg"
+          className="btn btn-secondary btn-lg row-8"
           type="button"
-          style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          aria-expanded={showAdv}
+          aria-controls="ticket-adv-filters"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
           Filtry
         </button>
 
         {hasActiveFilters && (
           <button
             onClick={handleClear}
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm row-6"
             type="button"
-            style={{ display: "flex", alignItems: "center", gap: "6px" }}
             title="Wyczyść filtry"
           >
             <X size={16} /> Wyczyść
@@ -132,22 +134,24 @@ export default function AdminTicketFilters({ clients }: AdminTicketFiltersProps)
 
       {/* Advanced panel drawer */}
       {showAdv && (
-        <div 
-          className="advanced-filters-panel" 
-          style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
-            gap: "16px", 
-            padding: "20px", 
-            borderRadius: "16px", 
-            background: "var(--section-bg)", 
+        <div
+          id="ticket-adv-filters"
+          className="advanced-filters-panel"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            padding: "20px",
+            borderRadius: "16px",
+            background: "var(--section-bg)",
             border: "1px solid var(--line)",
             animation: "slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards"
           }}
         >
           <div className="form-group">
-            <label className="form-label">Klient</label>
+            <label className="form-label" htmlFor="tf-client">Klient</label>
             <select
+              id="tf-client"
               className="input"
               value={localClientId}
               onChange={(e) => setLocalClientId(e.target.value)}
@@ -163,8 +167,9 @@ export default function AdminTicketFilters({ clients }: AdminTicketFiltersProps)
           </div>
 
           <div className="form-group">
-            <label className="form-label">Status</label>
+            <label className="form-label" htmlFor="tf-status">Status</label>
             <select
+              id="tf-status"
               className="input"
               value={localStatus}
               onChange={(e) => setLocalStatus(e.target.value)}
@@ -179,8 +184,9 @@ export default function AdminTicketFilters({ clients }: AdminTicketFiltersProps)
           </div>
 
           <div className="form-group">
-            <label className="form-label">Typ zgłoszenia</label>
+            <label className="form-label" htmlFor="tf-type">Typ zgłoszenia</label>
             <select
+              id="tf-type"
               className="input"
               value={localType}
               onChange={(e) => setLocalType(e.target.value)}

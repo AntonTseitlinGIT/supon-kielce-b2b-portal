@@ -69,65 +69,32 @@ export const CLIENT_NAV: NavItem[] = [
   },
 ];
 
-export const DEVELOPER_NAV: NavItem[] = [
-  {
-    label: "Przegląd",
-    href: "/developer/dashboard",
-    icon: "layout-dashboard",
-    roles: ["SUPON_DEV"],
-  },
-  {
-    label: "Konfiguracja klientów",
-    href: "/developer/clients",
-    icon: "building-2",
-    roles: ["SUPON_DEV"],
-  },
-  {
-    label: "Katalog produktów",
-    href: "/developer/catalog",
-    icon: "package",
-    roles: ["SUPON_DEV"],
-  },
-  {
-    label: "Użytkownicy systemu",
-    href: "/developer/users",
-    icon: "user-cog",
-    roles: ["SUPON_DEV"],
-  },
-  {
-    label: "Ustawienia systemu",
-    href: "/developer/settings",
-    icon: "settings",
-    roles: ["SUPON_DEV"],
-  },
-];
-
 export const ADMIN_NAV: NavItem[] = [
   {
     label: "Pulpit",
     href: "/admin/dashboard",
     icon: "layout-dashboard",
-    roles: ["SUPON_ADMIN", "SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
   },
   {
     label: "Zamówienia",
     href: "/admin/orders",
     icon: "shopping-bag",
-    roles: ["SUPON_ADMIN", "SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
     badge: "pending_orders",
   },
   {
     label: "Zgłoszenia",
     href: "/admin/tickets",
     icon: "message-circle",
-    roles: ["SUPON_ADMIN", "SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
     badge: "open_tickets",
   },
   {
     label: "Klienci",
     href: "/admin/clients",
     icon: "building-2",
-    roles: ["SUPON_ADMIN", "SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
   },
   {
     label: "Katalog",
@@ -139,18 +106,18 @@ export const ADMIN_NAV: NavItem[] = [
     label: "Raporty",
     href: "/admin/reports",
     icon: "bar-chart-2",
-    roles: ["SUPON_ADMIN", "SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
   },
   {
     label: "Użytkownicy",
     href: "/admin/users",
     icon: "user-cog",
-    roles: ["SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
   },
   {
     label: "Ustawienia",
     href: "/admin/settings",
     icon: "settings",
-    roles: ["SUPON_DEV"],
+    roles: ["SUPON_ADMIN"],
   },
 ];

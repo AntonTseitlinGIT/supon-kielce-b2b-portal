@@ -77,7 +77,7 @@ export default async function ClientDocumentsPage(props: PageProps) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader compact title="Dokumenty WZ" subtitle="Pobieraj i przeglądaj dokumenty wydania zewnętrznego (WZ) dla zrealizowanych dostaw" />
 
       {/* Filter Bar */}
@@ -140,7 +140,7 @@ export default async function ClientDocumentsPage(props: PageProps) {
                             {doc.wzNr}
                           </Link>
                         </td>
-                        <td style={{ color: "var(--text-secondary)" }}>
+                        <td style={{ color: "var(--muted)" }}>
                           {formatShortDate(doc.date)}
                         </td>
                         <td>
@@ -149,7 +149,7 @@ export default async function ClientDocumentsPage(props: PageProps) {
                           </Link>
                         </td>
                         {role === "CLIENT_HEAD" && (
-                          <td style={{ color: "var(--text-secondary)" }}>
+                          <td style={{ color: "var(--muted)" }}>
                             {doc.order.branch.name}
                           </td>
                         )}

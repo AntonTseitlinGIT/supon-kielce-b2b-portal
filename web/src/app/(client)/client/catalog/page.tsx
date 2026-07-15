@@ -60,7 +60,7 @@ export default async function ClientCatalogPage() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader compact title="Katalog ŚOI i odzieży" subtitle="Przeglądaj wykaz produktów ŚOI i odzieży roboczej uzgodnionych dla Twojej firmy" />
 
       {/* Interactive Catalog Grid */}

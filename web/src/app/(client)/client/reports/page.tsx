@@ -68,7 +68,7 @@ export default async function ClientReportsPage() {
     include: {
       _count: {
         select: {
-          employees: true,
+          employees: { where: { deletedAt: null } },
           orders: true
         }
       }
@@ -105,7 +105,8 @@ export default async function ClientReportsPage() {
   const totalEmployees = await prisma.employee.count({
     where: {
       branch: { clientId },
-      status: "ACTIVE"
+      status: "ACTIVE",
+      deletedAt: null
     }
   });
 
@@ -200,7 +201,7 @@ export default async function ClientReportsPage() {
   }));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div className="col-20">
       <PageHeader compact title="Raporty i analizy wydatków" subtitle="Przeglądaj statystyki finansowe, statusy zamówień oraz zużycie asortymentu w skali firmy" />
 
       {/* Main interactive dashboard */}

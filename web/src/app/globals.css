@@ -71,6 +71,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -132,6 +133,7 @@ body:has(.admin-shell) {
 .admin-shell {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
 }
 
@@ -145,6 +147,7 @@ body:has(.admin-shell) {
   top: 0;
   left: 0;
   height: 100vh;
+  height: 100dvh;
   z-index: 50;
   overflow-y: auto;
   overflow-x: hidden;
@@ -258,7 +261,50 @@ body:has(.admin-shell) {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   min-width: 0;
+}
+
+/* Mobile sidebar */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 7px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 49;
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+  .mobile-sidebar-overlay {
+    display: block;
+  }
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .admin-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+  .admin-main {
+    margin-left: 0;
+  }
 }
 
 .admin-topbar {
@@ -523,6 +569,17 @@ h1, h2, h3, h4, .brand-name {
   box-shadow: 0 2px 6px color-mix(in oklab, var(--accent) 15%, transparent);
 }
 
+/* Primary is the default .btn look; .btn-primary is an explicit alias so
+   conditional toggles like `btn ${active ? "btn-primary" : "btn-secondary"}`
+   read clearly and re-assert the accent style after any modifier. */
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px color-mix(in oklab, var(--accent) 20%, transparent);
+}
+.btn-primary:hover { background: var(--accent-hover); color: #fff; }
+
 .btn-secondary {
   background: var(--page-bg); color: var(--text);
   border: 1px solid var(--line);
@@ -708,7 +765,7 @@ textarea.input,
 .badge.warn, .badge-warning, .badge-warn { background: color-mix(in oklab, var(--warn) 14%, var(--page-bg)); color: var(--warn); border-color: color-mix(in oklab, var(--warn) 30%, transparent); }
 .badge.info, .badge-info { background: color-mix(in oklab, var(--info) 14%, var(--page-bg)); color: var(--info); border-color: color-mix(in oklab, var(--info) 30%, transparent); }
 .badge.err, .badge-danger, .badge-err { background: color-mix(in oklab, var(--err) 14%, var(--page-bg)); color: var(--err); border-color: color-mix(in oklab, var(--err) 30%, transparent); }
-.badge-neutral, .badge-pending { background: var(--section-bg); color: var(--text-secondary); }
+.badge-neutral, .badge-pending { background: var(--section-bg); color: var(--muted); }
 
 /* ===== PAGINATION ===== */
 .pagination-container, .pagination {
@@ -1215,6 +1272,85 @@ input:checked + .slider:before {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* ===== PORTAL LAYOUT ===== */
+.portal-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-main-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nav action buttons */
+.nav-search-btn {
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  color: var(--nav-text);
+  border-radius: 8px;
+  padding: 0 10px 0 12px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+  width: 140px;
+  transition: all 0.2s;
+  opacity: 0.8;
+  gap: 6px;
+}
+.nav-search-btn:hover { opacity: 1; }
+.nav-search-icon { flex-shrink: 0; }
+.nav-search-text { opacity: 0.7; font-size: 11.5px; flex: 1; }
+.nav-search-kbd {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.nav-icon-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--nav-text); cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0; opacity: 0.8;
+}
+.nav-icon-btn:hover { opacity: 1; }
+
+.nav-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 70%, #a5b4fc));
+  border: 2px solid rgba(255,255,255,0.2);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  cursor: default; letter-spacing: 0.03em; user-select: none;
+}
+
+.nav-logout-btn {
+  background: color-mix(in oklab, var(--err) 15%, transparent);
+  border: 1px solid color-mix(in oklab, var(--err) 28%, transparent);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fca5a5; cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.nav-logout-btn:hover {
+  background: var(--err);
+  color: #fff;
+}
+
 /* ===== AUTOMATIC RESPONSIVE SCALING & ADAPTATION ===== */
 
 /* Base HTML & Body adjustments to prevent overflow */
@@ -1519,6 +1655,50 @@ textarea.input,
 .section-gap { margin-bottom: 32px; }
 .card-gap    { margin-bottom: 16px; }
 
+/* ── Section head (card header w/ icon + title + meta) ────────────
+   Shared across all three portals so card sections look identical.
+   Replaces ad-hoc inline-styled headers. */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.section-head > svg { color: var(--accent); flex-shrink: 0; }
+.section-head h2,
+.section-head .section-head-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+}
+.section-head-meta {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Status icon inside data tables (enabled/disabled state) */
+.status-icon { display: inline-flex; vertical-align: middle; }
+.status-icon-on  { color: var(--ok); }
+.status-icon-off { color: var(--muted); opacity: 0.55; }
+
+/* ── List + side-editor grid (table on the left, form card on right) ─
+   Shared across portals. Collapses to a single column on tablet/mobile
+   so the form drops below the list instead of getting squished. */
+.list-editor-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .list-editor-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Consistent modal overlay ─────────────────────────────────── */
 .modal-overlay {
   position: fixed;
@@ -1619,4 +1799,180 @@ textarea.input,
 .skeleton-badge { height: 22px; width: 72px; border-radius: 20px; display: inline-block; }
 .skeleton-btn   { height: 36px; width: 120px; border-radius: var(--radius-sm); display: inline-block; }
 .skeleton-avatar { border-radius: 50%; flex-shrink: 0; }
+
+/* =================================================================
+   ACCESSIBILITY POLISH — keyboard focus + reduced motion
+   Added in UI audit pass. Priority #1 (focus) & #7 (motion).
+   ================================================================= */
+
+/* ── Visible keyboard focus ───────────────────────────────────────
+   Mouse clicks stay clean (:focus-visible only fires for keyboard /
+   programmatic focus). Every interactive element gets a clear ring. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+.btn:focus-visible,
+.btn-sm:focus-visible,
+.btn-xs:focus-visible,
+.btn-lg:focus-visible,
+.nav-link:focus-visible,
+.sidebar-link:focus-visible,
+.page-btn:focus-visible,
+.chip-filter:focus-visible,
+.module-card:focus-visible,
+.theme-toggle:focus-visible,
+.nav-icon-btn:focus-visible,
+.nav-search-btn:focus-visible,
+.nav-logout-btn:focus-visible,
+.topbar-icon-btn:focus-visible,
+.admin-search-btn:focus-visible,
+.sidebar-logout:focus-visible,
+.chat-attach-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-btn);
+}
+
+/* Inputs already paint a focus ring via box-shadow; keep the accent
+   outline tight to the field so it doesn't double up awkwardly. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.input:focus-visible,
+.form-input:focus-visible,
+.form-select:focus-visible,
+.form-textarea:focus-visible {
+  outline-offset: 0;
+}
+
+/* Focus ring on dark surfaces (sidebar/navbar) needs to read on dark */
+.sidebar-link:focus-visible,
+.sidebar-logout:focus-visible,
+.nav-link:focus-visible,
+.nav-icon-btn:focus-visible,
+.nav-search-btn:focus-visible,
+.nav-logout-btn:focus-visible,
+.theme-toggle:focus-visible {
+  outline-color: #fff;
+  outline-offset: 2px;
+}
+
+/* ── Respect prefers-reduced-motion ───────────────────────────────
+   Users who request reduced motion get near-instant transitions and
+   no looping/decorative animation, while focus/hover states still
+   work. Scoped so we don't kill essential feedback. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .page-main { animation: none; }
+  /* Disable lift/scale transforms that imply motion */
+  .kpi-card:hover,
+  .kpi:hover,
+  .module-card:hover,
+  .btn:hover,
+  .btn-secondary:hover,
+  .btn-ghost:hover,
+  .page-btn.active,
+  .logout-link:hover {
+    transform: none !important;
+  }
+  .module-card:hover .module-icon { transform: none !important; }
+}
+
+/* =================================================================
+   UTILITY CLASSES — extracted from common inline style patterns.
+   Use these instead of style={{}} for single-property and common
+   layout declarations. Covers the top-30 repeated inline patterns.
+   ================================================================= */
+
+/* ── Typography ──────────────────────────────────────────────────── */
+.text-muted    { color: var(--muted); }
+.text-accent   { color: var(--accent); }
+.text-xs       { font-size: 12px; }
+.text-sm       { font-size: 13px; }
+.text-base     { font-size: 14px; }
+.text-md       { font-size: 15px; }
+.text-lg       { font-size: 16px; }
+.text-xl       { font-size: 18px; }
+.text-2xl      { font-size: 22px; }
+.text-center   { text-align: center; }
+.text-right    { text-align: right; }
+.text-mono     { font-family: monospace; }
+.fw-500        { font-weight: 500; }
+.fw-600        { font-weight: 600; }
+.fw-700        { font-weight: 700; }
+.fw-800        { font-weight: 800; }
+.uppercase     { text-transform: uppercase; letter-spacing: 0.05em; }
+.text-muted-xs { font-size: 12px; color: var(--muted); }
+.text-muted-sm { font-size: 13px; color: var(--muted); }
+.label-xs      { font-size: 10px; font-weight: 700; color: var(--muted); display: block; letter-spacing: 0.05em; margin-bottom: 2px; }
+.section-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Spacing ─────────────────────────────────────────────────────── */
+.m-0  { margin: 0; }
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+.p-0  { padding: 0; }
+
+/* ── Flex layouts (column) ───────────────────────────────────────── */
+.col       { display: flex; flex-direction: column; }
+.col-4     { display: flex; flex-direction: column; gap: 4px; }
+.col-6     { display: flex; flex-direction: column; gap: 6px; }
+.col-8     { display: flex; flex-direction: column; gap: 8px; }
+.col-12    { display: flex; flex-direction: column; gap: 12px; }
+.col-14    { display: flex; flex-direction: column; gap: 14px; }
+.col-16    { display: flex; flex-direction: column; gap: 16px; }
+.col-20    { display: flex; flex-direction: column; gap: 20px; }
+.col-24    { display: flex; flex-direction: column; gap: 24px; }
+.col-32    { display: flex; flex-direction: column; gap: 32px; }
+
+/* ── Flex layouts (row) ──────────────────────────────────────────── */
+.row       { display: flex; align-items: center; }
+.row-4     { display: flex; align-items: center; gap: 4px; }
+.row-6     { display: flex; align-items: center; gap: 6px; }
+.row-8     { display: flex; align-items: center; gap: 8px; }
+.row-10    { display: flex; align-items: center; gap: 10px; }
+.row-12    { display: flex; align-items: center; gap: 12px; }
+.row-14    { display: flex; align-items: center; gap: 14px; }
+.row-16    { display: flex; align-items: center; gap: 16px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+.row-end   { display: flex; align-items: center; justify-content: flex-end; }
+
+/* ── Flex row (align-items: flex-start) ─────────────────────────── */
+.row-start-12 { display: flex; gap: 12px; align-items: flex-start; }
+.row-start-14 { display: flex; gap: 14px; align-items: flex-start; }
+.row-start-16 { display: flex; gap: 16px; align-items: flex-start; }
+
+/* ── Common widget — icon badge (accent bg circle/square) ──────── */
+.icon-badge {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--accent-light);
+  color: var(--accent);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Card variants ───────────────────────────────────────────────── */
+.card-flush         { padding: 0; overflow: hidden; }
+.card-pad           { padding: 14px 20px; }
+.card-borderless    { border: none; border-radius: 0; box-shadow: none; }
+
+/* ── Table cell helpers ──────────────────────────────────────────── */
+.td-compact { padding: 10px 8px; font-size: 11px; white-space: nowrap; }
+.td-mono    { font-weight: 600; font-family: monospace; }
+.shrink-0   { flex-shrink: 0; margin-top: 2px; }
+
+/* ── Width helpers ───────────────────────────────────────────────── */
+.w-full  { width: 100%; }
+.h-full  { height: 100%; }
 

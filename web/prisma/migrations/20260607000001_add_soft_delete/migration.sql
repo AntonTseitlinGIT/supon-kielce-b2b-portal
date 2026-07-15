@@ -1,0 +1,2 @@
+ALTER TABLE "Employee" ADD COLUMN "deletedAt" TIMESTAMP(3);
+ALTER TABLE "Order" ADD COLUMN "deletedAt" TIMESTAMP(3);

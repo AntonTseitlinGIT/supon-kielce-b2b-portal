@@ -202,12 +202,12 @@ export default function TicketChat({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "550px", border: "1px solid var(--line)", borderRadius: "var(--radius-lg)", overflow: "hidden", background: "var(--surface)" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "550px", border: "1px solid var(--line)", borderRadius: "var(--radius-lg)", overflow: "hidden", background: "var(--page-bg)" }}>
       
       {/* Header bar */}
-      <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--line)", background: "var(--surface-2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: isClosed ? "var(--text-muted)" : "var(--success)" }} />
+      <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--line)", background: "var(--section-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="row-8">
+          <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: isClosed ? "var(--muted)" : "var(--ok)" }} />
           <span style={{ fontWeight: 600, fontSize: "14px" }}>
             {isClosed ? "Zgłoszenie Zamknięte" : "Konwersacja online (Real-time)"}
           </span>
@@ -215,10 +215,10 @@ export default function TicketChat({
       </div>
 
       {/* Message Feed Area */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "16px", background: "var(--page-bg)" }}>
+      <div role="log" aria-live="polite" aria-label="Historia konwersacji" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "16px", background: "var(--page-bg)" }}>
         
         {messages.length === 0 ? (
-          <div style={{ textAlign: "center", color: "var(--text-muted)", margin: "auto" }}>
+          <div style={{ textAlign: "center", color: "var(--muted)", margin: "auto" }}>
             Brak wiadomości. Rozpocznij czat.
           </div>
         ) : (
@@ -241,7 +241,7 @@ export default function TicketChat({
                   maxWidth: "75%"
                 }}>
                   {/* Sender Name */}
-                  <span style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "4px", padding: "0 4px" }}>
+                  <span style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "4px", padding: "0 4px" }}>
                     {isMe ? "Ty" : msg.sender?.name || "Menedżer SUPON"}
                   </span>
                   
@@ -249,8 +249,8 @@ export default function TicketChat({
                   <div style={{
                     padding: "10px 14px",
                     borderRadius: "var(--radius)",
-                    background: isMe ? "var(--accent)" : "var(--surface)",
-                    color: isMe ? "#fff" : "var(--text-primary)",
+                    background: isMe ? "var(--accent)" : "var(--page-bg)",
+                    color: isMe ? "#fff" : "var(--text)",
                     boxShadow: "var(--shadow-xs)",
                     border: isMe ? "none" : "1px solid var(--line)",
                     fontSize: "14px",
@@ -273,7 +273,7 @@ export default function TicketChat({
                           marginTop: msg.text ? "8px" : "0",
                           padding: "6px 10px",
                           borderRadius: "var(--radius-sm)",
-                          background: isMe ? "rgba(255,255,255,0.15)" : "var(--surface-2)",
+                          background: isMe ? "rgba(255,255,255,0.15)" : "var(--section-bg)",
                           color: isMe ? "#fff" : "var(--accent-text)",
                           textDecoration: "none",
                           fontSize: "12px",
@@ -290,7 +290,7 @@ export default function TicketChat({
                   </div>
                   
                   {/* Timestamp */}
-                  <span style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px", padding: "0 4px" }}>
+                  <span style={{ fontSize: "10px", color: "var(--muted)", marginTop: "4px", padding: "0 4px" }}>
                     {formatDate(msg.createdAt)}
                   </span>
                 </div>
@@ -302,9 +302,9 @@ export default function TicketChat({
       </div>
 
       {/* Input Form Bar */}
-      <div style={{ borderTop: "1px solid var(--line)", padding: "14px 20px", background: "var(--surface)" }}>
+      <div style={{ borderTop: "1px solid var(--line)", padding: "14px 20px", background: "var(--page-bg)" }}>
         {isClosed ? (
-          <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "14px", padding: "10px 0" }}>
+          <div style={{ textAlign: "center", color: "var(--muted)", fontSize: "14px", padding: "10px 0" }}>
             Zgłoszenie zostało zamknięte. Czat jest wyłączony.
           </div>
         ) : (
@@ -312,13 +312,13 @@ export default function TicketChat({
             
             {/* Attachment Preview */}
             {attachedName && (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--surface-2)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontSize: "12px", border: "1px solid var(--line)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--section-bg)", padding: "6px 12px", borderRadius: "var(--radius-sm)", fontSize: "12px", border: "1px solid var(--line)" }}>
                 <FileText size={14} style={{ color: "var(--accent)" }} />
                 <span>Załączono plik: <strong>{attachedName}</strong></span>
                 <button 
                   type="button" 
                   onClick={() => { setAttachedUrl(""); setAttachedName(""); }}
-                  style={{ marginLeft: "auto", border: "none", background: "transparent", color: "var(--danger)", cursor: "pointer", fontWeight: 700 }}
+                  style={{ marginLeft: "auto", border: "none", background: "transparent", color: "var(--err)", cursor: "pointer", fontWeight: 700 }}
                 >
                   Usuń
                 </button>
@@ -344,11 +344,12 @@ export default function TicketChat({
                 ) : (
                   <Paperclip size={18} />
                 )}
-                <input 
-                  type="file" 
-                  onChange={handleAttachment} 
+                <input
+                  type="file"
+                  onChange={handleAttachment}
                   disabled={uploading || isPending}
-                  style={{ display: "none" }} 
+                  aria-label="Dodaj załącznik"
+                  style={{ display: "none" }}
                 />
               </label>
 
@@ -358,6 +359,7 @@ export default function TicketChat({
                 className="form-input"
                 style={{ height: "40px", flex: 1 }}
                 placeholder="Wpisz treść wiadomości..."
+                aria-label="Treść wiadomości"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isPending}
@@ -370,8 +372,9 @@ export default function TicketChat({
                 style={{ height: "40px", width: "40px", padding: 0 }}
                 disabled={isPending || uploading || (!inputText.trim() && !attachedUrl)}
                 title="Wyślij"
+                aria-label="Wyślij wiadomość"
               >
-                <Send size={18} />
+                <Send size={18} aria-hidden="true" />
               </button>
             </div>
           </form>

@@ -15,7 +15,7 @@ export default async function AdminSettingsPage() {
     redirect("/login");
   }
 
-  if (session.user.role !== "SUPON_DEV") {
+  if (session.user.role !== "SUPON_ADMIN") {
     redirect("/admin/dashboard");
   }
 

@@ -31,11 +31,12 @@ export default function TicketStatusController({
 
   return (
     <div>
-      <label style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
+      <label htmlFor="ticket-status-select" style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", display: "block", marginBottom: "6px" }}>
         Status zgłoszenia
       </label>
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <div className="row-8">
         <select
+          id="ticket-status-select"
           className="form-select"
           value={status}
           onChange={handleStatusChange}

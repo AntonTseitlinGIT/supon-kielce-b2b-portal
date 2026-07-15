@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { getPortalPath } from "@/config/permissions.config";
+import { checkRateLimit, clearRateLimit } from "@/lib/rate-limit";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -12,11 +13,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = (credentials.email as string).toLowerCase().trim();
+        const ip = (request as any)?.headers?.get?.("x-forwarded-for")?.split(",")[0]?.trim()
+          ?? (request as any)?.ip
+          ?? "unknown";
+        const rateLimitKey = `login:${ip}:${email}`;
+
+        const { allowed, retryAfterMs } = checkRateLimit(rateLimitKey);
+        if (!allowed) {
+          const minutes = Math.ceil(retryAfterMs / 60000);
+          throw new Error(`Za dużo prób logowania. Spróbuj ponownie za ${minutes} min.`);
+        }
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email },
           include: {
             client: { select: { id: true, name: true } },
             branch: { select: { id: true, name: true } },
@@ -30,6 +43,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user.passwordHash
         );
         if (!isValid) return null;
+
+        clearRateLimit(rateLimitKey);
 
         return {
           id: user.id,

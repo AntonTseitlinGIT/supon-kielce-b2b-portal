@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { EmployeeStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { employeeSchema, bulkEmployeeSchema, firstError } from "@/lib/schemas";
 
 interface EmployeeFormInput {
   employeeNr: string;
@@ -35,6 +36,12 @@ export async function createEmployee(input: EmployeeFormInput) {
   if (role !== "BRANCH_HEAD" && role !== "CLIENT_HEAD") {
     return { success: false, error: "Brak uprawnień." };
   }
+
+  const parsed = employeeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: firstError(parsed.error) };
+  }
+  input = parsed.data;
 
   let finalBranchId = input.branchId;
   if (role === "BRANCH_HEAD") {
@@ -109,6 +116,12 @@ export async function updateEmployee(id: string, input: EmployeeFormInput) {
   if (role !== "BRANCH_HEAD" && role !== "CLIENT_HEAD") {
     return { success: false, error: "Brak uprawnień." };
   }
+
+  const parsed = employeeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: firstError(parsed.error) };
+  }
+  input = parsed.data;
 
   try {
     // Find employee and verify ownership
@@ -216,15 +229,9 @@ export async function deleteEmployee(id: string) {
       return { success: false, error: "Brak uprawnień do usunięcia pracownika z tego oddziału." };
     }
 
-    // Set employeeId to null in OrderItem records to prevent foreign key violations
-    await prisma.orderItem.updateMany({
-      where: { employeeId: id },
-      data: { employeeId: null },
-    });
-
-    // Delete the employee (cascading relations like history, issued items, etc. are handled by DB schema)
-    await prisma.employee.delete({
+    await prisma.employee.update({
       where: { id },
+      data: { deletedAt: new Date(), status: "INACTIVE" },
     });
 
     revalidatePath("/client/personnel");
@@ -233,6 +240,47 @@ export async function deleteEmployee(id: string) {
   } catch (error) {
     console.error("Failed to delete employee:", error);
     return { success: false, error: "Wystąpił błąd podczas usuwania pracownika." };
+  }
+}
+
+export async function restoreEmployee(id: string) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { success: false, error: "Brak autoryzacji. Zaloguj się ponownie." };
+  }
+
+  const { role, clientId, branchId: userBranchId } = session.user;
+
+  if (role !== "BRANCH_HEAD" && role !== "CLIENT_HEAD") {
+    return { success: false, error: "Brak uprawnień." };
+  }
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { id },
+      include: { branch: true },
+    });
+
+    if (!employee || employee.branch.clientId !== clientId) {
+      return { success: false, error: "Nie znaleziono pracownika." };
+    }
+
+    if (role === "BRANCH_HEAD" && employee.branchId !== userBranchId) {
+      return { success: false, error: "Brak uprawnień do przywrócenia pracownika z tego oddziału." };
+    }
+
+    await prisma.employee.update({
+      where: { id },
+      data: { deletedAt: null, status: "ACTIVE" },
+    });
+
+    revalidatePath("/client/personnel");
+    revalidatePath("/client/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to restore employee:", error);
+    return { success: false, error: "Wystąpił błąd podczas przywracania pracownika." };
   }
 }
 
@@ -259,6 +307,12 @@ export async function bulkCreateEmployees(targetBranchId: string, list: BulkEmpl
   if (role !== "BRANCH_HEAD" && role !== "CLIENT_HEAD") {
     return { success: false, error: "Brak uprawnień." };
   }
+
+  const parsedList = bulkEmployeeSchema.safeParse(list);
+  if (!parsedList.success) {
+    return { success: false, error: firstError(parsedList.error) };
+  }
+  list = parsedList.data;
 
   let finalBranchId = targetBranchId;
   if (role === "BRANCH_HEAD") {

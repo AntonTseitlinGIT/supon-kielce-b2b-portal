@@ -46,7 +46,7 @@ export default function ApproveTicketButton({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      <div style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+      <div style={{ fontSize: "13px", color: "var(--muted)", lineHeight: "1.4" }}>
         {ticketType === "EXCHANGE" ? (
           <>
             Klient prosi o wymianę rozmiaru towaru <strong>{itemName}</strong> z obecnego <strong>{size || "brak"}</strong> na nowy: <strong style={{ color: "var(--accent)", fontSize: "14px" }}>{newSize || "brak"}</strong>.
@@ -59,14 +59,14 @@ export default function ApproveTicketButton({
       </div>
 
       {errorMsg && (
-        <div style={{ fontSize: "12px", color: "var(--err)", fontWeight: 500 }}>
+        <div role="alert" style={{ fontSize: "12px", color: "var(--err)", fontWeight: 500 }}>
           {errorMsg}
         </div>
       )}
 
       {successMsg ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--ok)", fontSize: "13px", fontWeight: 600 }}>
-          <Check size={16} /> {successMsg}
+        <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--ok)", fontSize: "13px", fontWeight: 600 }}>
+          <Check size={16} aria-hidden="true" /> {successMsg}
         </div>
       ) : (
         <button

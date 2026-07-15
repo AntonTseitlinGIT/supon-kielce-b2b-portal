@@ -125,7 +125,7 @@ export default function LoginForm() {
       </button>
 
       <div className={styles.alt}>
-        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <span className="row-6">
           <input id="remember" type="checkbox" defaultChecked style={{ width: "14px", height: "14px", margin: 0, cursor: "pointer" }} />
           <label htmlFor="remember" style={{ display: "inline", fontWeight: "normal", fontSize: "12.5px", cursor: "pointer" }}>Zapamiętaj mnie</label>
         </span>

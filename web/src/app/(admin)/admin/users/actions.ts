@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
 
 export async function createUser(prevState: any, formData: FormData) {
   const session = await auth();
@@ -20,6 +21,7 @@ export async function createUser(prevState: any, formData: FormData) {
 
   if (!name?.trim()) return { success: false, error: "Imię i nazwisko jest wymagane." };
   if (!email?.trim()) return { success: false, error: "Adres e-mail jest wymagany." };
+  if (!z.email().safeParse(email.trim()).success) return { success: false, error: "Nieprawidłowy format adresu e-mail." };
   if (!password || password.length < 6) return { success: false, error: "Hasło musi mieć co najmniej 6 znaków." };
   if (!role) return { success: false, error: "Rola użytkownika jest wymagana." };
 
@@ -27,6 +29,14 @@ export async function createUser(prevState: any, formData: FormData) {
   if (!validRoles.includes(role)) return { success: false, error: "Nieprawidłowa rola." };
 
   try {
+    // If a branch is assigned, it must belong to the assigned client
+    if (branchId) {
+      const branch = await prisma.branch.findUnique({ where: { id: branchId }, select: { clientId: true } });
+      if (!branch || branch.clientId !== clientId) {
+        return { success: false, error: "Wybrany oddział nie należy do wskazanego klienta." };
+      }
+    }
+
     const existing = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
     if (existing) return { success: false, error: "Użytkownik o podanym adresie e-mail już istnieje." };
 
@@ -69,8 +79,20 @@ export async function updateUser(prevState: any, formData: FormData) {
   if (!id) return { success: false, error: "Brak ID użytkownika." };
   if (!name?.trim()) return { success: false, error: "Imię i nazwisko jest wymagane." };
   if (!email?.trim()) return { success: false, error: "Adres e-mail jest wymagany." };
+  if (!z.email().safeParse(email.trim()).success) return { success: false, error: "Nieprawidłowy format adresu e-mail." };
+
+  const validRoles = ["BRANCH_HEAD", "CLIENT_HEAD", "SUPON_ADMIN"];
+  if (!role || !validRoles.includes(role)) return { success: false, error: "Nieprawidłowa rola." };
 
   try {
+    // If a branch is assigned, it must belong to the assigned client
+    if (branchId) {
+      const branch = await prisma.branch.findUnique({ where: { id: branchId }, select: { clientId: true } });
+      if (!branch || branch.clientId !== clientId) {
+        return { success: false, error: "Wybrany oddział nie należy do wskazanego klienta." };
+      }
+    }
+
     const thisUser = await prisma.user.findUnique({ where: { id } });
     if (thisUser?.role === "SUPON_ADMIN" && (!isActive || role !== "SUPON_ADMIN")) {
       const adminCount = await prisma.user.count({ where: { role: "SUPON_ADMIN", isActive: true } });

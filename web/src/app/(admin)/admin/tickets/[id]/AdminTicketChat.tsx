@@ -232,7 +232,7 @@ export default function AdminTicketChat({
       
       {/* Header bar */}
       <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--line)", background: "var(--section-bg)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="row-8">
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: isClosed ? "var(--muted)" : "var(--ok)" }} />
           <span style={{ fontWeight: 600, fontSize: "14px" }}>
             {isClosed ? "Zgłoszenie Zamknięte" : "Wiadomości real-time"}
@@ -241,7 +241,7 @@ export default function AdminTicketChat({
       </div>
 
       {/* Messages feed */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "16px", background: "var(--bg)" }}>
+      <div role="log" aria-live="polite" aria-label="Historia konwersacji" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "16px", background: "var(--bg)" }}>
         {messages.length === 0 ? (
           <div style={{ textAlign: "center", color: "var(--muted)", margin: "auto" }}>
             Brak historii konwersacji.
@@ -417,11 +417,12 @@ export default function AdminTicketChat({
                   ) : (
                     <Paperclip size={18} />
                   )}
-                  <input 
-                    type="file" 
-                    onChange={handleAttachment} 
+                  <input
+                    type="file"
+                    onChange={handleAttachment}
                     disabled={uploading || isPending}
-                    style={{ display: "none" }} 
+                    aria-label="Dodaj załącznik"
+                    style={{ display: "none" }}
                   />
                 </label>
               )}
@@ -438,6 +439,7 @@ export default function AdminTicketChat({
                   boxShadow: isInternal ? "0 0 0 3px color-mix(in oklab, var(--warn) 8%, transparent)" : "none"
                 }}
                 placeholder={isInternal ? "Wpisz treść notatki wewnętrznej (widocznej tylko dla zespołu)..." : "Wpisz treść wiadomości do klienta..."}
+                aria-label={isInternal ? "Treść notatki wewnętrznej" : "Treść wiadomości do klienta"}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isPending}
@@ -457,8 +459,9 @@ export default function AdminTicketChat({
                 }}
                 disabled={isPending || uploading || (!inputText.trim() && !attachedUrl)}
                 title="Wyślij"
+                aria-label="Wyślij wiadomość"
               >
-                <Send size={18} />
+                <Send size={18} aria-hidden="true" />
               </button>
             </div>
           </form>

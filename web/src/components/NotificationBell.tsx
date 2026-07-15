@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Bell, Check, Trash, ExternalLink, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from "@/app/actions/notifications";
+import { createClient } from "@/utils/supabase/client";
 
 interface NotificationItem {
   id: string;
@@ -14,14 +15,17 @@ interface NotificationItem {
   createdAt: string;
 }
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+  userId: string;
+}
+
+export default function NotificationBell({ userId }: NotificationBellProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch notifications on load and setup polling
   const loadNotifications = async () => {
     const res = await fetchNotifications();
     if (res.success && res.notifications) {
@@ -30,13 +34,33 @@ export default function NotificationBell() {
     }
   };
 
+  // Initial load + Supabase Realtime subscription for instant updates
   useEffect(() => {
     loadNotifications();
 
-    // Poll every 30 seconds
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!userId) return;
+
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`notifications:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `userId=eq.${userId}`,
+        },
+        () => {
+          loadNotifications();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId]);
 
   // Handle click outside to close dropdown
   useEffect(() => {

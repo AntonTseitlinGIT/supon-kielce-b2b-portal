@@ -1,7 +1,9 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import ClientDetailClient from "./ClientDetailClient";
+import { resolveModules, resolveLimits } from "@/config/modules.config";
 
 export const metadata = {
   title: "Konfiguracja Klienta | SUPON Kielce",
@@ -21,7 +23,7 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
   }
 
   // Admin access control
-  if (session.user.role !== "SUPON_ADMIN") {
+  if (!isSuponRole(session.user.role)) {
     redirect("/admin/dashboard");
   }
 
@@ -30,14 +32,15 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
   // 1. Fetch client details, branches and client products list
   const [client, branches, products, clientProducts] = await Promise.all([
     prisma.client.findUnique({
-      where: { id: clientId }
+      where: { id: clientId },
+      include: { config: true }
     }),
     prisma.branch.findMany({
       where: { clientId },
       include: {
         _count: {
           select: {
-            employees: true,
+            employees: { where: { deletedAt: null } },
             orders: true,
           }
         }
@@ -58,6 +61,19 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 
   if (!client) {
     notFound();
+  }
+
+  const modules = resolveModules(client.config?.modules);
+  const limits = resolveLimits(client.config?.limits);
+
+  // Resolve who last updated config
+  let updatedByName: string | null = null;
+  if (client.config?.updatedBy) {
+    const updater = await prisma.user.findUnique({
+      where: { id: client.config.updatedBy },
+      select: { name: true },
+    });
+    updatedByName = updater?.name ?? null;
   }
 
   // 2. Map existing ClientProduct settings
@@ -120,6 +136,10 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
           branches={serializedBranches}
           products={serializedProducts}
           initialClientProducts={clientProductsMap}
+          initialModules={modules}
+          initialLimits={limits}
+          lastUpdatedAt={client.config?.updatedAt?.toISOString() ?? null}
+          lastUpdatedBy={updatedByName}
         />
       </div>
     </div>

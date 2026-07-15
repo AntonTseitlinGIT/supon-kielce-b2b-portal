@@ -45,6 +45,7 @@ export async function globalSearch(query: string, scope: "client" | "admin") {
         where: {
           AND: [
             role === "BRANCH_HEAD" ? { branchId: branchId || "" } : { branch: { clientId } },
+            { deletedAt: null },
             {
               OR: [
                 { name: { contains: q, mode: "insensitive" } },
@@ -63,6 +64,7 @@ export async function globalSearch(query: string, scope: "client" | "admin") {
         where: {
           AND: [
             { clientId },
+            { deletedAt: null },
             role === "BRANCH_HEAD" ? { branchId: branchId || "" } : {},
             {
               OR: [
@@ -211,6 +213,7 @@ export async function globalSearch(query: string, scope: "client" | "admin") {
         // 3. Search orders
         prisma.order.findMany({
           where: {
+            deletedAt: null,
             OR: [
               { orderNr: { contains: q, mode: "insensitive" } },
               { clientRef: { contains: q, mode: "insensitive" } },

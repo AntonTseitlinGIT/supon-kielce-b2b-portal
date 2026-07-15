@@ -1,3 +1,4 @@
+import { isSuponRole } from "@/config/permissions.config";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
@@ -38,7 +39,7 @@ export default async function AdminDashboardPage() {
   }
 
   const { role } = session.user;
-  if (role !== "SUPON_ADMIN") {
+  if (!isSuponRole(role)) {
     redirect("/client/dashboard");
   }
 
@@ -57,7 +58,7 @@ export default async function AdminDashboardPage() {
     prisma.client.count({ where: { isActive: true } }),
     // Pending orders (not delivered or cancelled)
     prisma.order.count({
-      where: { status: { in: ["IN_PROGRESS", "PARTIALLY_SENT", "APPROVED", "DRAFT"] } }
+      where: { status: { in: ["IN_PROGRESS", "PARTIALLY_SENT", "APPROVED", "DRAFT"] }, deletedAt: null },
     }),
     // New tickets
     prisma.ticket.count({ where: { status: "NEW" } }),
@@ -65,6 +66,7 @@ export default async function AdminDashboardPage() {
     prisma.product.count({ where: { isActive: true } }),
     // Recent 5 orders
     prisma.order.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: {
@@ -252,7 +254,7 @@ export default async function AdminDashboardPage() {
                                 {order.orderNr}
                               </Link>
                             </td>
-                            <td style={{ color: "var(--text-secondary)" }} title={order.client.name}>
+                            <td style={{ color: "var(--muted)" }} title={order.client.name}>
                               {order.client.name.split("—")[0].trim()}
                             </td>
                             <td>{qtySum} szt.</td>
@@ -309,7 +311,7 @@ export default async function AdminDashboardPage() {
                                 {ticket.ticketNr}
                               </Link>
                             </td>
-                            <td style={{ color: "var(--text-secondary)" }}>
+                            <td style={{ color: "var(--muted)" }}>
                               {ticket.client.name.split("—")[0].trim()}
                             </td>
                             <td>{typeLabel}</td>
