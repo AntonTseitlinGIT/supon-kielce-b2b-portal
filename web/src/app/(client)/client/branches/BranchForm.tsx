@@ -48,13 +48,42 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
     isBranchHead ? "edit" : "add"
   );
   
+  // Helper to parse address
+  const parseBranchAddress = (addrString: string) => {
+    if (!addrString) return { street: "", postalCode: "", city: "" };
+    const parts = addrString.split("\n");
+    if (parts.length >= 3) {
+      return {
+        street: parts[0] || "",
+        postalCode: parts[1] || "",
+        city: parts[2] || ""
+      };
+    }
+    // Fallback for old comma-separated format
+    const commaParts = addrString.split(",");
+    const street = commaParts[0]?.trim() || "";
+    const rest = commaParts[1]?.trim() || "";
+    const postalMatch = rest.match(/\d{2}-\d{3}/);
+    if (postalMatch) {
+      const pc = postalMatch[0];
+      const c = rest.replace(pc, "").trim();
+      return { street, postalCode: pc, city: c };
+    }
+    return { street, postalCode: "", city: rest };
+  };
+
   // Branch fields
   const [branchName, setBranchName] = useState(
     isBranchHead && branches[0] ? branches[0].name : ""
   );
-  const [branchAddress, setBranchAddress] = useState(
-    isBranchHead && branches[0] ? branches[0].address : ""
-  );
+  const initialAddr = isBranchHead && branches[0] 
+    ? parseBranchAddress(branches[0].address)
+    : { street: "", postalCode: "", city: "" };
+
+  const [branchStreet, setBranchStreet] = useState(initialAddr.street);
+  const [branchPostalCode, setBranchPostalCode] = useState(initialAddr.postalCode);
+  const [branchCity, setBranchCity] = useState(initialAddr.city);
+
   const [branchActive, setBranchActive] = useState(
     isBranchHead && branches[0] ? branches[0].isActive : true
   );
@@ -79,7 +108,10 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
     setBranchMode("edit");
     setSelectedBranch(branch);
     setBranchName(branch.name);
-    setBranchAddress(branch.address);
+    const parsed = parseBranchAddress(branch.address);
+    setBranchStreet(parsed.street);
+    setBranchPostalCode(parsed.postalCode);
+    setBranchCity(parsed.city);
     setBranchActive(branch.isActive);
     setErrorMsg("");
     setSuccessMsg("");
@@ -88,7 +120,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
   const handleBranchReset = () => {
     setBranchMode("add");
     setBranchName("");
-    setBranchAddress("");
+    setBranchStreet("");
+    setBranchPostalCode("");
+    setBranchCity("");
     setBranchActive(true);
     setErrorMsg("");
     setSuccessMsg("");
@@ -138,14 +172,20 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
       setErrorMsg("Nazwa oddziału jest wymagana.");
       return;
     }
-    if (!branchAddress.trim()) {
-      setErrorMsg("Główny adres oddziału jest wymagany.");
+    if (!branchStreet.trim() || !branchPostalCode.trim() || !branchCity.trim()) {
+      setErrorMsg("Wszystkie pola głównego adresu (ulica, kod pocztowy, miasto) są wymagane.");
       return;
     }
 
+    const combinedAddress = [
+      branchStreet.trim(),
+      branchPostalCode.trim(),
+      branchCity.trim()
+    ].join("\n");
+
     const formData = new FormData();
     formData.append("name", branchName.trim());
-    formData.append("address", branchAddress.trim());
+    formData.append("address", combinedAddress);
 
     startTransition(async () => {
       let result;
@@ -161,7 +201,9 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
         setSuccessMsg(result.message || "Pomyślnie zaktualizowano oddział!");
         if (branchMode === "add") {
           setBranchName("");
-          setBranchAddress("");
+          setBranchStreet("");
+          setBranchPostalCode("");
+          setBranchCity("");
         } else {
           handleBranchReset();
         }
@@ -434,17 +476,47 @@ export default function BranchForm({ branches, userRole }: BranchFormProps) {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="bf-address">Główny adres</label>
-                  <textarea
-                    id="bf-address"
+                  <label className="form-label" htmlFor="bf-branch-street">Ulica i numer</label>
+                  <input
+                    id="bf-branch-street"
+                    type="text"
                     className="form-input"
-                    value={branchAddress}
-                    onChange={(e) => setBranchAddress(e.target.value)}
-                    placeholder="Wpisz pełny adres rejestracyjny..."
-                    rows={3}
+                    value={branchStreet}
+                    onChange={(e) => setBranchStreet(e.target.value)}
+                    placeholder="np. ul. Fabryczna 10"
                     disabled={isPending}
                     required
                   />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: "10px", marginBottom: "15px" }}>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-branch-postal">Kod pocztowy</label>
+                    <input
+                      id="bf-branch-postal"
+                      type="text"
+                      inputMode="numeric"
+                      className="form-input"
+                      value={branchPostalCode}
+                      onChange={(e) => setBranchPostalCode(e.target.value)}
+                      placeholder="00-000"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="bf-branch-city">Miasto</label>
+                    <input
+                      id="bf-branch-city"
+                      type="text"
+                      className="form-input"
+                      value={branchCity}
+                      onChange={(e) => setBranchCity(e.target.value)}
+                      placeholder="Kielce"
+                      disabled={isPending}
+                      required
+                    />
+                  </div>
                 </div>
                 {branchMode === "edit" && (
                   <div className="switch-container">
