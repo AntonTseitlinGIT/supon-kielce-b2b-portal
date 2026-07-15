@@ -225,7 +225,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Bluza ostrzegawcza klasy 2, EN ISO 20471",
       availableSizes: ["S", "M", "L", "XL", "XXL", "XXXL"],
-      photoUrls: [],
+      photoUrls: ["/uploads/bluza.jpg"],
     },
     {
       articleNr: "BUT-002",
@@ -257,7 +257,7 @@ async function main() {
       categoryId: catOdziez.id,
       description: "Kombinezon jednorazowy Tyvek, klasa 5/6",
       availableSizes: ["S", "M", "L", "XL", "XXL", "XXXL"],
-      photoUrls: [],
+      photoUrls: ["/uploads/kombinezon.jpg"],
     },
     {
       articleNr: "SHO-LEA-333",
@@ -265,7 +265,7 @@ async function main() {
       categoryId: catObuwie.id,
       description: "Trzewiki ze skóry naturalnej, klasa S3 SRC HRO",
       availableSizes: ["39", "40", "41", "42", "43", "44", "45", "46"],
-      photoUrls: [],
+      photoUrls: ["/uploads/trzewiki.jpg"],
     },
   ];
 
