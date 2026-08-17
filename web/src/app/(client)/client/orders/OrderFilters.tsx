@@ -25,7 +25,7 @@ export default function OrderFilters({
 
   // Read search params
   const searchVal = searchParams?.get("search") || "";
-  const statusVal = searchParams?.has("status") ? (searchParams.get("status") || "") : "IN_PROGRESS";
+  const statusVal = searchParams?.has("status") ? (searchParams.get("status") || "") : "ALL";
   const priorityVal = searchParams?.get("priority") || "";
   const branchIdVal = searchParams?.get("branchId") || "";
   const dateFromVal = searchParams?.get("dateFrom") || "";

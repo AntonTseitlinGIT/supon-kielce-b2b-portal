@@ -25,7 +25,7 @@ export default async function ClientOrdersPage(props: PageProps) {
   const searchParams = await props.searchParams;
 
   const search = (searchParams.search as string) || "";
-  const status = searchParams.status !== undefined ? (searchParams.status as string) : "IN_PROGRESS";
+  const status = searchParams.status !== undefined ? (searchParams.status as string) : "ALL";
   const priority = (searchParams.priority as string) || "";
   const branchIdParam = (searchParams.branchId as string) || "";
   const dateFrom = (searchParams.dateFrom as string) || "";
