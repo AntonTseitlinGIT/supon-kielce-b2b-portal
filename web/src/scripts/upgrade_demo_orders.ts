@@ -89,11 +89,12 @@ async function main() {
     await prisma.order.update({
       where: { id: demo03.id },
       data: {
+        status: "IN_PROGRESS",
         clientRef: "PO/2026/08/015",
         department: "Dział Narzędziowni",
       },
     });
-    console.log("Upgraded Z-2026-DEMO03 details.");
+    console.log("Upgraded Z-2026-DEMO03 status to IN_PROGRESS and details.");
   }
 
   console.log("All Demo Client Orders upgraded successfully!");

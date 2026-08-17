@@ -23,7 +23,11 @@ async function main() {
   const clientId = demoClient.id;
 
   // ─── 1. Clean up WZ Documents ───
-  const wzKeep = ["WZ-2026-06-DEMO1", "WZ-2026-07-DEMO2"];
+  const wzKeep = [
+    "WZ-2026-06-DEMO1", "WZ-2026-07-DEMO2", "WZ/2026/08/042",
+    "WZ/2026/07/901", "WZ/2026/08/088", "WZ/2026/08/112",
+    "WZ/2026/08/201", "WZ/2026/08/202"
+  ];
   const wzDeleted = await prisma.wzDocument.deleteMany({
     where: {
       clientId,
@@ -33,8 +37,11 @@ async function main() {
   console.log(`Deleted ${wzDeleted.count} custom WZ documents.`);
 
   // ─── 2. Clean up Orders ───
-  // Note: deleting orders will automatically cascade-delete OrderItem rows due to schema setup
-  const ordersKeep = ["Z-2026-DEMO01", "Z-2026-DEMO02", "Z-2026-DEMO03"];
+  const ordersKeep = [
+    "Z-2026-DEMO01", "Z-2026-DEMO02", "Z-2026-DEMO03", "Z-2026-DEMO04",
+    "Z-2026-DEMO05", "Z-2026-DEMO06", "Z-2026-DEMO07", "Z-2026-DEMO08",
+    "Z-2026-DEMO09", "Z-2026-DEMO10", "Z-2026-DEMO11", "Z-2026-DEMO12"
+  ];
   const ordersDeleted = await prisma.order.deleteMany({
     where: {
       clientId,
@@ -44,7 +51,6 @@ async function main() {
   console.log(`Deleted ${ordersDeleted.count} custom orders.`);
 
   // ─── 3. Clean up Tickets ───
-  // Note: deleting tickets cascades to TicketMessage and InternalNote
   const ticketsKeep = ["SRV-2026-DEMO1"];
   const ticketsDeleted = await prisma.ticket.deleteMany({
     where: {
@@ -55,7 +61,6 @@ async function main() {
   console.log(`Deleted ${ticketsDeleted.count} custom support tickets.`);
 
   // ─── 4. Clean up notifications ───
-  // Delete all notifications for the demo client's users
   const demoUsers = await prisma.user.findMany({
     where: { clientId },
     select: { id: true }
@@ -67,27 +72,6 @@ async function main() {
     }
   });
   console.log(`Deleted ${notificationsDeleted.count} notifications.`);
-
-  // ─── 5. Reset seeded order states to their defaults ───
-  await prisma.order.update({
-    where: { orderNr: "Z-2026-DEMO01" },
-    data: { status: "DELIVERED" }
-  }).catch(() => null);
-
-  await prisma.order.update({
-    where: { orderNr: "Z-2026-DEMO02" },
-    data: { status: "SENT" }
-  }).catch(() => null);
-
-  await prisma.order.update({
-    where: { orderNr: "Z-2026-DEMO03" },
-    data: { status: "DRAFT" }
-  }).catch(() => null);
-
-  await prisma.ticket.update({
-    where: { ticketNr: "SRV-2026-DEMO1" },
-    data: { status: "IN_PROGRESS" }
-  }).catch(() => null);
 
   console.log("✨ Demo cleanup completed successfully!");
 }

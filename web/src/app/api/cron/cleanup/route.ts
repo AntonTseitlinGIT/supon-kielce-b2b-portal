@@ -22,7 +22,11 @@ export async function GET(request: Request) {
     const clientId = demoClient.id;
 
     // ─── 1. Clean up WZ Documents ───
-    const wzKeep = ["WZ-2026-06-DEMO1", "WZ-2026-07-DEMO2"];
+    const wzKeep = [
+      "WZ-2026-06-DEMO1", "WZ-2026-07-DEMO2", "WZ/2026/08/042",
+      "WZ/2026/07/901", "WZ/2026/08/088", "WZ/2026/08/112",
+      "WZ/2026/08/201", "WZ/2026/08/202"
+    ];
     const wzDeleted = await prisma.wzDocument.deleteMany({
       where: {
         clientId,
@@ -30,8 +34,12 @@ export async function GET(request: Request) {
       }
     });
 
-    // ─── 2. Clean up Orders ───
-    const ordersKeep = ["Z-2026-DEMO01", "Z-2026-DEMO02", "Z-2026-DEMO03"];
+    // ─── 2. Clean up Orders (Keep all 12 demo orders) ───
+    const ordersKeep = [
+      "Z-2026-DEMO01", "Z-2026-DEMO02", "Z-2026-DEMO03", "Z-2026-DEMO04",
+      "Z-2026-DEMO05", "Z-2026-DEMO06", "Z-2026-DEMO07", "Z-2026-DEMO08",
+      "Z-2026-DEMO09", "Z-2026-DEMO10", "Z-2026-DEMO11", "Z-2026-DEMO12"
+    ];
     const ordersDeleted = await prisma.order.deleteMany({
       where: {
         clientId,
@@ -59,27 +67,6 @@ export async function GET(request: Request) {
         userId: { in: demoUserIds }
       }
     });
-
-    // ─── 5. Reset seeded order states to their defaults ───
-    await prisma.order.update({
-      where: { orderNr: "Z-2026-DEMO01" },
-      data: { status: "DELIVERED" }
-    }).catch(() => null);
-
-    await prisma.order.update({
-      where: { orderNr: "Z-2026-DEMO02" },
-      data: { status: "SENT" }
-    }).catch(() => null);
-
-    await prisma.order.update({
-      where: { orderNr: "Z-2026-DEMO03" },
-      data: { status: "DRAFT" }
-    }).catch(() => null);
-
-    await prisma.ticket.update({
-      where: { ticketNr: "SRV-2026-DEMO1" },
-      data: { status: "IN_PROGRESS" }
-    }).catch(() => null);
 
     return NextResponse.json({
       success: true,
