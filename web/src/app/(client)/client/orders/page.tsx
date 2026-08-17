@@ -8,8 +8,10 @@ import OrdersListClient from "./OrdersListClient";
 import Pagination from "@/components/Pagination";
 import PageHeader from "@/components/PageHeader";
 import { OrderStatus } from "@prisma/client";
-
 import { isDemoSession } from "@/lib/demo";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

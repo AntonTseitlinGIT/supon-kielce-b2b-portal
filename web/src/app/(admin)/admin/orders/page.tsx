@@ -10,6 +10,9 @@ import AdminOrdersList from "./AdminOrdersList";
 import Pagination from "@/components/Pagination";
 import PageHeader from "@/components/PageHeader";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 interface PageProps {

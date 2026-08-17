@@ -11,6 +11,9 @@ import {
 import { formatOrderStatus, formatTicketStatus, formatTicketType } from "@/utils/format";
 import { isDemoSession } from "@/lib/demo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ClientDashboardPage() {
   const session = await auth();
 

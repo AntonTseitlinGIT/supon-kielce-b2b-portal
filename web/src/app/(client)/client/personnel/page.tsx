@@ -6,6 +6,9 @@ import { Plus } from "lucide-react";
 import PersonnelList from "./PersonnelList";
 import { isDemoSession } from "@/lib/demo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ClientPersonnelPage() {
   const session = await auth();
 

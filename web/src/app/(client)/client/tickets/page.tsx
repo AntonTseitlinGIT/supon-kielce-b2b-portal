@@ -10,6 +10,9 @@ import ClickableRow from "./ClickableRow";
 import PageHeader from "@/components/PageHeader";
 import { isDemoSession } from "@/lib/demo";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 interface PageProps {
