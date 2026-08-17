@@ -726,10 +726,10 @@ export default function NewOrderForm({
                     }}
                   >
                     {/* Employee select */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       <select
                         className="input"
-                        style={{ margin: 0, width: "100%", height: "38px" }}
+                        style={{ margin: 0, width: "100%", height: "44px", borderRadius: "12px", fontSize: "14px", boxSizing: "border-box" }}
                         value={row.employeeId}
                         onChange={(e) => updateRow(index, "employeeId", e.target.value)}
                         disabled={isBulk || isPending}
@@ -745,7 +745,7 @@ export default function NewOrderForm({
                       
                       {/* Employee Size recommendation details */}
                       {sizeRecommendation && !isBulk && (
-                        <div style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", marginTop: "6px", fontWeight: 500 }}>
+                        <div style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: "4px", fontSize: "11px", marginTop: "4px", fontWeight: 500 }}>
                           <User size={12} />
                           Sugerowany: <strong>{sizeRecommendation}</strong>
                         </div>
@@ -753,10 +753,10 @@ export default function NewOrderForm({
                     </td>
 
                     {/* Product select */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       <select
                         className="input"
-                        style={{ margin: 0, width: "100%", height: "38px" }}
+                        style={{ margin: 0, width: "100%", height: "44px", borderRadius: "12px", fontSize: "14px", boxSizing: "border-box" }}
                         value={row.productId}
                         onChange={(e) => updateRow(index, "productId", e.target.value)}
                         disabled={isPending}
@@ -772,39 +772,44 @@ export default function NewOrderForm({
                     </td>
 
                     {/* Article Code Badge */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
-                      <span className="art-code-badge" style={{ 
-                        display: "inline-block", 
-                        padding: "6px 10px", 
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
+                      <div className="art-code-badge" style={{ 
+                        height: "44px", 
+                        padding: "0 12px", 
                         background: "var(--section-bg)", 
                         border: "1px solid var(--line)", 
-                        borderRadius: "8px", 
+                        borderRadius: "12px", 
                         fontFamily: "monospace", 
                         fontWeight: 700, 
                         fontSize: "12px", 
-                        color: "var(--text)"
+                        color: "var(--text)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxSizing: "border-box",
+                        width: "100%"
                       }}>
                         {selectedProduct?.articleNr || "—"}
-                      </span>
+                      </div>
                     </td>
 
                     {/* Photo cell */}
-                    <td style={{ padding: "12px", verticalAlign: "top", textAlign: "center" }}>
-                      <div style={{ margin: "0 auto", width: "56px", height: "56px" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle", textAlign: "center" }}>
+                      <div style={{ margin: "0 auto", width: "44px", height: "44px" }}>
                         <ProductImagePreview
                           src={productPhoto}
                           alt={selectedProduct?.name || "Zdjęcie produktu"}
-                          size={56}
+                          size={44}
                           borderRadius="12px"
                         />
                       </div>
                     </td>
 
                     {/* Size Selector */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       <select
                         className="input"
-                        style={{ margin: 0, width: "100%", height: "38px" }}
+                        style={{ margin: 0, width: "100%", height: "44px", borderRadius: "12px", fontSize: "14px", boxSizing: "border-box" }}
                         value={row.size}
                         onChange={(e) => updateRow(index, "size", e.target.value)}
                         disabled={isPending || !row.productId}
@@ -820,12 +825,12 @@ export default function NewOrderForm({
                     </td>
 
                     {/* Quantity */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       <input
                         type="number"
                         min={1}
                         className="input"
-                        style={{ margin: 0, width: "100%", height: "38px" }}
+                        style={{ margin: 0, width: "100%", height: "44px", borderRadius: "12px", fontSize: "14px", fontWeight: 700, textAlign: "center", boxSizing: "border-box" }}
                         value={row.quantity}
                         onChange={(e) => updateRow(index, "quantity", parseInt(e.target.value, 10) || 1)}
                         disabled={isPending}
@@ -834,11 +839,11 @@ export default function NewOrderForm({
                     </td>
 
                     {/* Remarks Input */}
-                    <td style={{ padding: "12px", verticalAlign: "top" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle" }}>
                       <input
                         type="text"
                         className="input"
-                        style={{ margin: 0, width: "100%", height: "38px" }}
+                        style={{ margin: 0, width: "100%", height: "44px", borderRadius: "12px", fontSize: "14px", boxSizing: "border-box" }}
                         placeholder="np. wymiana"
                         aria-label={`Uwagi — pozycja ${index + 1}`}
                         value={row.remarks}
@@ -848,29 +853,30 @@ export default function NewOrderForm({
                     </td>
 
                     {/* Action button */}
-                    <td style={{ padding: "12px", verticalAlign: "top", textAlign: "center" }}>
+                    <td style={{ padding: "12px", verticalAlign: "middle", textAlign: "center" }}>
                       <button
                         type="button"
                         onClick={() => removeRow(index)}
                         disabled={isPending || items.length === 1}
                         style={{
-                          height: "38px",
-                          width: "38px",
+                          height: "44px",
+                          width: "44px",
                           padding: 0,
                           border: "1px solid color-mix(in oklab, var(--err) 20%, transparent)",
                           color: "var(--err)",
                           background: "transparent",
                           display: "grid",
                           placeItems: "center",
-                          borderRadius: "10px",
+                          borderRadius: "12px",
                           cursor: items.length === 1 ? "not-allowed" : "pointer",
                           opacity: items.length === 1 ? 0.3 : 1,
-                          transition: "all 0.2s ease"
+                          transition: "all 0.2s ease",
+                          boxSizing: "border-box"
                         }}
                         title="Usuń pozycję"
                         className="btn-delete-row"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </td>
                   </tr>
