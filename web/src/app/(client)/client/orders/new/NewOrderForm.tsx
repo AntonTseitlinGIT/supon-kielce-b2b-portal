@@ -4,7 +4,7 @@ import React, { useState, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createOrder } from "./actions";
 import { Priority } from "@prisma/client";
-import { Plus, Trash2, AlertTriangle, ShieldCheck, User, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, ShieldCheck, User, X, ChevronRight, ChevronLeft, Check, Package } from "lucide-react";
 import CustomDatePicker from "@/components/CustomDatePicker";
 import ProductImagePreview from "@/components/ProductImagePreview";
 
@@ -956,6 +956,95 @@ export default function NewOrderForm({
                   {comments.trim() ? comments : "Brak instrukcji dodatkowych."}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Lista zamawianych produktów w Podsumowaniu */}
+          <div style={{ marginTop: "8px" }}>
+            <h4 style={{ margin: "0 0 12px 0", fontSize: "13px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Lista zamawianych produktów ({filledItems.length})
+            </h4>
+
+            <div style={{ border: "1px solid var(--line)", borderRadius: "14px", overflow: "hidden", background: "var(--card-bg)" }}>
+              <table className="table" style={{ width: "100%", margin: 0 }}>
+                <thead>
+                  <tr style={{ background: "var(--section-bg)", borderBottom: "1px solid var(--line)" }}>
+                    <th style={{ padding: "12px 16px", fontSize: "12px" }}>Produkt</th>
+                    <th style={{ padding: "12px 16px", fontSize: "12px" }}>Kod art.</th>
+                    <th style={{ padding: "12px 16px", fontSize: "12px" }}>Rozmiar</th>
+                    <th style={{ padding: "12px 16px", fontSize: "12px" }}>Pracownik</th>
+                    <th style={{ padding: "12px 16px", fontSize: "12px", textAlign: "center" }}>Ilość</th>
+                    <th style={{ padding: "12px 16px", fontSize: "12px" }}>Uwagi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filledItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} style={{ padding: "24px", textAlign: "center", color: "var(--muted)", fontStyle: "italic" }}>
+                        Brak wybranych produktów w zamówieniu.
+                      </td>
+                    </tr>
+                  ) : (
+                    filledItems.map((item, idx) => {
+                      const prod = products.find((p) => p.id === item.productId);
+                      const emp = employees.find((e) => e.id === item.employeeId);
+
+                      return (
+                        <tr key={item.key || idx} style={{ borderBottom: idx < filledItems.length - 1 ? "1px solid var(--line)" : "none" }}>
+                          <td style={{ padding: "12px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                              {prod?.photoUrls?.[0] ? (
+                                <ProductImagePreview
+                                  src={prod.photoUrls[0]}
+                                  alt={prod.name}
+                                  size={40}
+                                  borderRadius="8px"
+                                />
+                              ) : (
+                                <div style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  borderRadius: "8px",
+                                  background: "var(--section-bg)",
+                                  display: "grid",
+                                  placeItems: "center",
+                                  color: "var(--muted)",
+                                  border: "1px solid var(--line)",
+                                  flexShrink: 0
+                                }}>
+                                  <Package size={18} />
+                                </div>
+                              )}
+                              <span style={{ fontWeight: 700, fontSize: "14px", color: "var(--text)" }}>
+                                {prod?.name || "Nieznany produkt"}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: "12px", background: "var(--section-bg)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--line)" }}>
+                              {prod?.articleNr || "—"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px 16px" }}>
+                            <span className="badge badge-neutral" style={{ fontWeight: 700, padding: "4px 10px", borderRadius: "6px" }}>
+                              {item.size || "—"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px 16px", fontWeight: 600, fontSize: "13.5px" }}>
+                            {emp ? emp.name : <span style={{ color: "var(--muted)", fontStyle: "italic" }}>zbiorczo</span>}
+                          </td>
+                          <td style={{ padding: "12px 16px", textAlign: "center", fontWeight: 800, fontSize: "15px", color: "var(--accent)" }}>
+                            {item.quantity} szt.
+                          </td>
+                          <td style={{ padding: "12px 16px", color: "var(--muted)", fontSize: "13px" }}>
+                            {item.remarks || "—"}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
