@@ -547,9 +547,18 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
       )}
 
       {/* Main Table Header Actions */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "12px" }}>
+      <div style={{
+        padding: "14px 20px",
+        background: "var(--section-bg)",
+        borderBottom: "1px solid var(--line)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "12px"
+      }}>
         <span style={{ fontSize: "13px", color: "var(--muted)", fontWeight: 600 }}>
-          Liczba znalezionych zamówień: <strong style={{ color: "var(--text)" }}>{orders.length}</strong>
+          Liczba znalezionych zamówień: <strong style={{ color: "var(--text)", fontWeight: 800 }}>{orders.length}</strong>
         </span>
       </div>
 
