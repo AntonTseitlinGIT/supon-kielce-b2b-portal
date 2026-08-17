@@ -40,11 +40,21 @@ export default async function ClientOrdersPage(props: PageProps) {
 
   const isDemo = isDemoSession(session);
   const role = isDemo ? "CLIENT_HEAD" : session.user.role;
-  const clientId = session.user.clientId!;
+  let clientId = session.user.clientId;
+
+  if (isDemo) {
+    const demoClient = await prisma.client.findFirst({
+      where: { nip: "1112223344" },
+      select: { id: true }
+    });
+    if (demoClient) {
+      clientId = demoClient.id;
+    }
+  }
 
   // 1. Build DB Query Filter
   const where: any = {
-    clientId,
+    clientId: clientId!,
     deletedAt: null,
   };
 
@@ -142,7 +152,7 @@ export default async function ClientOrdersPage(props: PageProps) {
     prisma.order.count({ where }),
     role === "CLIENT_HEAD"
       ? prisma.branch.findMany({
-          where: { clientId, isActive: true },
+          where: { clientId: clientId!, isActive: true },
           select: { id: true, name: true },
           orderBy: { name: "asc" },
         })
