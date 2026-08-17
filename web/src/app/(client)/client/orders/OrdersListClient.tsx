@@ -1080,8 +1080,8 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
                           <tr key={item.id}>
                             <td style={{ padding: "8px" }}>
                               <img 
-                                onClick={() => setLightbox({ src: item.product.photoUrls?.[0] || "/placeholder-product.png", title: item.productName })}
-                                src={item.product.photoUrls?.[0] || "/placeholder-product.png"} 
+                                onClick={() => setLightbox({ src: item.product?.photoUrls?.[0] || "/placeholder-product.png", title: item.productName })}
+                                src={item.product?.photoUrls?.[0] || "/placeholder-product.png"} 
                                 alt="Produkt" 
                                 style={{ width: "48px", height: "48px", borderRadius: "8px", objectFit: "cover", cursor: "zoom-in" }} 
                               />
