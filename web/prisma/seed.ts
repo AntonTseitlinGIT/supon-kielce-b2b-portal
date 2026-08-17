@@ -478,21 +478,227 @@ async function main() {
     }
   });
 
-  // Order 3: Draft
+  // Order 3: In Progress
   await prisma.order.upsert({
     where: { orderNr: "Z-2026-DEMO03" },
-    update: {},
+    update: { status: OrderStatus.IN_PROGRESS },
     create: {
       orderNr: "Z-2026-DEMO03",
+      clientRef: "PO/2026/08/015",
+      department: "Dział Narzędziowni",
       clientId: demoClient.id,
       branchId: demoBranchNorth.id,
-      status: OrderStatus.DRAFT,
+      status: OrderStatus.IN_PROGRESS,
       priority: Priority.STANDARD,
       address: "ul. Testowa 5, 25-001 Kielce",
       createdById: demoClientHead.id,
       items: {
         create: [
           { productId: dbProducts["R-20"], articleNr: "R-20", productName: "Rękawice robocze Grip", size: "9 (L)", quantity: 5, employeeId: demoEmployee1.id, employeeName: demoEmployee1.name }
+        ]
+      }
+    }
+  });
+
+  // Order 4: Partially Sent
+  const demoOrder4 = await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO04" },
+    update: { status: OrderStatus.PARTIALLY_SENT },
+    create: {
+      orderNr: "Z-2026-DEMO04",
+      clientRef: "ZAM/BHP/992",
+      department: "Dział Produkcji Śrub",
+      clientId: demoClient.id,
+      branchId: demoBranchSouth.id,
+      status: OrderStatus.PARTIALLY_SENT,
+      priority: Priority.HIGH,
+      address: "ul. Wzornicza 12, 26-600 Radom",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["HIV-BLS-110"], articleNr: "HIV-BLS-110", productName: "Bluza Hi-Vis", size: "XL", quantity: 10, qtyDelivered: 5, qtySent: 5, employeeName: "Krzysztof Maj" },
+          { productId: dbProducts["BUT-002"], articleNr: "BUT-002", productName: "Buty ochronne S3", size: "42", quantity: 4, qtyDelivered: 0, qtySent: 2, employeeName: "Michał Lewandowski" }
+        ]
+      }
+    }
+  });
+
+  // Order 5: In Progress
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO05" },
+    update: { status: OrderStatus.IN_PROGRESS },
+    create: {
+      orderNr: "Z-2026-DEMO05",
+      clientRef: "WYM/2026/011",
+      department: "Główny Warsztat",
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
+      status: OrderStatus.IN_PROGRESS,
+      priority: Priority.STANDARD,
+      address: "ul. Testowa 5, 25-001 Kielce",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["MOT-TRS-001"], articleNr: "MOT-TRS-001", productName: "Spodnie Motion", size: "M (50)", quantity: 2, employeeName: "Robert Kowalczyk" }
+        ]
+      }
+    }
+  });
+
+  // Order 6: Delivered
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO06" },
+    update: { status: OrderStatus.DELIVERED },
+    create: {
+      orderNr: "Z-2026-DEMO06",
+      clientRef: "PO/DEL/2026/44",
+      department: "Magazyn Wyrobów Gotowych",
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
+      status: OrderStatus.DELIVERED,
+      priority: Priority.STANDARD,
+      address: "ul. Testowa 5, 25-001 Kielce",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["FR-JKT-220"], articleNr: "FR-JKT-220", productName: "Kurtka FR (Trudnopalna)", size: "44", quantity: 8, qtyDelivered: 8, employeeName: "Grzegorz Kamiński" }
+        ]
+      }
+    }
+  });
+
+  // Order 7: Approved / Realizowane
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO07" },
+    update: { status: OrderStatus.APPROVED },
+    create: {
+      orderNr: "Z-2026-DEMO07",
+      clientRef: "APPROVED/2026/099",
+      department: "Administracja B2B",
+      clientId: demoClient.id,
+      branchId: demoBranchSouth.id,
+      status: OrderStatus.APPROVED,
+      priority: Priority.STANDARD,
+      address: "ul. Wzornicza 12, 26-600 Radom",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["MOT-TRS-001"], articleNr: "MOT-TRS-001", productName: "Spodnie Motion", size: "XL", quantity: 12, qtyDelivered: 12, employeeName: "Zbiorcze dla działu" }
+        ]
+      }
+    }
+  });
+
+  // Order 8: In Progress
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO08" },
+    update: { status: OrderStatus.IN_PROGRESS },
+    create: {
+      orderNr: "Z-2026-DEMO08",
+      clientRef: "PO/BHP/2026/088",
+      department: "Dział Montażu i Grawerowania",
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
+      status: OrderStatus.IN_PROGRESS,
+      priority: Priority.HIGH,
+      address: "ul. Testowa 5, 25-001 Kielce",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["MOT-TRS-001"], articleNr: "MOT-TRS-001", productName: "Spodnie Motion", size: "L (52)", quantity: 6, employeeName: "Adam Nowak" },
+          { productId: dbProducts["BUT-002"], articleNr: "BUT-002", productName: "Buty ochronne S3", size: "43", quantity: 3, employeeName: "Piotr Zieliński" },
+          { productId: dbProducts["FR-JKT-220"], articleNr: "FR-JKT-220", productName: "Kurtka FR (Trudnopalna)", size: "XL", quantity: 2, employeeName: "Grzegorz Kamiński" }
+        ]
+      }
+    }
+  });
+
+  // Order 9: In Progress
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO09" },
+    update: { status: OrderStatus.IN_PROGRESS },
+    create: {
+      orderNr: "Z-2026-DEMO09",
+      clientRef: "ZAM/SUP/2026/104",
+      department: "Hala Obróbki Skrawaniem",
+      clientId: demoClient.id,
+      branchId: demoBranchSouth.id,
+      status: OrderStatus.IN_PROGRESS,
+      priority: Priority.STANDARD,
+      address: "ul. Wzornicza 12, 26-600 Radom",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["R-20"], articleNr: "R-20", productName: "Rękawice robocze Grip", size: "10 (XL)", quantity: 50, employeeName: "Rozdzielnia BHP" },
+          { productId: dbProducts["HIV-BLS-110"], articleNr: "HIV-BLS-110", productName: "Bluza Hi-Vis", size: "L", quantity: 8, employeeName: "Krzysztof Maj" }
+        ]
+      }
+    }
+  });
+
+  // Order 10: Partially Sent
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO10" },
+    update: { status: OrderStatus.PARTIALLY_SENT },
+    create: {
+      orderNr: "Z-2026-DEMO10",
+      clientRef: "PO/2026/08/902",
+      department: "Magazyn Główny i Logistyka",
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
+      status: OrderStatus.PARTIALLY_SENT,
+      priority: Priority.HIGH,
+      address: "ul. Testowa 5, 25-001 Kielce",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["BUT-002"], articleNr: "BUT-002", productName: "Buty ochronne S3", size: "42", quantity: 10, qtyDelivered: 5, qtySent: 5, employeeName: "Michał Lewandowski" },
+          { productId: dbProducts["MOT-TRS-001"], articleNr: "MOT-TRS-001", productName: "Spodnie Motion", size: "L", quantity: 10, qtyDelivered: 0, qtySent: 5, employeeName: "Adam Nowak" }
+        ]
+      }
+    }
+  });
+
+  // Order 11: In Progress
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO11" },
+    update: { status: OrderStatus.IN_PROGRESS },
+    create: {
+      orderNr: "Z-2026-DEMO11",
+      clientRef: "PO/WYM/2026/015",
+      department: "Spawalnia TIG",
+      clientId: demoClient.id,
+      branchId: demoBranchSouth.id,
+      status: OrderStatus.IN_PROGRESS,
+      priority: Priority.CRITICAL,
+      address: "ul. Wzornicza 12, 26-600 Radom",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["FR-JKT-220"], articleNr: "FR-JKT-220", productName: "Kurtka FR (Trudnopalna)", size: "L", quantity: 2, employeeName: "Michał Lewandowski (Wymiana)" }
+        ]
+      }
+    }
+  });
+
+  // Order 12: In Progress
+  await prisma.order.upsert({
+    where: { orderNr: "Z-2026-DEMO12" },
+    update: { status: OrderStatus.IN_PROGRESS },
+    create: {
+      orderNr: "Z-2026-DEMO12",
+      clientRef: "ZAM/BHP/2026/301",
+      department: "Dział Utrzymania Ruchu",
+      clientId: demoClient.id,
+      branchId: demoBranchNorth.id,
+      status: OrderStatus.IN_PROGRESS,
+      priority: Priority.STANDARD,
+      address: "ul. Testowa 5, 25-001 Kielce",
+      createdById: demoClientHead.id,
+      items: {
+        create: [
+          { productId: dbProducts["R-20"], articleNr: "R-20", productName: "Rękawice robocze Grip", size: "9 (L)", quantity: 30, employeeName: "Dział Utrzymania Ruchu" },
+          { productId: dbProducts["HIV-BLS-110"], articleNr: "HIV-BLS-110", productName: "Bluza Hi-Vis", size: "M", quantity: 5, employeeName: "Robert Kowalczyk" }
         ]
       }
     }
