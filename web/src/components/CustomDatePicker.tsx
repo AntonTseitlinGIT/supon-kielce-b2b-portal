@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock } from "lucide-react";
 
 interface CustomDatePickerProps {
@@ -32,7 +33,9 @@ export default function CustomDatePicker({
   minDate,
 }: CustomDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   // Parsed active view (year, month)
   const initialDate = value ? new Date(value) : new Date();
@@ -50,10 +53,50 @@ export default function CustomDatePicker({
     }
   }, [value]);
 
+  // Update floating popover position relative to button
+  const updatePosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const popoverWidth = 340;
+      const popoverHeight = 350;
+
+      let left = rect.left;
+      if (left + popoverWidth > window.innerWidth - 16) {
+        left = Math.max(16, window.innerWidth - popoverWidth - 16);
+      }
+
+      let top = rect.bottom + 8;
+      // If bottom overflows viewport, place popover above the input button
+      if (top + popoverHeight > window.innerHeight - 16 && rect.top > popoverHeight + 16) {
+        top = rect.top - popoverHeight - 8;
+      }
+
+      setPopoverPos({ top, left });
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      updatePosition();
+      const handleScrollOrResize = () => updatePosition();
+      window.addEventListener("scroll", handleScrollOrResize, true);
+      window.addEventListener("resize", handleScrollOrResize);
+
+      return () => {
+        window.removeEventListener("scroll", handleScrollOrResize, true);
+        window.removeEventListener("resize", handleScrollOrResize);
+      };
+    }
+  }, [isOpen]);
+
   // Close popup on click outside or Escape key
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        buttonRef.current && !buttonRef.current.contains(target) &&
+        popoverRef.current && !popoverRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -192,12 +235,12 @@ export default function CustomDatePicker({
 
   return (
     <div
-      ref={containerRef}
       style={{ position: "relative", width: "100%", ...style }}
       className={`custom-datepicker-container ${className}`}
     >
       {/* Trigger Button Field */}
       <button
+        ref={buttonRef}
         type="button"
         id={id}
         disabled={disabled}
@@ -252,33 +295,34 @@ export default function CustomDatePicker({
         )}
       </button>
 
-      {/* Spacious Enlarged Popover Dropdown Calendar */}
-      {isOpen && (
+      {/* React Portal floating popover calendar (Unclippable) */}
+      {isOpen && typeof window !== "undefined" && createPortal(
         <div
+          ref={popoverRef}
           role="dialog"
           aria-label="Kalendarz wyboru daty"
           style={{
-            position: "absolute",
-            top: "calc(100% + 8px)",
-            left: 0,
-            zIndex: 99999,
-            width: "360px",
+            position: "fixed",
+            top: `${popoverPos.top}px`,
+            left: `${popoverPos.left}px`,
+            zIndex: 999999,
+            width: "340px",
             background: "var(--card-bg, #ffffff)",
             border: "1px solid var(--line)",
             borderRadius: "18px",
-            boxShadow: "0 20px 45px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)",
-            padding: "20px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+            padding: "18px",
             animation: "slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards",
           }}
         >
           {/* Header Month / Year Navigation */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
             <button
               type="button"
               onClick={handlePrevMonth}
               style={{
-                width: "36px",
-                height: "36px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "10px",
                 border: "1px solid var(--line)",
                 background: "var(--section-bg)",
@@ -294,7 +338,7 @@ export default function CustomDatePicker({
             </button>
 
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--text)" }}>
+              <div style={{ fontSize: "15px", fontWeight: 800, color: "var(--text)" }}>
                 {MONTH_NAMES_PL[viewMonth]} {viewYear}
               </div>
             </div>
@@ -303,8 +347,8 @@ export default function CustomDatePicker({
               type="button"
               onClick={handleNextMonth}
               style={{
-                width: "36px",
-                height: "36px",
+                width: "34px",
+                height: "34px",
                 borderRadius: "10px",
                 border: "1px solid var(--line)",
                 background: "var(--section-bg)",
@@ -323,14 +367,14 @@ export default function CustomDatePicker({
           {/* Weekdays Header */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", marginBottom: "8px", textAlign: "center" }}>
             {WEEKDAYS_PL.map((wd) => (
-              <span key={wd} style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
+              <span key={wd} style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", textTransform: "uppercase" }}>
                 {wd}
               </span>
             ))}
           </div>
 
-          {/* Large Days Grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "6px", marginBottom: "16px" }}>
+          {/* Days Grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", marginBottom: "14px" }}>
             {getCalendarDays().map((cell, idx) => {
               const isSelected = cell.dateStr === value;
               const isToday = cell.dateStr === todayStr;
@@ -342,8 +386,8 @@ export default function CustomDatePicker({
                   disabled={cell.isDisabled}
                   onClick={() => handleSelectDate(cell.dateStr, cell.isDisabled)}
                   style={{
-                    height: "40px",
-                    borderRadius: "10px",
+                    height: "36px",
+                    borderRadius: "9px",
                     border: isSelected ? "2px solid var(--accent)" : isToday ? "1px solid var(--accent)" : "1px solid transparent",
                     background: isSelected
                       ? "var(--accent)"
@@ -358,7 +402,7 @@ export default function CustomDatePicker({
                       ? "color-mix(in oklab, var(--muted) 40%, transparent)"
                       : "var(--text)",
                     fontWeight: isSelected || isToday ? 800 : cell.isCurrentMonth ? 600 : 400,
-                    fontSize: "14px",
+                    fontSize: "13.5px",
                     cursor: cell.isDisabled ? "not-allowed" : "pointer",
                     display: "grid",
                     placeItems: "center",
@@ -371,14 +415,14 @@ export default function CustomDatePicker({
             })}
           </div>
 
-          {/* Quick Action Chips Bar */}
-          <div style={{ display: "flex", gap: "8px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>
+          {/* Quick Action Bar */}
+          <div style={{ display: "flex", gap: "6px", paddingTop: "10px", borderTop: "1px solid var(--line)" }}>
             <button
               type="button"
               onClick={() => handleQuickSelect(0)}
               style={{
                 flex: 1,
-                height: "34px",
+                height: "32px",
                 borderRadius: "8px",
                 border: "1px solid var(--line)",
                 background: "var(--section-bg)",
@@ -392,14 +436,14 @@ export default function CustomDatePicker({
                 gap: "4px"
               }}
             >
-              <Clock size={13} /> Dzisiaj
+              <Clock size={12} /> Dzisiaj
             </button>
             <button
               type="button"
               onClick={() => handleQuickSelect(7)}
               style={{
                 flex: 1,
-                height: "34px",
+                height: "32px",
                 borderRadius: "8px",
                 border: "1px solid var(--line)",
                 background: "var(--section-bg)",
@@ -416,7 +460,7 @@ export default function CustomDatePicker({
               onClick={() => handleQuickSelect(14)}
               style={{
                 flex: 1,
-                height: "34px",
+                height: "32px",
                 borderRadius: "8px",
                 border: "1px solid var(--line)",
                 background: "var(--section-bg)",
@@ -429,7 +473,8 @@ export default function CustomDatePicker({
               +14 dni
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
