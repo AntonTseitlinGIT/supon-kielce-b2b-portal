@@ -13,6 +13,8 @@ import {
   saveClientProductPrice, saveClientConfig, resetClientConfig
 } from "../actions";
 import { MODULES, ClientModules, ClientLimits } from "@/config/modules.config";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/ToastProvider";
 
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {
   "shopping-bag": ShoppingBag,
@@ -87,6 +89,8 @@ export default function ClientDetailClient({
   // Alert message states
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const { confirm } = useConfirm();
+  const { showSuccess, showError } = useToast();
 
   // ================= TAB 1: CLIENT DETAILS STATE =================
   const [clientName, setClientName] = useState(client.name);
@@ -119,14 +123,22 @@ export default function ClientDetailClient({
     });
   };
 
-  const handleResetConfig = () => {
-    if (!confirm(`Zresetować konfigurację portalu dla klienta "${client.name}" do wartości domyślnych?`)) return;
+  const handleResetConfig = async () => {
+    const confirmed = await confirm({
+      title: "Reset konfiguracji",
+      message: `Zresetować konfigurację portalu dla klienta "${client.name}" do wartości domyślnych?`,
+      confirmText: "Zresetuj",
+      variant: "danger",
+    });
+    if (!confirmed) return;
+
     startTransition(async () => {
       const res = await resetClientConfig(client.id);
       if (res.success) {
+        showSuccess("Konfiguracja zresetowana.");
         window.location.reload();
       } else {
-        setErrorMsg(res.error ?? "Błąd podczas resetowania konfiguracji.");
+        showError(res.error ?? "Błąd podczas resetowania konfiguracji.");
       }
     });
   };

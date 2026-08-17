@@ -273,7 +273,6 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
   // Get localized status label for the modal meta grid
   const getStatusLabel = (orderStatus: OrderStatus) => {
     switch (orderStatus) {
-      case "DRAFT": return "Szkic";
       case "APPROVED": return "Zrealizowane";
       case "IN_PROGRESS": return "W realizacji";
       case "PARTIALLY_SENT": return "Częściowo wysłane";
@@ -547,8 +546,14 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
         </div>
       )}
 
-      {/* Main Table */}
+      {/* Main Table Header Actions */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "12px" }}>
+        <span style={{ fontSize: "13px", color: "var(--muted)", fontWeight: 600 }}>
+          Liczba znalezionych zamówień: <strong style={{ color: "var(--text)" }}>{orders.length}</strong>
+        </span>
+      </div>
 
+      {/* Main Table */}
       <div className="table-wrapper" style={{ overflowX: "auto" }}>
         <table className="table" style={{ width: "100%", borderCollapse: "collapse", minWidth: "960px" }}>
           <thead>
@@ -747,10 +752,12 @@ export default function OrdersListClient({ orders }: OrdersListClientProps) {
                         }}
                         className="btn btn-secondary" 
                         style={{ 
-                          height: "28px", 
-                          padding: "0 10px", 
-                          fontSize: "12px", 
-                          color: "var(--ok)", 
+                          height: "32px", 
+                          padding: "0 12px", 
+                          fontSize: "12.5px", 
+                          fontWeight: 600,
+                          borderRadius: "8px",
+                          color: "var(--ok, #16a34a)", 
                           borderColor: "color-mix(in oklab, var(--ok) 35%, transparent)" 
                         }}
                       >

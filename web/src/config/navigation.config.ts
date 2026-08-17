@@ -67,6 +67,12 @@ export const CLIENT_NAV: NavItem[] = [
     roles: ["CLIENT_HEAD"],
     moduleKey: "reports",
   },
+  {
+    label: "Mój profil",
+    href: "/client/profile",
+    icon: "user-cog",
+    roles: ["BRANCH_HEAD", "CLIENT_HEAD"],
+  },
 ];
 
 export const ADMIN_NAV: NavItem[] = [
@@ -111,6 +117,12 @@ export const ADMIN_NAV: NavItem[] = [
   {
     label: "Użytkownicy",
     href: "/admin/users",
+    icon: "user-cog",
+    roles: ["SUPON_ADMIN"],
+  },
+  {
+    label: "Mój profil",
+    href: "/admin/profile",
     icon: "user-cog",
     roles: ["SUPON_ADMIN"],
   },

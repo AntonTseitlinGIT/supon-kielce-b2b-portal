@@ -4,6 +4,8 @@ import React, { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { deleteEmployee } from "../actions";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/ToastProvider";
 
 interface DeleteEmployeeButtonProps {
   employeeId: string;
@@ -16,20 +18,26 @@ export default function DeleteEmployeeButton({
 }: DeleteEmployeeButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { confirm } = useConfirm();
+  const { showSuccess, showError } = useToast();
 
-  const handleDelete = () => {
-    const confirmed = window.confirm(
-      `Czy na pewno chcesz usunąć pracownika ${employeeName}?`
-    );
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Usuń pracownika",
+      message: `Czy na pewno chcesz usunąć pracownika ${employeeName}?`,
+      confirmText: "Usuń",
+      variant: "danger",
+    });
 
     if (!confirmed) return;
 
     startTransition(async () => {
       const res = await deleteEmployee(employeeId);
       if (res.success) {
+        showSuccess("Pracownik został pomyślnie usunięty.");
         router.push("/client/personnel");
       } else {
-        alert(res.error || "Wystąpił błąd podczas usuwania pracownika.");
+        showError(res.error || "Wystąpił błąd podczas usuwania pracownika.");
       }
     });
   };
@@ -60,3 +68,4 @@ export default function DeleteEmployeeButton({
     </button>
   );
 }
+

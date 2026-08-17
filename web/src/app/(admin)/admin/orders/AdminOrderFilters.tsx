@@ -160,7 +160,7 @@ export default function AdminOrderFilters({ clients }: AdminOrderFiltersProps) {
         {hasActiveFilters && (
           <button
             onClick={handleClear}
-            className="btn btn-secondary btn-sm row-6"
+            className="btn btn-secondary btn-lg"
             title="Wyczyść filtry"
           >
             <X size={16} /> Wyczyść

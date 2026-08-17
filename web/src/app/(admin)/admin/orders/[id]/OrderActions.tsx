@@ -4,6 +4,8 @@ import React, { useState, useEffect, useTransition } from "react";
 import { OrderStatus, OrderType } from "@prisma/client";
 import { generateWz, uploadWzPdf, forceMarkAsDelivered, forceApproveOrder } from "./actions";
 import { FileText, Settings, Loader2, Upload, CheckCircle } from "lucide-react";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/ToastProvider";
 
 interface OrderItemInput {
   id: string;
@@ -49,6 +51,8 @@ export default function OrderActions({
   const [shipQtys, setShipQtys] = useState<Record<string, number>>(initialShipQtys);
 
   const [wzError, setWzError] = useState("");
+  const { confirm } = useConfirm();
+  const { showSuccess, showError } = useToast();
 
   // Close WZ modal on Escape
   useEffect(() => {
@@ -61,29 +65,41 @@ export default function OrderActions({
   }, [isWzModalOpen]);
 
   const handleMarkAsDelivered = async () => {
-    if (!confirm("Czy na pewno chcesz oznaczyć to zamówienie jako dostarczone? Spowoduje to również zatwierdzenie wszystkich powiązanych dostaw.")) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Oznacz jako dostarczone",
+      message: "Czy na pewno chcesz oznaczyć to zamówienie jako dostarczone? Spowoduje to również zatwierdzenie wszystkich powiązanych dostaw.",
+      confirmText: "Oznacz jako dostarczone",
+      variant: "primary",
+    });
+    if (!confirmed) return;
+
     startUpdateStatus(async () => {
       const res = await forceMarkAsDelivered(orderId);
       if (res.success) {
         setStatus("DELIVERED");
+        showSuccess("Zamówienie zostało oznaczone jako dostarczone.");
       } else {
-        alert(res.error || "Wystąpił błąd");
+        showError(res.error || "Wystąpił błąd podczas zmiany statusu.");
       }
     });
   };
 
   const handleApproveOrder = async () => {
-    if (!confirm("Czy na pewno chcesz zatwierdzić (zamknąć) to zamówienie? Ta operacja sfinalizuje całe zamówienie.")) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Zatwierdź zamówienie",
+      message: "Czy na pewno chcesz zatwierdzić (zamknąć) to zamówienie? Ta operacja sfinalizuje całe zamówienie.",
+      confirmText: "Zatwierdź zamówienie",
+      variant: "primary",
+    });
+    if (!confirmed) return;
+
     startUpdateStatus(async () => {
       const res = await forceApproveOrder(orderId);
       if (res.success) {
         setStatus("APPROVED");
+        showSuccess("Zamówienie zostało sfinalizowane.");
       } else {
-        alert(res.error || "Wystąpił błąd");
+        showError(res.error || "Wystąpił błąd podczas sfinalizowania zamówienia.");
       }
     });
   };
@@ -133,7 +149,7 @@ export default function OrderActions({
         // Reset quantities
         setShipQtys({});
         setSelectedFile(null);
-        alert(`Dokument WZ został wygenerowany pomyślnie!`);
+        showSuccess("Dokument WZ został wygenerowany pomyślnie!");
       } else {
         setWzError(res.error || "Wystąpił błąd");
       }

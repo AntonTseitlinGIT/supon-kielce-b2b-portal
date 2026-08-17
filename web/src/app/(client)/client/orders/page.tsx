@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Plus } from "lucide-react";
 import OrderFilters from "./OrderFilters";
 import OrdersListClient from "./OrdersListClient";
 import Pagination from "@/components/Pagination";
@@ -162,8 +162,8 @@ export default async function ClientOrdersPage(props: PageProps) {
   return (
     <div className="col-24">
       <PageHeader compact title="Twoje Zamówienia" subtitle="Zarządzaj swoimi zamówieniami, śledź dostawy i pobieraj dokumenty">
-        <Link href="/client/orders/new" className="btn" style={{ background: "var(--accent)", color: "#fff", fontWeight: 700, borderRadius: "10px", padding: "10px 24px" }}>
-          Złóż zamówienie
+        <Link href="/client/orders/new" className="btn btn-primary btn-lg">
+          <Plus size={16} /> Złóż zamówienie
         </Link>
       </PageHeader>
 

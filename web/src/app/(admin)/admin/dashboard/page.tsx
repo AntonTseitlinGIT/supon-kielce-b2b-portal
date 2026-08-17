@@ -151,6 +151,38 @@ export default async function AdminDashboardPage() {
       <PageHeader title="Pulpit Menedżera" subtitle="Panel administracyjny SUPON Kielce — Zarządzanie portalem klientów" />
 
       <div className="container" style={{ padding: 0 }}>
+
+        {/* Quick Action Bar */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: "24px",
+            padding: "16px 20px",
+            background: "var(--card-bg, #ffffff)",
+            borderRadius: "16px",
+            border: "1px solid var(--line, #e2e8f0)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontSize: "13px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", marginRight: "8px" }}>
+            Szybkie akcje:
+          </span>
+          <Link href="/admin/orders" className="btn btn-sm" style={{ gap: "6px", background: "var(--accent)", color: "#fff", border: "none" }}>
+            <ShoppingBag size={15} /> Nowe zamówienie
+          </Link>
+          <Link href="/admin/clients" className="btn btn-secondary btn-sm" style={{ gap: "6px" }}>
+            <Building2 size={15} /> Klienci
+          </Link>
+          <Link href="/admin/catalog" className="btn btn-secondary btn-sm" style={{ gap: "6px" }}>
+            <Package size={15} /> Katalog BHP
+          </Link>
+          <Link href="/admin/tickets" className="btn btn-secondary btn-sm" style={{ gap: "6px" }}>
+            <MessageCircle size={15} /> Zgłoszenia
+          </Link>
+        </div>
         
         {/* KPI Summaries */}
         <div className="stats-summary" style={{ marginBottom: "24px" }}>
@@ -160,8 +192,8 @@ export default async function AdminDashboardPage() {
                 <h3>Aktywni Klienci</h3>
                 <div className="value">{clientsCount}</div>
               </div>
-              <div style={{ background: "var(--accent-light)", color: "var(--accent)", padding: "8px", borderRadius: "10px" }}>
-                <Building2 size={20} />
+              <div style={{ background: "var(--accent-light, #eff6ff)", color: "var(--accent, #2563eb)", padding: "10px", borderRadius: "12px" }}>
+                <Building2 size={22} />
               </div>
             </div>
             <div className="delta muted">Zarejestrowane firmy w portalu</div>
@@ -173,8 +205,8 @@ export default async function AdminDashboardPage() {
                 <h3>Oczekujące zamówienia</h3>
                 <div className="value">{pendingOrdersCount}</div>
               </div>
-              <div style={{ background: "color-mix(in oklab, var(--warn) 15%, var(--page-bg))", color: "var(--warn)", padding: "8px", borderRadius: "10px" }}>
-                <ShoppingBag size={20} />
+              <div style={{ background: "color-mix(in oklab, var(--warn, #d97706) 15%, var(--page-bg, #fff))", color: "var(--warn, #d97706)", padding: "10px", borderRadius: "12px" }}>
+                <ShoppingBag size={22} />
               </div>
             </div>
             <div className="delta muted">Zamówienia do realizacji i wysyłki</div>
@@ -186,8 +218,8 @@ export default async function AdminDashboardPage() {
                 <h3>Nowe zgłoszenia</h3>
                 <div className="value">{newTicketsCount}</div>
               </div>
-              <div style={{ background: "color-mix(in oklab, var(--info) 15%, var(--page-bg))", color: "var(--info)", padding: "8px", borderRadius: "10px" }}>
-                <MessageCircle size={20} />
+              <div style={{ background: "color-mix(in oklab, var(--info, #2563eb) 15%, var(--page-bg, #fff))", color: "var(--info, #2563eb)", padding: "10px", borderRadius: "12px" }}>
+                <MessageCircle size={22} />
               </div>
             </div>
             <div className="delta muted">Zgłoszenia oczekujące na odpowiedź</div>
@@ -199,8 +231,8 @@ export default async function AdminDashboardPage() {
                 <h3>Asortyment w bazie</h3>
                 <div className="value">{productsCount}</div>
               </div>
-              <div style={{ background: "color-mix(in oklab, var(--ok) 15%, var(--page-bg))", color: "var(--ok)", padding: "8px", borderRadius: "10px" }}>
-                <Package size={20} />
+              <div style={{ background: "color-mix(in oklab, var(--ok, #059669) 15%, var(--page-bg, #fff))", color: "var(--ok, #059669)", padding: "10px", borderRadius: "12px" }}>
+                <Package size={22} />
               </div>
             </div>
             <div className="delta muted">Aktywne artykuły BHP / ŚOI</div>

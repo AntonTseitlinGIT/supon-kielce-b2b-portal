@@ -3,6 +3,8 @@
 import React, { useTransition, useState } from "react";
 import { approveTicketAndGenerateOrder } from "./actions";
 import { Check, Loader2 } from "lucide-react";
+import { useConfirm } from "@/components/ConfirmDialog";
+import { useToast } from "@/components/ToastProvider";
 
 interface ApproveTicketButtonProps {
   ticketId: string;
@@ -22,24 +24,34 @@ export default function ApproveTicketButton({
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const { confirm } = useConfirm();
+  const { showSuccess, showError } = useToast();
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     setErrorMsg("");
     setSuccessMsg("");
 
-    const confirmed = window.confirm(
-      `Czy na pewno chcesz zatwierdzić to zgłoszenie i wygenerować automatyczne zamówienie typu ${
+    const confirmed = await confirm({
+      title: "Zatwierdzenie zgłoszenia",
+      message: `Czy na pewno chcesz zatwierdzić to zgłoszenie i wygenerować automatyczne zamówienie typu ${
         ticketType === "EXCHANGE" ? "Wymiana" : "Reklamacja"
-      }?`
-    );
+      }?`,
+      confirmText: "Zatwierdź i wygeneruj",
+      variant: "primary",
+    });
+
     if (!confirmed) return;
 
     startTransition(async () => {
       const res = await approveTicketAndGenerateOrder(ticketId);
       if (res.success) {
-        setSuccessMsg(`Zatwierdzono! Wygenerowano zamówienie: ${res.orderNr}`);
+        const msg = `Zatwierdzono! Wygenerowano zamówienie: ${res.orderNr}`;
+        setSuccessMsg(msg);
+        showSuccess(msg);
       } else {
-        setErrorMsg(res.error || "Wystąpił błąd podczas zatwierdzania.");
+        const err = res.error || "Wystąpił błąd podczas zatwierdzania.";
+        setErrorMsg(err);
+        showError(err);
       }
     });
   };
@@ -89,3 +101,4 @@ export default function ApproveTicketButton({
     </div>
   );
 }
+

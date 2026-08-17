@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { sendTicketMessage } from "./actions";
 import { Paperclip, Send, FileText, Download, Loader2 } from "lucide-react";
 import { formatDate } from "@/utils/format";
+import { useToast } from "@/components/ToastProvider";
 
 interface ChatMessage {
   id: string;
@@ -66,7 +67,9 @@ export default function TicketChat({
   const [uploading, setUploading] = useState(false);
   const [attachedUrl, setAttachedUrl] = useState("");
   const [attachedName, setAttachedName] = useState("");
+  const { showError } = useToast();
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isPending, startTransition] = useTransition();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isClosed = ticketStatus === "CLOSED";
@@ -155,7 +158,7 @@ export default function TicketChat({
       setAttachedName(file.name);
     } catch (error) {
       console.error("Error uploading chat attachment:", error);
-      alert("Nie udało się załączyć pliku. Spróbuj ponownie.");
+      showError("Nie udało się załączyć pliku. Spróbuj ponownie.");
     } finally {
       setUploading(false);
     }
@@ -183,7 +186,7 @@ export default function TicketChat({
       });
 
       if (!res.success || !res.message) {
-        alert(res.error || "Nie udało się wysłać wiadomości.");
+        showError(res.error || "Nie udało się wysłać wiadomości.");
         // Restore input if error
         setInputText(messageText);
         setAttachedUrl(fUrl);

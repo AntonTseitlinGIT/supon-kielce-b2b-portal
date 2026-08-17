@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import { TicketStatus } from "@prisma/client";
 import { updateTicketStatus } from "./actions";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ToastProvider";
 
 interface TicketStatusControllerProps {
   ticketId: string;
@@ -16,6 +17,7 @@ export default function TicketStatusController({
 }: TicketStatusControllerProps) {
   const [status, setStatus] = useState<TicketStatus>(initialStatus);
   const [isPending, startTransition] = useTransition();
+  const { showSuccess, showError } = useToast();
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newStatus = e.target.value as TicketStatus;
@@ -23,8 +25,9 @@ export default function TicketStatusController({
       const res = await updateTicketStatus(ticketId, newStatus);
       if (res.success) {
         setStatus(newStatus);
+        showSuccess("Status zgłoszenia został zaktualizowany.");
       } else {
-        alert(res.error || "Wystąpił błąd");
+        showError(res.error || "Wystąpił błąd podczas zmiany statusu.");
       }
     });
   };
@@ -53,3 +56,4 @@ export default function TicketStatusController({
     </div>
   );
 }
+

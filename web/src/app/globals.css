@@ -574,10 +574,10 @@ h1, h2, h3, h4, .brand-name {
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; 
   height: 40px; padding: 0 18px; font-size: 14px;
-  border-radius: var(--radius-md); border: 1px solid transparent;
+  border-radius: 10px; border: 1px solid transparent;
   background: var(--accent); color: #fff; text-decoration: none; 
   font-weight: 600; letter-spacing: .1px;
-  box-shadow: 0 4px 12px color-mix(in oklab, var(--accent) 15%, transparent);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 18%, transparent);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   cursor: pointer;
@@ -585,38 +585,35 @@ h1, h2, h3, h4, .brand-name {
 }
 .btn:hover {
   background: var(--accent-hover);
-  transform: translateY(-1.5px) scale(1.01);
-  box-shadow: 0 6px 20px color-mix(in oklab, var(--accent) 24%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px color-mix(in oklab, var(--accent) 26%, transparent);
 }
 .btn:active {
-  transform: translateY(0.5px) scale(0.99);
-  box-shadow: 0 2px 6px color-mix(in oklab, var(--accent) 12%, transparent);
+  transform: translateY(0);
+  box-shadow: 0 2px 4px color-mix(in oklab, var(--accent) 12%, transparent);
 }
 
-/* Primary is the default .btn look; .btn-primary is an explicit alias so
-   conditional toggles like `btn ${active ? "btn-primary" : "btn-secondary"}`
-   read clearly and re-assert the accent style after any modifier. */
 .btn-primary {
   background: var(--accent);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 4px 12px color-mix(in oklab, var(--accent) 15%, transparent);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 18%, transparent);
 }
 .btn-primary:hover { background: var(--accent-hover); color: #fff; }
 
 .btn-secondary {
-  background: var(--page-bg); color: var(--text);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-xs);
+  background: var(--card-bg, #ffffff); color: var(--text);
+  border: 1px solid var(--line, #e2e8f0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 .btn-secondary:hover {
-  background: var(--section-bg);
-  border-color: color-mix(in oklab, var(--text) 10%, var(--line));
+  background: var(--page-bg, #f8fafc);
+  border-color: color-mix(in oklab, var(--text) 15%, var(--line));
   color: var(--text);
-  transform: translateY(-1.5px) scale(1.01);
+  transform: translateY(-1px);
 }
 .btn-secondary:active {
-  transform: translateY(0.5px) scale(0.99);
+  transform: translateY(0);
 }
 
 .btn-ghost {
@@ -629,26 +626,36 @@ h1, h2, h3, h4, .brand-name {
   background: color-mix(in oklab, var(--accent) 8%, transparent);
   color: var(--accent);
   box-shadow: none;
-  transform: translateY(-1.5px) scale(1.01);
+  transform: translateY(-1px);
 }
 .btn-ghost:active {
-  transform: translateY(0.5px) scale(0.99);
+  transform: translateY(0);
 }
 
 .btn-danger {
   background: var(--err);
+  color: #fff;
   border-color: var(--err);
-  box-shadow: 0 4px 14px color-mix(in oklab, var(--err) 35%, transparent);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--err) 25%, transparent);
 }
 .btn-danger:hover {
   background: color-mix(in oklab, var(--err) 85%, #000);
 }
 
 .btn-sm {
-  height: 28px;
-  padding: 0 10px;
-  font-size: 12px;
-  border-radius: 6px;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.btn-lg {
+  height: 42px;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
 }
 
 .btn-icon {
@@ -668,21 +675,53 @@ textarea.input,
 .form-select,
 .form-textarea {
   display: block; width: 100%;
-  height: 44px; border-radius: var(--radius-md); border: 1px solid var(--line);
-  background: var(--page-bg); color: var(--text); padding: 0 16px; margin-top: 6px;
+  height: 42px; border-radius: 10px; border: 1px solid var(--line, #e2e8f0);
+  background: var(--card-bg, #ffffff); color: var(--text); padding: 0 16px; margin-top: 6px;
   font-family: var(--font);
   font-size: 14px;
   transition: all 0.2s var(--ease);
   outline: none;
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .input:focus,
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   border-color: var(--accent);
-  background: var(--page-bg);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 8%, transparent);
+  background: var(--card-bg, #ffffff);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 12%, transparent);
+}
+
+/* ===== FILTER CHIPS ===== */
+.chip-filter {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--line, #e2e8f0);
+  background: var(--card-bg, #ffffff);
+  color: var(--muted, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.chip-filter:hover {
+  background: var(--page-bg, #f8fafc);
+  color: var(--text, #0f172a);
+  border-color: color-mix(in oklab, var(--text) 20%, var(--line));
+}
+
+.chip-filter.active {
+  background: var(--accent, #2563eb);
+  color: #ffffff;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--accent) 25%, transparent);
 }
 textarea.input,
 .form-textarea { height: 120px; padding: 14px 16px; resize: vertical; }

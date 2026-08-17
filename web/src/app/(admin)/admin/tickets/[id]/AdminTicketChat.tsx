@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import { sendAdminTicketMessage } from "./actions";
 import { Paperclip, Send, FileText, Download, Loader2, EyeOff, MessageSquare } from "lucide-react";
 import { formatDate } from "@/utils/format";
+import { useToast } from "@/components/ToastProvider";
 
 interface ChatMessage {
   id: string;
@@ -70,6 +71,7 @@ export default function AdminTicketChat({
   const [uploading, setUploading] = useState(false);
   const [attachedUrl, setAttachedUrl] = useState("");
   const [attachedName, setAttachedName] = useState("");
+  const { showError } = useToast();
 
   const [isPending, startTransition] = useTransition();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -182,7 +184,7 @@ export default function AdminTicketChat({
       setAttachedName(file.name);
     } catch (error) {
       console.error("Error uploading attachment:", error);
-      alert("Błąd przy wgrywaniu załącznika. Spróbuj ponownie.");
+      showError("Błąd przy wgrywaniu załącznika. Spróbuj ponownie.");
     } finally {
       setUploading(false);
     }
@@ -211,7 +213,7 @@ export default function AdminTicketChat({
       });
 
       if (!res.success || !res.message) {
-        alert(res.error || "Wystąpił błąd podczas wysyłania.");
+        showError(res.error || "Wystąpił błąd podczas wysyłania.");
         setInputText(messageText);
         if (!mode) {
           setAttachedUrl(fUrl);

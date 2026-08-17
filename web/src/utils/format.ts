@@ -2,8 +2,6 @@ import { OrderStatus, TicketStatus, TicketType, Priority } from "@prisma/client"
 
 export function formatOrderStatus(status: OrderStatus): { label: string; className: string } {
   switch (status) {
-    case "DRAFT":
-      return { label: "Szkic", className: "badge-neutral" };
     case "IN_PROGRESS":
       return { label: "W realizacji", className: "badge-warning" };
     case "APPROVED":

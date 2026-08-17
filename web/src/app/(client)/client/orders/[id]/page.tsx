@@ -114,6 +114,63 @@ export default async function ClientOrderDetailPage(props: PageProps) {
         </div>
       </div>
 
+      {/* Shipment Progress Stepper */}
+      <div
+        className="card"
+        style={{
+          padding: "24px 28px",
+          background: "var(--card-bg, #ffffff)",
+          border: "1px solid var(--line, #e2e8f0)",
+          borderRadius: "20px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+        }}
+      >
+        <h4 style={{ margin: "0 0 20px", fontSize: "14px", fontWeight: 700, textTransform: "uppercase", color: "var(--muted)", letterSpacing: "0.5px" }}>
+          Status realizacji i dostawy
+        </h4>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", gap: "12px", flexWrap: "wrap" }}>
+          {[
+            { label: "Przyjęte", statusKey: "APPROVED" },
+            { label: "W realizacji", statusKey: "IN_PROGRESS" },
+            { label: "Wysłane / W drodze", statusKey: "SENT" },
+            { label: "Dostarczone", statusKey: "DELIVERED" },
+          ].map((step, idx) => {
+            const statusOrder = ["APPROVED", "IN_PROGRESS", "SENT", "PARTIALLY_SENT", "DELIVERED"];
+            const currentIdx = statusOrder.indexOf(order.status);
+            const stepIdx = statusOrder.indexOf(step.statusKey);
+
+            const isPassed = currentIdx >= stepIdx;
+            const isCurrent = order.status === step.statusKey || (order.status === "PARTIALLY_SENT" && step.statusKey === "SENT");
+
+            return (
+              <div key={step.statusKey} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", flex: 1, minWidth: "110px", textAlign: "center", position: "relative", zIndex: 2 }}>
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    background: isPassed ? (isCurrent ? "var(--accent, #2563eb)" : "color-mix(in oklab, var(--accent) 20%, var(--page-bg))") : "var(--page-bg, #f8fafc)",
+                    color: isPassed ? (isCurrent ? "#ffffff" : "var(--accent, #2563eb)") : "var(--muted, #94a3b8)",
+                    border: `2px solid ${isPassed ? "var(--accent, #2563eb)" : "var(--line, #cbd5e1)"}`,
+                    boxShadow: isCurrent ? "0 0 0 4px color-mix(in oklab, var(--accent) 20%, transparent)" : "none",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {isPassed && !isCurrent ? "✓" : idx + 1}
+                </div>
+                <span style={{ fontSize: "12.5px", fontWeight: isCurrent ? 700 : 500, color: isCurrent ? "var(--text)" : "var(--muted)" }}>
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main Grid Layout */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "28px", alignItems: "start" }}>
         
