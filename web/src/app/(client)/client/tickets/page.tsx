@@ -8,6 +8,7 @@ import { formatTicketStatus, formatTicketType, formatShortDate } from "@/utils/f
 import TicketsFilterWrapper from "./TicketsFilterWrapper";
 import ClickableRow from "./ClickableRow";
 import PageHeader from "@/components/PageHeader";
+import { isDemoSession } from "@/lib/demo";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -32,7 +33,9 @@ export default async function ClientTicketsPage(props: PageProps) {
   const limit = 10;
   const skip = (page - 1) * limit;
 
-  const { role, clientId, branchId } = session.user;
+  const isDemo = isDemoSession(session);
+  const role = isDemo ? "CLIENT_HEAD" : session.user.role;
+  const { clientId, branchId } = session.user;
 
   // 1. Where filters
   const where: any = {

@@ -9,6 +9,7 @@ import {
   Plus, ArrowRight, Package, Building, BarChart2, ChevronRight 
 } from "lucide-react";
 import { formatOrderStatus, formatTicketStatus, formatTicketType } from "@/utils/format";
+import { isDemoSession } from "@/lib/demo";
 
 export default async function ClientDashboardPage() {
   const session = await auth();
@@ -17,7 +18,9 @@ export default async function ClientDashboardPage() {
     redirect("/login");
   }
 
-  const { role, clientId, branchId } = session.user;
+  const isDemo = isDemoSession(session);
+  const role = isDemo ? "CLIENT_HEAD" : session.user.role;
+  const { clientId, branchId } = session.user;
 
   // Build role-scoped database filters
   const whereFilterOrder = role === "BRANCH_HEAD"

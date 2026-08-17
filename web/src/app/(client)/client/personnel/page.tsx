@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import PersonnelList from "./PersonnelList";
+import { isDemoSession } from "@/lib/demo";
 
 export default async function ClientPersonnelPage() {
   const session = await auth();
@@ -12,7 +13,9 @@ export default async function ClientPersonnelPage() {
     redirect("/login");
   }
 
-  const { role, clientId, branchId } = session.user;
+  const isDemo = isDemoSession(session);
+  const role = isDemo ? "CLIENT_HEAD" : session.user.role;
+  const { clientId, branchId } = session.user;
 
   // 1. Where filter for employees
   const where: any = { deletedAt: null };

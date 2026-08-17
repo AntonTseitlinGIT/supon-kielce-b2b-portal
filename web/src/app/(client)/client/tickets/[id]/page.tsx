@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { isDemoSession } from "@/lib/demo";
 import { ArrowLeft, MessageCircle, AlertCircle, ShoppingBag, User, Briefcase, FileText } from "lucide-react";
 import { formatTicketStatus, formatTicketType, formatDate } from "@/utils/format";
 import TicketChat from "./TicketChat";
@@ -44,7 +45,8 @@ export default async function ClientTicketDetailPage(props: PageProps) {
     notFound();
   }
 
-  if (role === "BRANCH_HEAD" && ticket.branchId !== branchId) {
+  const isDemo = isDemoSession(session);
+  if (!isDemo && role === "BRANCH_HEAD" && ticket.branchId !== branchId) {
     redirect("/client/tickets");
   }
 

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { isDemoSession } from "@/lib/demo";
 import { 
   ArrowLeft, 
   Edit, 
@@ -85,7 +86,7 @@ export default async function ClientEmployeeDetailPage(props: PageProps) {
     notFound();
   }
 
-  if (session.user.role === "BRANCH_HEAD" && employee.branchId !== session.user.branchId) {
+  if (!isDemoSession(session) && session.user.role === "BRANCH_HEAD" && employee.branchId !== session.user.branchId) {
     redirect("/client/personnel");
   }
 

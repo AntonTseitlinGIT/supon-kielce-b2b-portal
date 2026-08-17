@@ -9,6 +9,8 @@ import Pagination from "@/components/Pagination";
 import PageHeader from "@/components/PageHeader";
 import { OrderStatus } from "@prisma/client";
 
+import { isDemoSession } from "@/lib/demo";
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 interface PageProps {
@@ -34,7 +36,8 @@ export default async function ClientOrdersPage(props: PageProps) {
   const limit = 10;
   const skip = (page - 1) * limit;
 
-  const role = session.user.role;
+  const isDemo = isDemoSession(session);
+  const role = isDemo ? "CLIENT_HEAD" : session.user.role;
   const clientId = session.user.clientId!;
 
   // 1. Build DB Query Filter

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FileText, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { formatShortDate } from "@/utils/format";
+import { isDemoSession } from "@/lib/demo";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -26,7 +27,9 @@ export default async function ClientDocumentsPage(props: PageProps) {
   const limit = 10;
   const skip = (page - 1) * limit;
 
-  const { role, clientId, branchId } = session.user;
+  const isDemo = isDemoSession(session);
+  const role = isDemo ? "CLIENT_HEAD" : session.user.role;
+  const { clientId, branchId } = session.user;
 
   // 1. Where filters
   const where: any = {
