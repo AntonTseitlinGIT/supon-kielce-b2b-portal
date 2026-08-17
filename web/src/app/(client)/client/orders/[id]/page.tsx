@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { isDemoSession } from "@/lib/demo";
+import ProductImagePreview from "@/components/ProductImagePreview";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -203,29 +204,27 @@ export default async function ClientOrderDetailPage(props: PageProps) {
                     <tr key={item.id} style={{ borderBottom: "1px solid var(--line)" }}>
                       <td style={{ padding: "14px 20px" }}>
                         <div className="row-12">
-                          <div style={{
-                            width: "44px",
-                            height: "44px",
-                            borderRadius: "10px",
-                            background: "var(--section-bg)",
-                            display: "grid",
-                            placeItems: "center",
-                            color: "var(--muted)",
-                            overflow: "hidden",
-                            border: "1px solid var(--line)",
-                            boxShadow: "var(--shadow-xs)",
-                            flexShrink: 0
-                          }}>
-                            {item.product.photoUrls?.[0] ? (
-                              <img 
-                                src={item.product.photoUrls[0]} 
-                                alt={item.productName} 
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                              />
-                            ) : (
+                          {item.product.photoUrls?.[0] ? (
+                            <ProductImagePreview
+                              src={item.product.photoUrls[0]}
+                              alt={item.productName}
+                              size={44}
+                            />
+                          ) : (
+                            <div style={{
+                              width: "44px",
+                              height: "44px",
+                              borderRadius: "10px",
+                              background: "var(--section-bg)",
+                              display: "grid",
+                              placeItems: "center",
+                              color: "var(--muted)",
+                              border: "1px solid var(--line)",
+                              flexShrink: 0
+                            }}>
                               <Package size={20} />
-                            )}
-                          </div>
+                            </div>
+                          )}
                           <div style={{ fontWeight: 700, color: "var(--text)" }}>{item.productName}</div>
                         </div>
                       </td>

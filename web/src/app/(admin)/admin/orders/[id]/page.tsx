@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import ProductImagePreview from "@/components/ProductImagePreview";
 import { 
   ArrowLeft, MapPin, User, Calendar, Clock, Truck, FileText, MessageSquare, Package, Building 
 } from "lucide-react";
@@ -132,28 +133,27 @@ export default async function AdminOrderDetailPage(props: PageProps) {
                     {order.items.map((item) => (
                       <tr key={item.id}>
                         <td>
-                          <div className="row-10">
-                            <div style={{
-                              width: "36px",
-                              height: "36px",
-                              borderRadius: "var(--radius-sm)",
-                              background: "var(--section-bg)",
-                              display: "grid",
-                              placeItems: "center",
-                              color: "var(--muted)",
-                              overflow: "hidden",
-                              flexShrink: 0
-                            }}>
-                              {item.product.photoUrls?.[0] ? (
-                                <img 
-                                  src={item.product.photoUrls[0]} 
-                                  alt={item.productName} 
-                                  style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                                />
-                              ) : (
+                          <div className="row-12">
+                            {item.product.photoUrls?.[0] ? (
+                              <ProductImagePreview
+                                src={item.product.photoUrls[0]}
+                                alt={item.productName}
+                                size={40}
+                              />
+                            ) : (
+                              <div style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "8px",
+                                background: "var(--section-bg)",
+                                display: "grid",
+                                placeItems: "center",
+                                color: "var(--muted)",
+                                flexShrink: 0
+                              }}>
                                 <Package size={18} />
-                              )}
-                            </div>
+                              </div>
+                            )}
                             <div style={{ fontWeight: 600 }}>{item.productName}</div>
                           </div>
                         </td>

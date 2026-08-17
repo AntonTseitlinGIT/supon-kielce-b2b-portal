@@ -6,6 +6,7 @@ import { createOrder } from "./actions";
 import { Priority } from "@prisma/client";
 import { Plus, Trash2, AlertTriangle, ShieldCheck, User, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import CustomDatePicker from "@/components/CustomDatePicker";
+import ProductImagePreview from "@/components/ProductImagePreview";
 
 interface DeliveryAddressOption {
   id: string;
@@ -789,22 +790,12 @@ export default function NewOrderForm({
 
                     {/* Photo cell */}
                     <td style={{ padding: "12px", verticalAlign: "top", textAlign: "center" }}>
-                      <div style={{ position: "relative", width: "56px", height: "56px", margin: "0 auto" }}>
-                        <img 
-                          className="photo" 
-                          src={productPhoto} 
-                          alt="Zdjęcie" 
-                          style={{
-                            width: "56px",
-                            height: "56px",
-                            border: "1px solid var(--line)",
-                            borderRadius: "12px",
-                            objectFit: "cover",
-                            background: "var(--section-bg)",
-                            cursor: "pointer",
-                            transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-                            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)"
-                          }}
+                      <div style={{ margin: "0 auto", width: "56px", height: "56px" }}>
+                        <ProductImagePreview
+                          src={productPhoto}
+                          alt={selectedProduct?.name || "Zdjęcie produktu"}
+                          size={56}
+                          borderRadius="12px"
                         />
                       </div>
                     </td>
