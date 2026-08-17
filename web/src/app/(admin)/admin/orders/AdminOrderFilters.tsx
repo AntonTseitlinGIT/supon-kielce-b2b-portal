@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useTransition } from "react";
 import { Search, X } from "lucide-react";
+import CustomDatePicker from "@/components/CustomDatePicker";
 
 interface ClientOption {
   id: string;
@@ -204,25 +205,21 @@ export default function AdminOrderFilters({ clients }: AdminOrderFiltersProps) {
 
           <div className="form-group col-6">
             <label htmlFor="of-date-from" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data od</label>
-            <input
+            <CustomDatePicker
               id="of-date-from"
-              className="input"
-              type="date"
               value={localDateFrom}
-              onChange={(e) => setLocalDateFrom(e.target.value)}
-              style={{ width: "100%", height: "40px", margin: 0 }}
+              onChange={(dateStr) => setLocalDateFrom(dateStr)}
+              placeholder="Od daty..."
             />
           </div>
 
           <div className="form-group col-6">
             <label htmlFor="of-date-to" style={{ fontSize: "12px", fontWeight: 700, color: "var(--muted)" }}>Data do</label>
-            <input
+            <CustomDatePicker
               id="of-date-to"
-              className="input"
-              type="date"
               value={localDateTo}
-              onChange={(e) => setLocalDateTo(e.target.value)}
-              style={{ width: "100%", height: "40px", margin: 0 }}
+              onChange={(dateStr) => setLocalDateTo(dateStr)}
+              placeholder="Do daty..."
             />
           </div>
 

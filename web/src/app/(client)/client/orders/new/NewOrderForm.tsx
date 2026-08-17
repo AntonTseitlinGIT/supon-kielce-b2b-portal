@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createOrder } from "./actions";
 import { Priority } from "@prisma/client";
 import { Plus, Trash2, AlertTriangle, ShieldCheck, User, X, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import CustomDatePicker from "@/components/CustomDatePicker";
 
 interface DeliveryAddressOption {
   id: string;
@@ -579,14 +580,12 @@ export default function NewOrderForm({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div className="form-group">
               <label className="form-label" htmlFor="no-date" style={{ fontWeight: 600, fontSize: "13px" }}>Preferowana data dostawy</label>
-              <input
+              <CustomDatePicker
                 id="no-date"
-                type="date"
-                className="input"
                 value={preferredDate}
-                onChange={(e) => setPreferredDate(e.target.value)}
+                onChange={(dateStr) => setPreferredDate(dateStr)}
                 disabled={isPending}
-                style={{ width: "100%", height: "42px", margin: 0 }}
+                placeholder="Wybierz datę dostawy..."
               />
             </div>
             <div className="form-group">
