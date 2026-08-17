@@ -2076,3 +2076,53 @@ textarea:focus-visible,
   gap: 8px !important;
 }
 
+/* ── Enlarged Date Picker & Calendar Popup Window ─────────────────── */
+input[type="date"],
+.input[type="date"] {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--text) !important;
+  cursor: pointer !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer !important;
+  width: 24px !important;
+  height: 24px !important;
+  opacity: 0.85 !important;
+  transform: scale(1.35) !important;
+  margin-right: 6px !important;
+  transition: opacity 0.15s ease, transform 0.15s ease !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1 !important;
+  transform: scale(1.5) !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0 4px !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: var(--muted) !important;
+  padding: 0 3px !important;
+  font-weight: 700 !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  padding: 2px 4px !important;
+  border-radius: 4px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+  background: color-mix(in oklab, var(--accent) 18%, transparent) !important;
+  color: var(--accent) !important;
+}
+
