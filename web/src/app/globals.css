@@ -2039,3 +2039,40 @@ textarea:focus-visible,
 .w-full  { width: 100%; }
 .h-full  { height: 100%; }
 
+/* ── Unified Search Bar Row & Controls Uniformity ─────────────────── */
+.search-bar-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-bar-row .input,
+.search-bar-row input[type="search"],
+.search-bar-row .btn {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+
+.search-bar-row .input,
+.search-bar-row input[type="search"] {
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 48px !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-bar-row .btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
