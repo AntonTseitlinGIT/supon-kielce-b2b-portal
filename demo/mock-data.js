@@ -1,4 +1,26 @@
-// Mock data for static demo prototype (supon-b2b-demo)
+// SafeStorage helper for static prototype
+window.safeStorage = {
+  get: function(key, fallback) {
+    try {
+      const item = localStorage.getItem(key);
+      if (!item) return fallback;
+      const parsed = JSON.parse(item);
+      // Auto-purge old 2025 data if present
+      if (Array.isArray(parsed) && parsed.some(o => o && o.id && o.id.includes("Z-2025"))) {
+        localStorage.removeItem(key);
+        return fallback;
+      }
+      return parsed;
+    } catch(e) {
+      return fallback;
+    }
+  },
+  set: function(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch(e) {}
+  }
+};
 
 window.CURRENT_USER = {
   name: "Tomasz Dyrektor",
@@ -200,5 +222,12 @@ window.DEFAULT_ORDERS = [
     ]
   }
 ];
+
+// Force auto-sync portal_orders with DEFAULT_ORDERS
+(function() {
+  try {
+    localStorage.setItem('portal_orders', JSON.stringify(window.DEFAULT_ORDERS));
+  } catch(e) {}
+})();
 
 window.MOCK_ORDERS = window.DEFAULT_ORDERS;

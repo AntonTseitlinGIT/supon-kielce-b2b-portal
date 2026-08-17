@@ -527,10 +527,20 @@
       const $ = (s, r=document)=>r.querySelector(s);
       const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
 
-      // MOCK DATA (Expanded) + LocalStorage
+      // MOCK DATA (Expanded) + LocalStorage Sync
       let stored = window.safeStorage.get('portal_orders', []);
-      if (!Array.isArray(stored)) {
-        stored = [];
+      if (!Array.isArray(stored) || stored.length < 5) {
+        stored = window.DEFAULT_ORDERS || [];
+        window.safeStorage.set('portal_orders', stored);
+      } else {
+        // Merge missing 2026 demo orders
+        const existingIds = new Set(stored.map(o => o.id));
+        (window.DEFAULT_ORDERS || []).forEach(demoOrd => {
+          if (!existingIds.has(demoOrd.id)) {
+            stored.unshift(demoOrd);
+          }
+        });
+        window.safeStorage.set('portal_orders', stored);
       }
       stored = stored.filter(o => o !== null && o !== undefined);
 
